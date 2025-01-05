@@ -3,5 +3,5 @@
 export(calculate_cycletime)
 export(calculate_mcyclength)
 export(cycle_plot)
-export(data_check)
+export(cycledata_check)
 export(summary_ovulation)
