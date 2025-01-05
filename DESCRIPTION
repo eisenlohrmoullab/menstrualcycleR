@@ -1,0 +1,24 @@
+Package: menstrualcycleR
+Title: What the Package Does (One Line, Title Case)
+Version: 0.0.0.9000
+Authors@R: 
+    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: What the package does (one paragraph).
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports: 
+  dplyr, 
+  ggplot2,
+  magrittr, 
+  rlang, 
+  tidyr,
+  zoo,
+  viridis
+NeedsCompilation: no
+Packaged: 2024-12-30 17:43:37 UTC; anishan
+Author: First Last [aut, cre] (YOUR-ORCID-ID)
+Maintainer: First Last <first.last@example.com>
+Depends: R (>= 3.5.0)

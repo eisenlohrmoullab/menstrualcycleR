@@ -1,0 +1,569 @@
+#' Process Data (Internal)
+#'
+#' Internal helper functions to process the data.
+#'
+#' @param data A data frame containing cycle data.
+#' @param id A column specifying individual ids.
+#' @param daterated A column specifying the dates.
+#' @param menses A column indicating menses (0/1).
+#'
+#' @return A data frame with processed data.
+#' @keywords internal
+#' 
+#' 
+
+process_luteal_phase_base <- function(data, id, daterated, menses) {
+  `%>%` <- magrittr::`%>%`
+  
+  # Quote column names for tidy evaluation
+  id <- rlang::enquo(id)
+  daterated <- rlang::enquo(daterated)
+  menses <- rlang::enquo(menses)
+  
+  # Group and arrange data
+  data <- data %>%
+    dplyr::group_by(!!id) %>%
+    dplyr::arrange(!!daterated, .by_group = TRUE) %>%
+    dplyr::mutate(lutmax = NA)
+  
+  # Helper function to calculate lutdaycount1
+  calculate_lutdaycount <- function(data, id_col, menses_col) {
+    last_id <- NULL
+    lutdaycount1 <- rep(NA, nrow(data))
+    
+    for (i in 1:nrow(data)) {
+      if (is.null(last_id) || last_id != data[[id_col]][i]) {
+        lutdaycount1[i] <- ifelse(data$ovtoday[i] == 1, 0, NA)
+      } else if (!is.na(lutdaycount1[i - 1])) {
+        lutdaycount1[i] <- lutdaycount1[i - 1] + 1
+      }
+      
+      if (!is.na(lutdaycount1[i]) &&
+          !is.na(data[[menses_col]][i]) && data[[menses_col]][i] == 1) {
+        lutdaycount1[i] <- NA
+      } else if (data$ovtoday[i] == 1) {
+        lutdaycount1[i] <- 0
+      }
+      
+      last_id <- data[[id_col]][i]
+    }
+    
+    data$lutdaycount1 <- lutdaycount1
+    return(data)
+  }
+  
+  # Apply the helper function to calculate lutdaycount1
+  data <- calculate_lutdaycount(
+    data,
+    id_col = rlang::quo_name(id),
+    menses_col = rlang::quo_name(menses)
+  )
+  
+  # Calculate lutdaycount
+  data <- data %>%
+    dplyr::group_by(!!id) %>%
+    dplyr::mutate(
+      lutdaycount = dplyr::lag(lutdaycount1),
+      lutdaycount = dplyr::case_when(
+        is.na(lutdaycount) | !!id != dplyr::lag(!!id) ~ NA,
+        TRUE ~ lutdaycount
+      )
+    )
+  
+  # Calculate lutmax
+  for (i in 1:(nrow(data) - 1)) {
+    if (is.na(data$lutdaycount[i + 1]) && !is.na(data$lutdaycount[i])) {
+      data$lutmax[(i - (data$lutdaycount[i])):i] <- as.numeric(data$lutdaycount[i])
+    }
+  }
+  
+  # Calculate lutperc and lutperc1
+  data <- data %>%
+    dplyr::mutate(
+      lutperc = ifelse(lutmax <= 18 & lutmax >= 7, lutdaycount / lutmax, NA),
+      lutperc1 = lutperc - 1
+    )
+  
+  # Calculate lutdaycount_ov and lutperc_ov
+  data <- data %>%
+    dplyr::group_by(!!id) %>%
+    dplyr::mutate(
+      lutdaycount_ov = dplyr::lead(lutdaycount),
+      lutdaycount_ov = dplyr::case_when(
+        is.na(lutdaycount_ov) | !!id != dplyr::lead(!!id) ~ NA,
+        TRUE ~ lutdaycount_ov
+      ),
+      lutperc_ov = ifelse(lutmax <= 18 & lutmax >= 7, lutdaycount_ov / lutmax, NA),
+      lutperc_ov = ifelse(lutdaycount_ov == 0, 0, lutperc_ov)
+    )
+  
+  return(data)
+}
+
+
+process_follicular_phase_base <- function(data, id, daterated, menses) {
+  `%>%` <- magrittr::`%>%`
+  
+  # Quote column names for tidy evaluation
+  id <- rlang::enquo(id)
+  daterated <- rlang::enquo(daterated)
+  menses <- rlang::enquo(menses)
+  
+  # Group by ID, sort by daterated, and initialize folmax
+  data <- data %>%
+    dplyr::group_by(!!id) %>%
+    dplyr::arrange(!!daterated, .by_group = TRUE) %>%
+    dplyr::mutate(folmax = NA) %>%
+    dplyr::mutate(foldaycount = NA)
+  
+  # Function to calculate foldaycount
+  calculate_foldaycount <- function(data, id_col, menses_col) {
+    foldaycount <- NA
+    last_id <- NULL
+    
+    for (i in 1:nrow(data)) {
+      if (is.null(last_id) || last_id != data[[id_col]][i]) {
+        # Restart counting when id changes
+        foldaycount <- ifelse(data[[menses_col]][i] == 1, 0, NA)
+      } else if (!is.na(foldaycount)) {
+        foldaycount <- foldaycount + 1
+      }
+      
+      if (!is.na(foldaycount) &&
+          i >= 3 && !is.na(data$ovtoday[i]) && data$ovtoday[i - 1] == 1) {
+        # Stop counting one row after ovtoday == 1
+        foldaycount <- NA
+      } else if (data[[menses_col]][i] == 1) {
+        # Start counting when menses == 1
+        foldaycount <- 0
+      }
+      
+      # Assign the foldaycount value to the current row
+      data$foldaycount[i] <- foldaycount
+      
+      # Update last_id
+      last_id <- data[[id_col]][i]
+    }
+    
+    return(data)
+  }
+  
+  # Apply the helper function to calculate foldaycount
+  data <- calculate_foldaycount(
+    data,
+    id_col = rlang::quo_name(id),
+    menses_col = rlang::quo_name(menses)
+  )
+  
+  # Calculate folmax = follicular phase length
+  for (i in 1:(nrow(data) - 1)) {
+    if (is.na(data$foldaycount[i + 1]) && !is.na(data$foldaycount[i])) {
+      data$folmax[(i - (data$foldaycount[i])):i] <- as.numeric(data$foldaycount[i])
+    }
+  }
+  
+  # Calculate follength = folmax + 1 (to include menses onset)
+  data <- data %>%
+    dplyr::mutate(follength = folmax + 1)
+  
+  # Calculate folperc (only when follicular length is between 8 and 25)
+  data <- data %>%
+    dplyr::mutate(folperc = ifelse(follength >= 8 & follength <= 25, foldaycount / folmax, NA))
+  
+  # Calculate percfol and percfol_ov
+  data <- data %>% 
+    dplyr::mutate(
+      percfol = dplyr::case_when(
+        !is.na(lutperc1) & !is.na(folperc) & folperc != 0 ~ NA,
+        TRUE ~ folperc
+      ),
+      percfol_ov = percfol - 1
+    )
+  
+  return(data)
+}
+
+
+calculate_ovtoday_impute <- function(data, id, daterated, menses) {
+  `%>%` <- magrittr::`%>%`
+  
+  # Dynamically handle input column names
+  id <- rlang::enquo(id)
+  daterated <- rlang::enquo(daterated)
+  menses <- rlang::enquo(menses)
+  
+  # Step 1: Calculate `lutlength_impute` and `follength_impute`
+  data <- data %>%
+    dplyr::mutate(
+      lutlength_impute = dplyr::case_when(
+        mcyclength == 21 ~ (mcyclength * 0.476),
+        mcyclength == 22 ~ (mcyclength * 0.491),
+        mcyclength == 23 ~ (mcyclength * 0.491),
+        mcyclength == 24 ~ (mcyclength * 0.492),
+        mcyclength == 25 ~ (mcyclength * 0.484),
+        mcyclength == 26 ~ (mcyclength * 0.481),
+        mcyclength == 27 ~ (mcyclength * 0.470),
+        mcyclength == 28 ~ (mcyclength * 0.461),
+        mcyclength == 29 ~ (mcyclength * 0.448),
+        mcyclength == 30 ~ (mcyclength * 0.437),
+        mcyclength == 31 ~ (mcyclength * 0.426),
+        mcyclength == 32 ~ (mcyclength * 0.416),
+        mcyclength == 33 ~ (mcyclength * 0.40),
+        mcyclength == 34 ~ (mcyclength * 0.391),
+        mcyclength == 35 ~ (mcyclength * 0.377),
+        TRUE ~ NA
+      ),
+      follength_impute = dplyr::case_when(
+        mcyclength == 21 ~ (mcyclength * 0.524),
+        mcyclength == 22 ~ (mcyclength * 0.509),
+        mcyclength == 23 ~ (mcyclength * 0.509),
+        mcyclength == 24 ~ (mcyclength * 0.508),
+        mcyclength == 25 ~ (mcyclength * 0.516),
+        mcyclength == 26 ~ (mcyclength * 0.519),
+        mcyclength == 27 ~ (mcyclength * 0.530),
+        mcyclength == 28 ~ (mcyclength * 0.539),
+        mcyclength == 29 ~ (mcyclength * 0.552),
+        mcyclength == 30 ~ (mcyclength * 0.563),
+        mcyclength == 31 ~ (mcyclength * 0.574),
+        mcyclength == 32 ~ (mcyclength * 0.584),
+        mcyclength == 33 ~ (mcyclength * 0.60),
+        mcyclength == 34 ~ (mcyclength * 0.609),
+        mcyclength == 35 ~ (mcyclength * 0.623),
+        TRUE ~ NA
+      )
+    )
+  
+  # Step 2: Group by `id` and sort by `daterated`
+  data <- data %>%
+    dplyr::group_by(!!id) %>%
+    dplyr::arrange(!!daterated, .by_group = TRUE)
+  
+  # Step 3: Calculate `follcount1_impute`
+  data$follcount1_impute <- NA
+  for (i in 1:nrow(data)) {
+    if (data[[rlang::as_name(menses)]][i] == 1 & !is.na(data$follength_impute[i])) {
+      follcount1_impute <- seq_len(round(data$follength_impute[i]))
+      end_index <- i + length(follcount1_impute) - 1
+      if (end_index <= nrow(data)) {
+        data$follcount1_impute[i:end_index] <- follcount1_impute
+      } else {
+        data$follcount1_impute[i:nrow(data)] <- follcount1_impute[1:(nrow(data) - i + 1)]
+      }
+    }
+  }
+  
+  # Step 4: Calculate `ovtoday_impute`
+  data <- data %>%
+    dplyr::mutate(
+      ovtoday_impute = dplyr::case_when(
+        round(follength_impute) == follcount1_impute ~ 1,
+        TRUE ~ NA
+      )
+    )
+  
+  # Step 5: Replace NA values in `ovtoday_impute` with 0
+  data$ovtoday_impute <- ifelse(is.na(data$ovtoday_impute), 0, data$ovtoday_impute)
+  
+  return(data)
+}
+
+
+process_luteal_phase_impute <- function(data, id, daterated, menses) {
+  `%>%` <- magrittr::`%>%`
+  
+  # Dynamically handle input column names
+  id <- rlang::enquo(id)
+  daterated <- rlang::enquo(daterated)
+  menses <- rlang::enquo(menses)
+  
+  # Group by ID and arrange by date
+  data <- data %>%
+    dplyr::group_by(!!id) %>%
+    dplyr::arrange(!!daterated, .by_group = TRUE) %>%
+    dplyr::mutate(lutmax_impute = NA)
+  
+  # Helper function to calculate `lutdaycount1_impute`
+  calculate_lutdaycount_impute <- function(data, id_col, menses_col) {
+    last_id <- NULL
+    lutdaycount1_impute <- rep(NA, nrow(data))
+    
+    for (i in 1:nrow(data)) {
+      if (is.null(last_id) || last_id != data[[id_col]][i]) {
+        lutdaycount1_impute[i] <- ifelse(data$ovtoday_impute[i] == 1, 0, NA)
+      } else if (!is.na(lutdaycount1_impute[i - 1])) {
+        lutdaycount1_impute[i] <- lutdaycount1_impute[i - 1] + 1
+      }
+      
+      if (!is.na(lutdaycount1_impute[i]) &&
+          !is.na(data[[menses_col]][i]) &&
+          data[[menses_col]][i] == 1) {
+        lutdaycount1_impute[i] <- NA
+      } else if (data$ovtoday_impute[i] == 1) {
+        lutdaycount1_impute[i] <- 0
+      }
+      
+      last_id <- data[[id_col]][i]
+    }
+    
+    data$lutdaycount1_impute <- lutdaycount1_impute
+    return(data)
+  }
+  
+  # Apply helper function
+  data <- calculate_lutdaycount_impute(
+    data,
+    id_col = rlang::quo_name(id),
+    menses_col = rlang::quo_name(menses)
+  )
+  
+  # Calculate `lutdaycount_impute`
+  data <- data %>%
+    dplyr::group_by(!!id) %>%
+    dplyr::mutate(
+      lutdaycount_impute = dplyr::lag(lutdaycount1_impute),
+      lutdaycount_impute = dplyr::case_when(
+        is.na(lutdaycount_impute) | !!id != dplyr::lag(!!id) ~ NA,
+        TRUE ~ lutdaycount_impute
+      )
+    )
+  
+  # Calculate `lutmax_impute`
+  for (i in 1:(nrow(data) - 1)) {
+    if (is.na(data$lutdaycount_impute[i + 1] &&
+              !is.na(data$lutdaycount_impute[i]))) {
+      data$lutmax_impute[(i - (data$lutdaycount_impute[i])):i] <- as.numeric(data$lutdaycount_impute[i])
+    }
+  }
+  
+  # Lag `lutlength_impute` to align with `lutdaycount`
+  data$lutlength1_impute <- dplyr::lag(data$lutlength_impute)
+  
+  data <- data %>%
+    dplyr::mutate(lutperc_impute = dplyr::if_else(
+      is.na(lutlength1_impute),
+      NA,
+      dplyr::if_else(
+        is.na(lutlength1_impute) &
+          !is.na(lutmax_impute) & cycle_incomplete == 0,
+        lutdaycount_impute / lutmax_impute,
+        lutdaycount_impute / round(lutlength1_impute)
+      )
+    ))
+  
+  #lutperc is scaled from 0 to 1, so substracting 1 so that it is scaled from -1 to 0 for menses-centered scaled_cycleday 
+  data$perclut_impute = data$lutperc_impute -1 
+  
+  # Calculate `lutdaycount_imp_ov`
+  data <- data %>%
+    dplyr::group_by(!!id) %>%
+    dplyr::mutate(
+      lutdaycount_imp_ov = dplyr::lead(lutdaycount_impute),
+      lutdaycount_imp_ov = dplyr::case_when(
+        is.na(lutdaycount_imp_ov) | !!id != dplyr::lead(!!id) ~ NA_real_,
+        TRUE ~ lutdaycount_imp_ov
+      )
+    )
+  
+  # Calculate `lutperc_imp_ov`
+  data <- data %>%
+    dplyr::mutate(lutperc_imp_ov = dplyr::if_else(
+      is.na(lutlength1_impute) ,
+      NA,
+      dplyr::if_else(
+        is.na(lutlength1_impute) & !is.na(lutmax) & cycle_incomplete == 0,
+        lutdaycount_imp_ov / lutmax_impute,
+        lutdaycount_imp_ov / round(lutlength1_impute)
+      )
+    ))
+  
+
+    #  %>%
+    # dplyr::mutate(
+    #   lutperc_imp_ov = ifelse(
+    #     ovtoday_impute == 1,
+    #     0,
+    #     lutperc_imp_ov
+    #   )
+    # )
+
+  
+  return(data)
+}
+
+
+process_follicular_phase_impute <- function(data, id, daterated, menses) {
+  `%>%` <- magrittr::`%>%`
+  
+  # Dynamically handle input column names
+  id <- rlang::enquo(id)
+  daterated <- rlang::enquo(daterated)
+  menses <- rlang::enquo(menses)
+  
+  # Group by ID and arrange by date
+  data <- data %>%
+    dplyr::group_by(!!id) %>%
+    dplyr::arrange(!!daterated, .by_group = TRUE) %>%
+    dplyr::mutate(folmax_impute = NA, foldaycount_impute = NA)
+  
+  # Helper function to calculate `foldaycount_impute`
+  calculate_foldaycount_impute <- function(data, id_col, menses_col) {
+    foldaycount_impute <- NA
+    last_id <- NULL
+    
+    for (i in 1:nrow(data)) {
+      if (is.null(last_id) || last_id != data[[id_col]][i]) {
+        # Restart counting when ID changes
+        foldaycount_impute <- ifelse(data[[menses_col]][i] == 1, 0, NA)
+      } else if (!is.na(foldaycount_impute)) {
+        foldaycount_impute <- foldaycount_impute + 1
+      }
+      
+      if (!is.na(foldaycount_impute) &&
+          i >= 3 &&
+          !is.na(data$ovtoday_impute[i]) &&
+          data$ovtoday_impute[i - 1] == 1) {
+        # Stop counting one row after ovtoday == 1
+        foldaycount_impute <- NA
+      } else if (data[[menses_col]][i] == 1) {
+        # Start counting when menses == 1
+        foldaycount_impute <- 0
+      }
+      
+      # Assign the foldaycount value to the current row
+      data$foldaycount_impute[i] <- foldaycount_impute
+      
+      # Update last_id
+      last_id <- data[[id_col]][i]
+    }
+    
+    return(data)
+  }
+  
+  # Apply helper function to calculate `foldaycount_impute`
+  data <- calculate_foldaycount_impute(
+    data,
+    id_col = rlang::quo_name(id),
+    menses_col = rlang::quo_name(menses)
+  )
+  
+  # Create `folmax_impute` as the highest number `foldaycount_impute` counts up to
+  for (i in 1:(nrow(data) - 1)) {
+    if (is.na(data$foldaycount_impute[i + 1] &&
+              !is.na(data$foldaycount_impute[i]))) {
+      data$folmax_impute[(i - (data$foldaycount_impute[i])):i] <- as.numeric(data$foldaycount_impute[i])
+    }
+  }
+  
+  # Create `percfol_impute`, based on Bull 2019 norms
+  data <- data %>%
+    dplyr::mutate(percfol_impute = foldaycount_impute / folmax_impute)
+  
+  return(data)
+}
+
+
+create_scaled_cycleday <- function(id, data) {
+  `%>%` <- magrittr::`%>%`
+  
+  # Dynamically handle input column name
+  id <- rlang::enquo(id)
+  
+  # Create `percentlut` and `percentfol`
+  data <- data %>%
+    dplyr::mutate(
+      percentlut = dplyr::case_when(!is.na(percfol) ~ 0, TRUE ~ lutperc1),
+      percentfol = dplyr::case_when(!is.na(lutperc1) ~ 0, TRUE ~ percfol)
+    )
+  
+  # Create `scaled_cycleday`
+  data <- data %>%
+    dplyr::mutate(scaled_cycleday = ifelse(percentlut == 0, percentfol, percentlut))
+  
+  # Create ovulation-centered `scaled_cycleday_ov`
+  data <- data %>%
+    dplyr::mutate(scaled_cycleday_ov = ifelse(is.na(percfol_ov), lutperc_ov, percfol_ov))
+  
+  # Prioritize luteal phase measures created with ovtoday over ovtoday_impute
+  data <- data %>%
+    dplyr::mutate(
+      group = cumsum(
+        is.na(lutperc_imp_ov) &
+          dplyr::lag(is.na(lutperc_imp_ov), default = TRUE) != is.na(lutperc_imp_ov)
+      )
+    ) %>%
+    dplyr::group_by(!!id, group) %>%
+    dplyr::mutate(perclut_ov_imp = if (any(!is.na(lutperc_ov))) lutperc_ov else lutperc_imp_ov) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(-group)
+  
+  # Apply functions for imputation
+  data <- data %>%
+    dplyr::mutate(
+      group = cumsum(
+        is.na(perclut_impute) &
+          dplyr::lag(is.na(perclut_impute), default = TRUE) != is.na(perclut_impute)
+      )
+    ) %>%
+    dplyr::group_by(!!id, group) %>%
+    dplyr::mutate(percentlut_impute = if (any(!is.na(lutperc1))) lutperc1 else perclut_impute) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(-group)
+  
+  data <- data %>%
+    dplyr::mutate(
+      group = cumsum(
+        is.na(percfol_impute) &
+          dplyr::lag(is.na(percfol_impute), default = TRUE) != is.na(percfol_impute)
+      )
+    ) %>%
+    dplyr::group_by(!!id, group) %>%
+    dplyr::mutate(percentfol_impute = if (any(!is.na(folperc))) folperc else percfol_impute) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(-group)
+  
+  # Create ovulation-centered `percfol_ov_imp`
+  data <- data %>%
+    dplyr::mutate(
+      percfol_ov_imp = ifelse(
+        !is.na(percentfol_impute),
+        percentfol_impute - 1,
+        NA
+      )
+    )
+  
+  # Create `scaled_cycleday_impute` from `percentlut_impute` and `percentfol_impute`
+  data <- data %>%
+    dplyr::mutate(
+      scaled_cycleday_impute = ifelse(
+        is.na(percentlut_impute),
+        percentfol_impute,
+        percentlut_impute
+      )
+    )
+  
+  # Replace NA with 0 in `percentlut_impute` and `percentfol_impute`
+  data$percentlut_impute <- ifelse(
+    is.na(data$percentlut_impute) & !is.na(data$percentfol_impute),
+    0,
+    data$percentlut_impute
+  )
+  data$percentfol_impute <- ifelse(
+    is.na(data$percentfol_impute) & !is.na(data$percentlut_impute),
+    0,
+    data$percentfol_impute
+  )
+  
+  # Create ovulation-centered `scaled_cycleday_imp_ov` with imputed measures
+  data <- data %>%
+    dplyr::mutate(
+      scaled_cycleday_imp_ov = ifelse(
+        is.na(percfol_ov_imp),
+        perclut_ov_imp,
+        percfol_ov_imp
+      )
+    )
+  
+  return(data)
+}
+
+
