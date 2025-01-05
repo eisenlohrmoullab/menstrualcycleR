@@ -1,5 +1,15 @@
-# How to install menstrualcycleR 
+# How to Install and Load `menstrualcycleR`
 
-1. If you haven't installed it yet, install.packages("remotes") in R
+To install and load the `menstrualcycleR` package, follow these steps:
 
-2. Then run, remotes::install_github("eisenlohrmoullab/menstrualcycleR")
+1. Install the `remotes` package (if not already installed):
+   `install.packages("remotes")`
+   
+
+2. Install `menstrualcycleR` from GitHub 
+
+`remotes::install_github("eisenlohrmoullab/menstrualcycleR")`
+
+3. Load the package 
+
+`library(menstrualcycleR)`
