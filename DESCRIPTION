@@ -1,26 +1,33 @@
 Package: menstrualcycleR
-Title: What the Package Does (One Line, Title Case)
+Title: Tools for Phase-Aligned Cycle Time Scaling (PACTS) and Menstrual Cycle Analysis
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+    person("Anisha", "Nagpal", , "anagpa7@uic.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-7111-9322")),
+    person("Tory", "Eisenlohr-Moul", , "temo@uic.edu", role = "aut",
+           comment = c(ORCID = "0000-0002-9231-3105"))
+Description: The menstrualcycleR package provides tools for Phase-Aligned Cycle Time Scaling (PACTS),
+    enabling precise and dynamic analysis of menstrual cycle data by standardizing events across
+    cycles onto a continuous timeline while accounting for variability in ovulation timing and
+    cycle lengths.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports: 
-  dplyr, 
-  ggplot2,
-  magrittr, 
-  rlang, 
-  tidyr,
-  zoo,
-  viridis
+    dplyr, 
+    ggplot2,
+    magrittr, 
+    rlang, 
+    tidyr,
+    zoo,
+    viridis
 NeedsCompilation: no
 Packaged: 2024-12-30 17:43:37 UTC; anishan
-Author: First Last [aut, cre] (YOUR-ORCID-ID)
-Maintainer: First Last <first.last@example.com>
+Author: 
+    Anisha Nagpal [aut, cre] (0000-0001-7111-9322),
+    Tory Eisenlohr-Moul [aut] (0000-0002-9231-3105)
+Maintainer: Anisha Nagpal <anagpa7@uic.edu>
 Depends: R (>= 3.5.0)
 Suggests: 
     testthat (>= 3.0.0)
