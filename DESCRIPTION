@@ -2,9 +2,9 @@ Package: menstrualcycleR
 Title: Tools for Phase-Aligned Cycle Time Scaling (PACTS) and Menstrual Cycle Analysis
 Version: 0.0.0.9000
 Authors@R: 
-    person("Anisha", "Nagpal", , "anagpa7@uic.edu", role = c("aut", "cre"),
+    person("Anisha", "Nagpal","anagpa7@uic.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-7111-9322")),
-    person("Tory", "Eisenlohr-Moul", , "temo@uic.edu", role = "aut",
+    person("Tory", "Eisenlohr-Moul", "temo@uic.edu", role = "aut",
            comment = c(ORCID = "0000-0002-9231-3105"))
 Description: The menstrualcycleR package provides tools for Phase-Aligned Cycle Time Scaling (PACTS),
     enabling precise and dynamic analysis of menstrual cycle data by standardizing events across
