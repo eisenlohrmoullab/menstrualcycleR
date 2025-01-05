@@ -22,3 +22,6 @@ Packaged: 2024-12-30 17:43:37 UTC; anishan
 Author: First Last [aut, cre] (YOUR-ORCID-ID)
 Maintainer: First Last <first.last@example.com>
 Depends: R (>= 3.5.0)
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
