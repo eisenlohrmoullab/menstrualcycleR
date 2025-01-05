@@ -52,9 +52,18 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
       dplyr::mutate("{{var}}.d" := as.numeric({{var}}) - as.numeric({{var_m}}))
   }
   
-  # Apply centering and deviation calculations
+  # Function to create 5-day rolling deviations 
+  create_rolling_deviation <- function(df, var.d) {
+    df <- df %>%
+      dplyr::group_by(id) %>%
+      dplyr::mutate("{{var.d}}.roll" := zoo::rollapply({{var.d}}, 5, mean, align = "center", fill = NA)) %>%
+      dplyr::ungroup()
+  }
+  
+  # Apply person-mean centering and rolling avg calculations
   data <- create_person_mean(data, !!dplyr::sym(symptom), "id")
   data <- create_deviation(data, !!dplyr::sym(symptom), !!dplyr::sym(paste0(symptom, ".m")))
+  data <- create_rolling_deviation(data, !!!dplyr::sym(paste0(symptom, ".d")))
   
   # Add cycle percentage variables based on centering and include_impute
   if (centering == "menses" & include_impute) {
@@ -83,8 +92,7 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
   } else if (y_scale == "person-centered_roll") {
     dat_summary <- data %>%
       dplyr::group_by(cycleday_5perc) %>%
-      dplyr::summarise(mean_dev = mean(!!dplyr::sym(paste0(symptom, ".d")), na.rm = TRUE)) %>%
-      dplyr::mutate(mean_dev_roll = zoo::rollapply(mean_dev, 3, mean, align = "center", fill = NA))
+      dplyr::summarise(mean_dev_roll = mean(!!dplyr::sym(paste0(symptom, ".d.roll")), na.rm = TRUE)) 
   } else if (y_scale == "means") {
     dat_summary <- data %>%
       dplyr::group_by(cycleday_5perc) %>%
