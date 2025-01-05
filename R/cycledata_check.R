@@ -51,7 +51,7 @@
 #' )
 #'
 #' # Analyze symptom data availability
-#' result <- data_check(
+#' result <- cycledata_check(
 #'   data, 
 #'   symptom_columns = c("symptom")
 #' )
@@ -62,7 +62,7 @@
 #' print(result$data_symptom_plots$symptom)
 
 
-data_check <- function(data, symptom_columns) {
+cycledata_check <- function(data, symptom_columns) {
   `%>%` <- magrittr::`%>%`
   
   # Table grouped by id
