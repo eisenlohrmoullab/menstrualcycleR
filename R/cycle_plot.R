@@ -56,7 +56,7 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
   create_rolling_deviation <- function(df, var.d) {
     df <- df %>%
       dplyr::group_by(id) %>%
-      dplyr::mutate("{{var.d}}.roll" := zoo::rollapply({{var.d}}, 5, mean, align = "center", fill = NA)) %>%
+      dplyr::mutate("{{var.d}}.roll" := zoo::rollapply({{var.d}}, 5, mean, align = "center", fill = "extend")) %>%
       dplyr::ungroup()
   }
   
