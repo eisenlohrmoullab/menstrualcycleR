@@ -63,7 +63,7 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
   # Apply person-mean centering and rolling avg calculations
   data <- create_person_mean(data, !!dplyr::sym(symptom), "id")
   data <- create_deviation(data, !!dplyr::sym(symptom), !!dplyr::sym(paste0(symptom, ".m")))
-  data <- create_rolling_deviation(data, !!dplyr::sym(paste0(symptom, ".d")))
+  data <- create_rolling_deviation(data, !!dplyr::sym(paste0(symptom, ".d"))) 
   
   # Add cycle percentage variables based on centering and include_impute
   if (centering == "menses" & include_impute) {
