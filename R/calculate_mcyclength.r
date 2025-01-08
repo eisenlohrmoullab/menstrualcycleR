@@ -62,16 +62,14 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   #   dplyr::mutate(ovtoday = dplyr::lag(LHtest))
   
   #Turn NAs to 0 for menses, ovtoday, and LHtest 
+  cols <- c("ovtoday", "menses")  # Example: Dynamic column names
+  
   data <- data %>%
     dplyr::mutate(
-      !!ovtoday = dplyr::case_when(
-        is.na(!!ovtoday) ~ 0,
-        TRUE ~ !!ovtoday
-      ),
-      !!menses = dplyr::case_when(
-        is.na(!!menses) ~ 0,
-        TRUE ~ !!menses
-      )
+      dplyr::across(dplyr::all_of(cols), ~ dplyr::case_when(
+        is.na(.) ~ 0,
+        TRUE ~ .
+      ))
     )
   # data$LHtest <- ifelse(is.na(data$LHtest), 0, data$LHtest) 
   
