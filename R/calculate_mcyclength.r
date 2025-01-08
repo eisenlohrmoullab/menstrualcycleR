@@ -157,6 +157,7 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
       )
     )
   
+  cols = c("menses", "ovtoday")
   data <- data %>%
     dplyr::mutate(
       dplyr::across(dplyr::all_of(cols), ~ dplyr::case_when(
