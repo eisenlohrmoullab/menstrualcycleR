@@ -62,7 +62,7 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   #   dplyr::mutate(ovtoday = dplyr::lag(LHtest))
   
   #Turn NAs to 0 for menses, ovtoday, and LHtest 
-  
+ 
   data <- data %>%
     dplyr::mutate(
       !!rlang::quo_name(menses) := ifelse(is.na(!!menses), 0, !!menses),
@@ -111,14 +111,14 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
     )) %>%
     dplyr::ungroup()
   
-  # Propagate cycle_incomplete within each group of m2mcount
+  # Propagate cycle_incomplete within each group of m2mcount and calculate mcyclength
   data <- data %>%
     dplyr::group_by(!!id) %>%
     dplyr::mutate(cycle_group = cumsum(!is.na(m2mcount) & m2mcount == 1)) %>%
     dplyr::group_by(!!id, cycle_group) %>%
     dplyr::mutate(
       cycle_incomplete = ifelse(any(cycle_incomplete == 1), 1, 0),
-      mcyclength = ifelse(all(is.na(m2mcount)), NA, max(m2mcount, na.rm = TRUE))
+      mcyclength = if (all(is.na(m2mcount))) NA else max(m2mcount, na.rm = TRUE)
     ) %>%
     dplyr::ungroup() %>%
     dplyr::select(-cycle_group)
