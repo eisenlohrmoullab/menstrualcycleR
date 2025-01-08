@@ -120,7 +120,7 @@ process_follicular_phase_base <- function(data, id, daterated, menses) {
   calculate_foldaycount <- function(data, id_col, menses_col) {
     foldaycount <- NA
     last_id <- NULL
-    
+    data[[menses_col]][is.na(data[[menses_col]])] <- 0
     for (i in 1:nrow(data)) {
       if (is.null(last_id) || last_id != data[[id_col]][i]) {
         # Restart counting when id changes
