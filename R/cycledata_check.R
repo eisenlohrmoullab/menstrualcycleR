@@ -83,14 +83,14 @@ cycledata_check <- function(data, symptom_columns) {
   
   # Check for warnings
   for (symptom in symptom_columns) {
-    symptom_nonNA_col <- paste0(symptom, "_nonNA")
+    symptom_nonNA_col <- paste0(symptom, "_nonNA")  # Match the dynamically generated name
     warnings <- result_by_id %>%
-      dplyr::filter(.data[[symptom_nonNA_col]] < 10) %>%
+      dplyr::filter(.data[[symptom_nonNA_col]] < 10) %>%  # Correctly reference the column
       dplyr::select(id)
     
     if (nrow(warnings) > 0) {
-      for (id in warnings$id) {
-        message(sprintf("Warning: ID number %s has < 10 observations for %s", id, symptom))
+      for (warning_id in warnings$id) {
+        message(sprintf("Warning: ID number %s has < 10 observations for %s", warning_id, symptom))
       }
     }
   }
