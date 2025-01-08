@@ -113,10 +113,9 @@ cycledata_check <- function(data, symptom_columns) {
   data_symptom_plots <- list()
   for (symptom in symptom_columns) {
     symptom_plot <- data %>%
-      dplyr::mutate(
-        has_data = ifelse(!is.na(.data[[symptom]]) & !is.na(.data$scaled_cycleday_impute), 1, NA)
+      dplyr::filter(
+        !is.na(.data[[symptom]]) & !is.na(.data$scaled_cycleday_impute)
       ) %>%
-      dplyr::filter(!is.na(has_data)) %>%
       ggplot2::ggplot(ggplot2::aes(x = .data$scaled_cycleday_impute, y = factor(id), color = as.numeric(id), fill = as.numeric(id))) +
       ggplot2::geom_point(shape = 21, size = 3, alpha = 0.5, stroke = 0.2) +  
       ggplot2::scale_fill_gradientn(colors = viridis::viridis(256)) +  
