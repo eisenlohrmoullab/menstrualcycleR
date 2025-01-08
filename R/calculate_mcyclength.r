@@ -62,18 +62,12 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   #   dplyr::mutate(ovtoday = dplyr::lag(LHtest))
   
   #Turn NAs to 0 for menses, ovtoday, and LHtest 
-  cols <- c("ovtoday", "menses")  # Example: Dynamic column names
   
   data <- data %>%
-    dplyr::mutate(
-      dplyr::across(dplyr::all_of(cols), ~ dplyr::case_when(
-        is.na(.) ~ 0,
-        TRUE ~ .
-      ))
-    )
+    dplyr::mutate(!!rlang::quo_name(menses) = ifelse(is.na(!!rlang::quo_name(menses)), 0, !!rlang::quo_name(menses)))
+  data <- data %>%
+    dplyr::mutate(!!rlang::quo_name(ovtoday) = ifelse(is.na(!!rlang::quo_name(ovtoday)), 0, !!rlang::quo_name(ovtoday)))
   # data$LHtest <- ifelse(is.na(data$LHtest), 0, data$LHtest) 
-  
-  
   
   # Initialize columns
   data <- data %>%
@@ -122,10 +116,11 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
     dplyr::group_by(!!id, cycle_group) %>%
     dplyr::mutate(
       cycle_incomplete = ifelse(any(cycle_incomplete == 1), 1, 0),
-      mcyclength = max(m2mcount, na.rm = TRUE)
+      mcyclength = ifelse(all(is.na(m2mcount)), NA, max(m2mcount, na.rm = TRUE))
     ) %>%
     dplyr::ungroup() %>%
     dplyr::select(-cycle_group)
+  
   
   data$cycle_incomplete <- ifelse(is.na(data$cycle_incomplete), 1, data$cycle_incomplete)
   data$cycle_incomplete <- ifelse(is.na(data$m2mcount), NA, data$cycle_incomplete)
