@@ -62,9 +62,20 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   #   dplyr::mutate(ovtoday = dplyr::lag(LHtest))
   
   #Turn NAs to 0 for menses, ovtoday, and LHtest 
-  data$ovtoday <- ifelse(is.na(data$ovtoday), 0, data$ovtoday)
-  data$menses <- ifelse(is.na(data$menses), 0, data$menses) 
+  data <- data %>%
+    dplyr::mutate(
+      !!ovtoday = dplyr::case_when(
+        is.na(!!ovtoday) ~ 0,
+        TRUE ~ !!ovtoday
+      ),
+      !!menses = dplyr::case_when(
+        is.na(!!menses) ~ 0,
+        TRUE ~ !!menses
+      )
+    )
   # data$LHtest <- ifelse(is.na(data$LHtest), 0, data$LHtest) 
+  
+  
   
   # Initialize columns
   data <- data %>%
@@ -136,6 +147,14 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
       cumsum(!is.na(m2mcount) & m2mcount == 1 & cycle_incomplete == 0)
     )) %>%
     dplyr::ungroup()
+  #If mcyclength = -inf, turn to NA 
+  data <- data %>%
+    dplyr::mutate(
+      mcyclength = dplyr::case_when(
+        mcyclength == -Inf ~ NA,
+        TRUE ~ mcyclength
+      )
+    )
   
   return(data)
 }
