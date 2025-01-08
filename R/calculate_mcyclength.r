@@ -64,8 +64,10 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   #Turn NAs to 0 for menses, ovtoday, and LHtest 
   
   data <- data %>%
-    dplyr::mutate(!!rlang::sym(menses) := ifelse(is.na(!!rlang::sym(menses)), 0, !!rlang::sym(menses))) %>%
-    dplyr::mutate(!!rlang::sym(ovtoday) := ifelse(is.na(!!rlang::sym(ovtoday)), 0, !!rlang::sym(ovtoday)))
+    dplyr::mutate(
+      !!rlang::quo_name(menses) := ifelse(is.na(!!menses), 0, !!menses),
+      !!rlang::quo_name(ovtoday) := ifelse(is.na(!!ovtoday), 0, !!ovtoday)
+    )
   
   # data$LHtest <- ifelse(is.na(data$LHtest), 0, data$LHtest) 
   
