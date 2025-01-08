@@ -69,6 +69,15 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
       !!rlang::quo_name(ovtoday) := ifelse(is.na(!!ovtoday), 0, !!ovtoday)
     )
   
+  cols = c("menses", "ovtoday")
+  data <- data %>%
+    dplyr::mutate(
+      dplyr::across(dplyr::all_of(cols), ~ dplyr::case_when(
+        is.na(.) ~ 0,
+        TRUE ~ .
+      ))
+    )
+  
   # data$LHtest <- ifelse(is.na(data$LHtest), 0, data$LHtest) 
   
   # Initialize columns
@@ -125,10 +134,6 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
     ) %>%
     dplyr::ungroup() %>%
     dplyr::select(-cycle_group)
-  
-  
-  
-  
   
   data$cycle_incomplete <- ifelse(is.na(data$cycle_incomplete), 1, data$cycle_incomplete)
   data$cycle_incomplete <- ifelse(is.na(data$m2mcount), NA, data$cycle_incomplete)
