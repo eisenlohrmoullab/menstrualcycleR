@@ -112,10 +112,12 @@ cycledata_check <- function(data, symptom_columns) {
   # Generate plots with lightly colored circles and custom annotations
   data_symptom_plots <- list()
   for (symptom in symptom_columns) {
-    symptom_plot <- data %>%
+    filtered_data <- data %>%
       dplyr::filter(
         !is.na(.data[[symptom]]) & !is.na(.data$scaled_cycleday_impute)
-      ) %>%
+      )
+    
+    symptom_plot <- filtered_data %>%
       ggplot2::ggplot(ggplot2::aes(x = .data$scaled_cycleday_impute, y = factor(id), color = as.numeric(id), fill = as.numeric(id))) +
       ggplot2::geom_point(shape = 21, size = 3, alpha = 0.5, stroke = 0.2) +  
       ggplot2::scale_fill_gradientn(colors = viridis::viridis(256)) +  
@@ -124,7 +126,7 @@ cycledata_check <- function(data, symptom_columns) {
         breaks = c(-1, -0.5, 0, 0.5, 1),
         labels = c("0% L", "50% L \nLuteal Phase", "Menses", "50% F \nFollicular Phase", "Ovulation")
       ) +  
-      ggplot2::scale_y_discrete(labels = unique(data$id)) +  
+      ggplot2::scale_y_discrete(limits = unique(filtered_data$id)) +  
       ggplot2::labs(
         title = paste("Data Availability for", symptom),
         x = "Cycle Time (Including Imputed Ovulation from NC Norms)",
@@ -138,10 +140,11 @@ cycledata_check <- function(data, symptom_columns) {
         axis.title = ggplot2::element_text(size = 10),
         plot.title = ggplot2::element_text(size = 12, face = "bold"),
         legend.position = "none"  # Remove the legend
-      ) 
+      )
     
     data_symptom_plots[[symptom]] <- symptom_plot
   }
+  
   
   # Return a list with both tables and circle-only plots
   return(list(
