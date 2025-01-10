@@ -196,7 +196,7 @@ calculate_ovtoday_impute <- function(data, id, daterated, menses) {
   data <- data %>%
     dplyr::mutate(
       lutlength_impute = dplyr::case_when(
-        mcyclength == 21 ~ (mcyclength * 0.476),
+        mcyclength == 21 ~ (mcyclength * 0.433), #9.1/21
         mcyclength == 22 ~ (mcyclength * 0.491),
         mcyclength == 23 ~ (mcyclength * 0.491),
         mcyclength == 24 ~ (mcyclength * 0.492),
@@ -214,8 +214,8 @@ calculate_ovtoday_impute <- function(data, id, daterated, menses) {
         TRUE ~ NA
       ),
       follength_impute = dplyr::case_when(
-        mcyclength == 21 ~ (mcyclength * 0.524),
-        mcyclength == 22 ~ (mcyclength * 0.509),
+        mcyclength == 21 ~ (mcyclength * 0.567), #11.9/21
+        mcyclength == 22 ~ (mcyclength * 0.554), #12.2/22 
         mcyclength == 23 ~ (mcyclength * 0.509),
         mcyclength == 24 ~ (mcyclength * 0.508),
         mcyclength == 25 ~ (mcyclength * 0.516),
