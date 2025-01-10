@@ -116,18 +116,29 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   # Propagate cycle_incomplete within each group of m2mcount and calculate mcyclength
   data <- data %>%
     dplyr::group_by(!!id) %>%
-    dplyr::mutate(cycle_group = cumsum(!is.na(m2mcount) & m2mcount == 1)) %>%
+    dplyr::mutate(
+      cycle_group = cumsum(!is.na(m2mcount) & m2mcount == 1)
+    ) %>%
     dplyr::group_by(!!id, cycle_group) %>%
     dplyr::mutate(
       cycle_incomplete = dplyr::if_else(any(cycle_incomplete == 1), 1, 0),
       mcyclength = dplyr::case_when(
-        all(is.na(m2mcount)) ~ NA_real_,                      
-        all(!is.finite(m2mcount)) ~ NA_real_,                 
-        TRUE ~ max(m2mcount, na.rm = TRUE)                    # Compute max if valid values exist
+        # Handle all NA case
+        all(is.na(m2mcount)) ~ NA_real_,
+        # Handle cases where valid values exist
+        !all(is.na(m2mcount)) ~ {
+          valid_values <- m2mcount[!is.na(m2mcount)]
+          if (length(valid_values) > 0) {
+            max(valid_values)
+          } else {
+            NA_real_
+          }
+        }
       )
     ) %>%
     dplyr::ungroup() %>%
     dplyr::select(-cycle_group)
+  
   
   data$cycle_incomplete <- ifelse(is.na(data$cycle_incomplete), 1, data$cycle_incomplete)
   data$cycle_incomplete <- ifelse(is.na(data$m2mcount), NA, data$cycle_incomplete)
