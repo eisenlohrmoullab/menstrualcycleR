@@ -470,7 +470,7 @@ process_follicular_phase_impute <- function(data, id, daterated, menses) {
   
   # Create `percfol_impute`, based on Bull 2019 norms
   data <- data %>%
-    dplyr::mutate(percfol_impute = foldaycount_impute / folmax_impute)
+    dplyr::mutate(percfol_impute = ifelse(mcyclength >= 21 & mcyclength <= 35, foldaycount_impute / folmax_impute, NA))
   
   return(data)
 }
