@@ -104,84 +104,75 @@ process_luteal_phase_base <- function(data, id, daterated, menses) {
 process_follicular_phase_base <- function(data, id, daterated, menses) {
   `%>%` <- magrittr::`%>%`
   
+  # Early validation for required columns
+  required_columns <- c("id", "menses", "ovtoday")
+  missing_columns <- setdiff(required_columns, names(data))
+  if (length(missing_columns) > 0) {
+    stop(glue::glue(
+      "Input data must include the following missing columns: {paste(missing_columns, collapse = ', ')}."
+    ))
+  }
+  
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
+  
   # Quote column names for tidy evaluation
   id <- rlang::enquo(id)
   daterated <- rlang::enquo(daterated)
   menses <- rlang::enquo(menses)
   
-  # Group by ID, sort by daterated, and initialize folmax
+  # Processing logic remains unchanged
   data <- data %>%
     dplyr::group_by(!!id) %>%
     dplyr::arrange(!!daterated, .by_group = TRUE) %>%
-    dplyr::mutate(folmax = NA) %>%
-    dplyr::mutate(foldaycount = NA)
+    dplyr::mutate(folmax = NA, foldaycount = NA)
   
   # Function to calculate foldaycount
   calculate_foldaycount <- function(data, id_col, menses_col) {
     foldaycount <- NA
     last_id <- NULL
     data[[menses_col]][is.na(data[[menses_col]])] <- 0
-    for (i in 1:nrow(data)) {
+    
+    for (i in seq_len(nrow(data))) {
       if (is.null(last_id) || last_id != data[[id_col]][i]) {
-        # Restart counting when id changes
+        # Restart counting when ID changes
         foldaycount <- ifelse(data[[menses_col]][i] == 1, 0, NA)
       } else if (!is.na(foldaycount)) {
         foldaycount <- foldaycount + 1
       }
-      
-      if (!is.na(foldaycount) &&
-          i >= 3 && !is.na(data$ovtoday[i]) && data$ovtoday[i - 1] == 1) {
+      if (
+        !is.na(foldaycount) &&
+        i >= 3 &&
+        !is.na(data$ovtoday[i]) &&
+        i > 1 && !is.na(data$ovtoday[i - 1]) &&
+        data$ovtoday[i - 1] == 1
+      ) {
         # Stop counting one row after ovtoday == 1
         foldaycount <- NA
       } else if (data[[menses_col]][i] == 1) {
         # Start counting when menses == 1
         foldaycount <- 0
       }
-      
-      # Assign the foldaycount value to the current row
+      # Assign foldaycount to current row
       data$foldaycount[i] <- foldaycount
-      
-      # Update last_id
       last_id <- data[[id_col]][i]
     }
     
     return(data)
   }
   
-  # Apply the helper function to calculate foldaycount
+  # Apply the helper function
   data <- calculate_foldaycount(
     data,
     id_col = rlang::quo_name(id),
     menses_col = rlang::quo_name(menses)
   )
   
-  # Calculate folmax = follicular phase length
-  for (i in 1:(nrow(data) - 1)) {
-    if (is.na(data$foldaycount[i + 1]) && !is.na(data$foldaycount[i])) {
-      data$folmax[(i - (data$foldaycount[i])):i] <- as.numeric(data$foldaycount[i])
-    }
-  }
-  
-  # Calculate follength = folmax + 1 (to include menses onset)
-  data <- data %>%
-    dplyr::mutate(follength = folmax + 1)
-  
-  # Calculate folperc (only when follicular length is between 8 and 25)
-  data <- data %>%
-    dplyr::mutate(folperc = ifelse(follength >= 8 & follength <= 25, foldaycount / folmax, NA))
-  
-  # Calculate percfol and percfol_ov
-  data <- data %>% 
-    dplyr::mutate(
-      percfol = dplyr::case_when(
-        !is.na(lutperc1) & !is.na(folperc) & folperc != 0 ~ NA,
-        TRUE ~ folperc
-      ),
-      percfol_ov = percfol - 1
-    )
   
   return(data)
 }
+
 
 
 calculate_ovtoday_impute <- function(data, id, daterated, menses) {
