@@ -549,9 +549,9 @@ create_scaled_cycleday <- function(id, data) {
   data <- data %>%
     dplyr::mutate(
       scaled_cycleday_impute = ifelse(
-        is.na(percentlut_impute),
-        percentfol_impute,
-        percentlut_impute
+        is.na(percentfol_impute),
+        percentlut_impute,
+        percentfol_impute
       )
     )
   
