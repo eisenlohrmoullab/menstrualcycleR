@@ -169,7 +169,30 @@ process_follicular_phase_base <- function(data, id, daterated, menses) {
     menses_col = rlang::quo_name(menses)
   )
   
+  # Calculate folmax = follicular phase length
+  for (i in 1:(nrow(data) - 1)) {
+    if (is.na(data$foldaycount[i + 1]) && !is.na(data$foldaycount[i])) {
+      data$folmax[(i - (data$foldaycount[i])):i] <- as.numeric(data$foldaycount[i])
+    }
+  }
   
+  # Calculate follength = folmax + 1 (to include menses onset)
+  data <- data %>%
+    dplyr::mutate(follength = folmax + 1)
+  
+  # Calculate folperc (only when follicular length is between 8 and 25)
+  data <- data %>%
+    dplyr::mutate(folperc = ifelse(follength >= 8 & follength <= 25, foldaycount / folmax, NA))
+  
+  # Calculate percfol and percfol_ov
+  data <- data %>% 
+    dplyr::mutate(
+      percfol = dplyr::case_when(
+        !is.na(lutperc1) & !is.na(folperc) & folperc != 0 ~ NA,
+        TRUE ~ folperc
+      ),
+      percfol_ov = percfol - 1
+    )
   return(data)
 }
 
