@@ -278,6 +278,23 @@ calculate_ovtoday_impute <- function(data, id, daterated, menses) {
   # Step 5: Replace NA values in `ovtoday_impute` with 0
   data$ovtoday_impute <- ifelse(is.na(data$ovtoday_impute), 0, data$ovtoday_impute)
   
+  
+  # Step 6: If ovtoday and ovtoday_impute are within 5 days of each other, ovtoday_impute == 0
+  data <- data %>%
+    dplyr::group_by(!!id) %>%
+    dplyr::arrange(!!daterated, .by_group = TRUE) %>%
+    dplyr::mutate(
+      ovtoday_impute = ifelse(
+        ovtoday_impute == 1 & sapply(!!daterated, function(date) {
+          any(abs(difftime(daterated[ovtoday == 1], date, units = "days")) <= 5)
+        }),
+        0,
+        ovtoday_impute
+      )
+    ) %>%
+    dplyr::ungroup()
+  
+  
   return(data)
 }
 
