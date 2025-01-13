@@ -197,38 +197,38 @@ calculate_ovtoday_impute <- function(data, id, daterated, menses) {
     dplyr::mutate(
       lutlength_impute = dplyr::case_when(
         mcyclength == 21 ~ (mcyclength * 0.433), #9.1/21
-        mcyclength == 22 ~ (mcyclength * 0.491),
-        mcyclength == 23 ~ (mcyclength * 0.491),
-        mcyclength == 24 ~ (mcyclength * 0.492),
-        mcyclength == 25 ~ (mcyclength * 0.484),
-        mcyclength == 26 ~ (mcyclength * 0.481),
-        mcyclength == 27 ~ (mcyclength * 0.470),
-        mcyclength == 28 ~ (mcyclength * 0.461),
-        mcyclength == 29 ~ (mcyclength * 0.448),
-        mcyclength == 30 ~ (mcyclength * 0.437),
-        mcyclength == 31 ~ (mcyclength * 0.426),
-        mcyclength == 32 ~ (mcyclength * 0.416),
-        mcyclength == 33 ~ (mcyclength * 0.40),
-        mcyclength == 34 ~ (mcyclength * 0.391),
-        mcyclength == 35 ~ (mcyclength * 0.377),
+        mcyclength == 22 ~ (mcyclength * 0.445), #9.8/22
+        mcyclength == 23 ~ (mcyclength * 0.448), #10.3/23
+        mcyclength == 24 ~ (mcyclength * 0.45), #10.8/24
+        mcyclength == 25 ~ (mcyclength * 0.444), #11.1/25
+        mcyclength == 26 ~ (mcyclength * 0.442), #11.5/26
+        mcyclength == 27 ~ (mcyclength * 0.433), #11.7/27
+        mcyclength == 28 ~ (mcyclength * 0.425), #11.9/28
+        mcyclength == 29 ~ (mcyclength * 0.414), #12/29
+        mcyclength == 30 ~ (mcyclength * 0.403), #12.1/30
+        mcyclength == 31 ~ (mcyclength * 0.394), #12.2/31
+        mcyclength == 32 ~ (mcyclength * 0.384), #12.3/32
+        mcyclength == 33 ~ (mcyclength * 0.370), #12.2/33
+        mcyclength == 34 ~ (mcyclength * 0.362), #12.3/34
+        mcyclength == 35 ~ (mcyclength * 0.349), #12.2/35
         TRUE ~ NA
       ),
       follength_impute = dplyr::case_when(
         mcyclength == 21 ~ (mcyclength * 0.567), #11.9/21
         mcyclength == 22 ~ (mcyclength * 0.554), #12.2/22 
-        mcyclength == 23 ~ (mcyclength * 0.509),
-        mcyclength == 24 ~ (mcyclength * 0.508),
-        mcyclength == 25 ~ (mcyclength * 0.516),
-        mcyclength == 26 ~ (mcyclength * 0.519),
-        mcyclength == 27 ~ (mcyclength * 0.530),
-        mcyclength == 28 ~ (mcyclength * 0.539),
-        mcyclength == 29 ~ (mcyclength * 0.552),
-        mcyclength == 30 ~ (mcyclength * 0.563),
-        mcyclength == 31 ~ (mcyclength * 0.574),
-        mcyclength == 32 ~ (mcyclength * 0.584),
-        mcyclength == 33 ~ (mcyclength * 0.60),
-        mcyclength == 34 ~ (mcyclength * 0.609),
-        mcyclength == 35 ~ (mcyclength * 0.623),
+        mcyclength == 23 ~ (mcyclength * 0.552), #12.7/23
+        mcyclength == 24 ~ (mcyclength * 0.550), #13.2/24
+        mcyclength == 25 ~ (mcyclength * 0.556), #13.9/25
+        mcyclength == 26 ~ (mcyclength * 0.558), #14.5/26
+        mcyclength == 27 ~ (mcyclength * 0.567), #15.3/27
+        mcyclength == 28 ~ (mcyclength * 0.575), #16.1/28
+        mcyclength == 29 ~ (mcyclength * 0.586), #17/29
+        mcyclength == 30 ~ (mcyclength * 0.597), #17.9/30
+        mcyclength == 31 ~ (mcyclength * 0.606), #18.8/31
+        mcyclength == 32 ~ (mcyclength * 0.616), #19.7/32
+        mcyclength == 33 ~ (mcyclength * 0.630), #20.8/33
+        mcyclength == 34 ~ (mcyclength * 0.638), #21.7/34
+        mcyclength == 35 ~ (mcyclength * 0.651), #22.8/35
         TRUE ~ NA
       )
     )
