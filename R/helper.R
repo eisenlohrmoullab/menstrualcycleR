@@ -80,7 +80,7 @@ process_luteal_phase_base <- function(data, id, daterated, menses) {
   # Calculate lutperc and lutperc1
   data <- data %>%
     dplyr::mutate(
-      lutperc = ifelse(lutmax <= 18 & lutmax >= 7 & mcyclength < 36 & mcyclength > 20, lutdaycount / lutmax, NA),
+      lutperc = ifelse(lutmax <= 18 & lutmax >= 7 & cycle_incomplete != 1, lutdaycount / lutmax, NA),
       lutperc1 = lutperc - 1
     )
   
@@ -93,7 +93,7 @@ process_luteal_phase_base <- function(data, id, daterated, menses) {
         is.na(lutdaycount_ov) | !!id != dplyr::lead(!!id) ~ NA,
         TRUE ~ lutdaycount_ov
       ),
-      lutperc_ov = ifelse(lutmax <= 18 & lutmax >= 7 & mcyclength < 36 & mcyclength > 20, lutdaycount_ov / lutmax, NA),
+      lutperc_ov = ifelse(lutmax <= 18 & lutmax >= 7 & cycle_incomplete != 1, lutdaycount_ov / lutmax, NA),
       lutperc_ov = ifelse(lutdaycount_ov == 0, 0, lutperc_ov)
     )
   
@@ -182,7 +182,7 @@ process_follicular_phase_base <- function(data, id, daterated, menses) {
   
   # Calculate folperc (only when follicular length is between 8 and 25)
   data <- data %>%
-    dplyr::mutate(folperc = ifelse(follength >= 8 & follength <= 25 & mcyclength < 36 & mcyclength > 20, foldaycount / folmax, NA))
+    dplyr::mutate(folperc = ifelse(follength >= 8 & follength <= 25 & cycle_incomplete != 1, foldaycount / folmax, NA))
   
   # Calculate percfol and percfol_ov
   data <- data %>% 
