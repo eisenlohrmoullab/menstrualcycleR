@@ -57,17 +57,23 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
     df <- df %>%
       dplyr::group_by(id) %>%
       dplyr::mutate(
-        # Apply rollapply only if sufficient non-NA values exist
-        "{{var.d}}.roll" := if (sum(!is.na({{var.d}})) >= 2) {
-          zoo::rollapply({{var.d}}, 5, mean, align = "center", fill = "extend")
-        } else {
+        "{{var.d}}.roll" := if (sum(!is.na({{var.d}})) < 2) {
           NA_real_
+        } else {
+          zoo::rollapply(
+            {{var.d}}, 
+            5, 
+            mean, 
+            align = "center", 
+            fill = NA  # Use NA instead of "extend" to avoid interpolation
+          )
         }
       ) %>%
       dplyr::ungroup()
     
     return(df)
   }
+  
   
   # Apply person-mean centering and rolling avg calculations
   data <- create_person_mean(data, !!dplyr::sym(symptom), "id")
