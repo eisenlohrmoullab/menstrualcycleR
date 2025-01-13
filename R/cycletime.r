@@ -94,7 +94,7 @@ calculate_cycletime <- function(data, id, daterated, menses, ovtoday) {
   data <- process_follicular_phase_impute(data, id, daterated, menses)
   data <- create_scaled_cycleday(id, data)
   
-  Select and return the relevant columns
+  #Select and return the relevant columns
   data <- data %>%
     dplyr::select(
       c(
