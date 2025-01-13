@@ -72,6 +72,15 @@ calculate_cycletime <- function(data, id, daterated, menses, ovtoday) {
   data <- data %>% 
     dplyr::mutate(ovtoday = !!ovtoday)
   
+  data <- data %>% 
+    dplyr::mutate(menses = !!menses)
+  
+  data <- data %>% 
+    dplyr::mutate(daterated = !!daterated)
+  
+  data <- data %>% 
+    dplyr::mutate(id = !!id)
+  
   # Group and arrange data by ID and date
   data <- data %>%
     dplyr::group_by(!!id) %>%
