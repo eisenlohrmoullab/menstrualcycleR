@@ -286,7 +286,7 @@ calculate_ovtoday_impute <- function(data, id, daterated, menses) {
     dplyr::mutate(
       ovtoday_impute = ifelse(
         ovtoday_impute == 1 & sapply(!!daterated, function(date) {
-          any(abs(difftime(daterated[ovtoday == 1], date, units = "days")) <= 5)
+          any(abs(difftime(daterated[ovtoday == 1], date, units = "days")) <= 7)
         }),
         0,
         ovtoday_impute
