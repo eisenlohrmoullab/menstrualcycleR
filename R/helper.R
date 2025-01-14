@@ -80,7 +80,7 @@ process_luteal_phase_base <- function(data, id, daterated, menses) {
   # Calculate lutperc and lutperc1
   data <- data %>%
     dplyr::mutate(
-      lutperc = ifelse(lutmax <= 18 & lutmax >= 7 & cycle_incomplete != 1, lutdaycount / lutmax, NA),
+      lutperc = ifelse(lutmax <= 18 & lutmax >= 7, lutdaycount / lutmax, NA),
       lutperc1 = lutperc - 1
     )
   
