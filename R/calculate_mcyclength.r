@@ -41,6 +41,13 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   `%>%` <- magrittr::`%>%`
   `:=` <- rlang::`:=`
   
+  
+  # Ensure variable and daterated are evaluated correctly
+  menses <- rlang::enquo(menses)
+  daterated <- rlang::enquo(daterated)
+  id <- rlang::enquo(id)
+  ovtoday <- rlang::enquo(ovtoday)
+  
   data <- data %>% 
     dplyr::mutate(ovtoday = !!ovtoday)
   
@@ -53,11 +60,6 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   data <- data %>% 
     dplyr::mutate(id = !!id)
   
-  # Ensure variable and daterated are evaluated correctly
-  menses <- rlang::enquo(menses)
-  daterated <- rlang::enquo(daterated)
-  id <- rlang::enquo(id)
-  ovtoday <- rlang::enquo(ovtoday)
   
   # Ensure daterated is in Date format
   data <- data %>%
