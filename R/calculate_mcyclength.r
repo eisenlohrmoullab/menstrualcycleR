@@ -54,11 +54,7 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   print(glue::glue("daterated: {rlang::quo_name(daterated)}"))
   print(glue::glue("menses: {rlang::quo_name(menses)}"))
   print(glue::glue("ovtoday: {rlang::quo_name(ovtoday)}"))
-  
-  # Ensure id column is present
-  if (!rlang::quo_name(id) %in% names(data)) {
-    stop(glue::glue("The column '{rlang::quo_name(id)}' is missing from the dataset."))
-  }
+
   
   # Initialize columns
   data <- data %>%
@@ -88,6 +84,10 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
     tidyr::fill(!!id, .direction = "downup") %>%
     dplyr::ungroup()
   
+  # Ensure id column is present
+  if (!rlang::quo_name(id) %in% names(data)) {
+    stop(glue::glue("The column '{rlang::quo_name(id)}' is missing from the dataset."))
+  }
   
   data <- data %>%
     dplyr::mutate(
