@@ -75,7 +75,13 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   # Group and complete daterated sequence
   data <- data %>%
     dplyr::group_by(!!id) %>%
-    tidyr::complete(!!daterated := seq.Date(min(!!daterated, na.rm = TRUE), max(!!daterated, na.rm = TRUE), by = "day"))
+    tidyr::complete(!!daterated := seq.Date(min(!!daterated, na.rm = TRUE), max(!!daterated, na.rm = TRUE), by = "day")) %>%
+    tidyr::fill(!!id, .direction = "downup") %>%
+    dplyr::mutate(
+      !!menses := ifelse(is.na(!!menses), 0, !!menses),
+      !!ovtoday := ifelse(is.na(!!ovtoday), 0, !!ovtoday)
+    )
+  
   
   
   #Create ovtoday 
