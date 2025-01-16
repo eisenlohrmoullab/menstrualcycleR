@@ -68,38 +68,32 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
                   ovtoday = !!ovtoday)
   
   
-  # Ensure daterated is in Date format
+  # Step 1: Ensure daterated is in Date format
   data <- data %>%
-    dplyr::mutate(!!daterated := as.Date(!!daterated))
+    dplyr::mutate(!!rlang::quo_name(daterated) := lubridate::ymd(!!daterated))
   
-  # Group and complete daterated sequence
+  # Step 2: Remove rows with missing dates
+  data <- data[complete.cases(data[[rlang::quo_name(daterated)]]), ]
+  
+  # Step 3: Fill missing dates within each group
   data <- data %>%
     dplyr::group_by(!!id) %>%
-    tidyr::complete(!!daterated := seq.Date(min(!!daterated, na.rm = TRUE), max(!!daterated, na.rm = TRUE), by = "day")) %>%
-    tidyr::fill(!!id, .direction = "downup") %>%
+    tidyr::complete(!!daterated := seq.Date(
+      min(!!daterated, na.rm = TRUE),
+      max(!!daterated, na.rm = TRUE),
+      by = "day"
+    )) %>%
+    tidyr::fill(!!id, .direction = "downup") %>% # Fill missing id values
     dplyr::mutate(
       !!menses := ifelse(is.na(!!menses), 0, !!menses),
       !!ovtoday := ifelse(is.na(!!ovtoday), 0, !!ovtoday)
     )
   
-  
-  
-  #Create ovtoday 
-  # data <- data %>% dplyr::arrange(id, daterated) %>%
-  #   dplyr::group_by(id) %>%
-  #   dplyr::mutate(ovtoday = dplyr::lag(LHtest))
-  
-  #Turn NAs to 0 for menses, ovtoday, and LHtest 
- 
+  # Step 4: Ensure data is grouped and sorted properly
   data <- data %>%
-    dplyr::mutate(
-      !!menses := ifelse(is.na(!!menses), 0, !!menses),
-      !!ovtoday := ifelse(is.na(!!ovtoday), 0, !!ovtoday)
-    )
+    dplyr::group_by(!!id) %>%
+    dplyr::arrange(!!daterated, .by_group = TRUE)
   
-
-  
-  # data$LHtest <- ifelse(is.na(data$LHtest), 0, data$LHtest) 
   
   # Initialize columns
   data <- data %>%
