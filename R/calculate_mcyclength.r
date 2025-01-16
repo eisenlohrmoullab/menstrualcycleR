@@ -57,11 +57,11 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
 
   
   # Initialize columns
-  data <- data %>%
-    dplyr::mutate(id = !!id, 
-                  daterated = !!daterated, 
-                  menses = !!menses, 
-                  ovtoday = !!ovtoday)
+  # data <- data %>%
+  #   dplyr::mutate(id = !!id, 
+  #                 daterated = !!daterated, 
+  #                 menses = !!menses, 
+  #                 ovtoday = !!ovtoday)
   
   
   # Step 1: Ensure daterated is in Date format
