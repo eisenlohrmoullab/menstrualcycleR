@@ -89,9 +89,9 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
       !!ovtoday := ifelse(is.na(!!ovtoday), 0, !!ovtoday)
     )
   data <- data %>%
-    dplyr::mutate(menses = ifelse(is.na(menses), 0, menses))
+    dplyr::mutate(menses = ifelse(is.na(!!menses), 0, !!menses))
   data <- data %>%
-    dplyr::mutate(ovtoday = ifelse(is.na(ovtoday), 0, ovtoday))
+    dplyr::mutate(ovtoday = ifelse(is.na(!!ovtoday), 0, !!ovtoday))
   
   
   # Step 4: Ensure data is grouped and sorted properly
