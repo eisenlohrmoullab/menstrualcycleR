@@ -65,8 +65,7 @@ summary_ovulation <- function(data){
     ) %>%
     dplyr::group_by(id) %>%
     dplyr::summarise(
-      `Total cycles with cycle length < 21 or > 35` = ifelse(all(.data$mcyclength < 21  &
-                                                                   .data$mcyclength > 35), 1, 0),
+      `Total cycles with cycle length < 21 or > 35` = sum(cycles_outside_norm),
       `Total cycles with confirmed ovulation` = sum(confirmed_ovulation),
       `Total cycles with imputed ovulation via Natural Cycles Norms` = sum(imputed_ovulation),
       .groups = "drop"
