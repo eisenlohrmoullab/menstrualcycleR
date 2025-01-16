@@ -76,14 +76,30 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   data <- data[complete.cases(data[[rlang::quo_name(daterated)]]), ]
   
   # Step 3: Fill missing dates within each group
+  print("Before complete:")
+  print(head(data))
+  
   data <- data %>%
     dplyr::group_by(!!id) %>%
-    tidyr::complete(!!daterated := seq.Date(
-      min(!!daterated, na.rm = TRUE),
-      max(!!daterated, na.rm = TRUE),
-      by = "day"
-    )) %>%
-    tidyr::fill(!!id, .direction = "downup") %>% # Fill missing id values
+    tidyr::complete(
+      !!daterated := seq.Date(
+        min(!!daterated, na.rm = TRUE),
+        max(!!daterated, na.rm = TRUE),
+        by = "day"
+      )
+    )
+  
+  print("After complete:")
+  print(head(data))
+  
+  data <- data %>%
+    tidyr::fill(!!id, .direction = "downup")
+  
+  print("After fill:")
+  print(head(data))
+  
+  
+  data <- data %>%
     dplyr::mutate(
       !!menses := ifelse(is.na(!!menses), 0, !!menses),
       !!ovtoday := ifelse(is.na(!!ovtoday), 0, !!ovtoday)
