@@ -125,7 +125,7 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   # Identify incomplete cycles
   data <- data %>%
     dplyr::mutate(cycle_incomplete = ifelse(!is.na(m2mcount) & 
-                                       (is.na(dplyr::lead(m2mcount)) & id != dplyr::lead(!!id)), 1, 0))
+                                       (is.na(dplyr::lead(m2mcount)) & !!id != dplyr::lead(!!id)), 1, 0))
   
   # Set cycle_incomplete = 1 if m2mcount restarts when id changes
   data <- data %>%
