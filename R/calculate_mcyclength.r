@@ -73,8 +73,7 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   
   # Step 3: Fill missing dates within each group
   data <- data %>%
-    dplyr::mutate(id_backup = !!id) %>%
-    dplyr::group_by(id_backup) %>%
+    dplyr::group_by(!!id) %>%
     tidyr::complete(
       !!daterated := seq.Date(
         min(!!daterated, na.rm = TRUE),
@@ -82,14 +81,8 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
         by = "day"
       )
     ) %>%
-    dplyr::mutate(id = id_backup) %>%
-    tidyr::fill(id, .direction = "downup") %>%
+    tidyr::fill(!!id, .direction = "downup") %>%
     dplyr::ungroup()
-  
-  # Validate after complete
-  if (any(is.na(data$id))) {
-    stop("`id` column contains NA values after tidyr::complete and tidyr::fill.")
-  }
   
   
   data <- data %>%
@@ -129,17 +122,19 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   
   # Loop to calculate m2mcount
   for (i in seq_len(nrow(data))) {
-    if (!is.na(dplyr::pull(data, !!menses)[i]) && dplyr::pull(data, !!menses)[i] == 1) {
+    if (!is.na(data[[rlang::quo_name(menses)]][i]) && data[[rlang::quo_name(menses)]][i] == 1) {
       data$m2mcount[i] <- 1
       j <- i + 1
       
-      while (j <= nrow(data) && data$id[j] == data$id[i] && (is.na(dplyr::pull(data, !!menses)[j]) || dplyr::pull(data, !!menses)[j] != 1)) {
+      while (
+        j <= nrow(data) &&
+        !is.na(data[[rlang::quo_name(id)]][j]) &&
+        !is.na(data[[rlang::quo_name(id)]][i]) &&
+        data[[rlang::quo_name(id)]][j] == data[[rlang::quo_name(id)]][i] &&
+        (is.na(data[[rlang::quo_name(menses)]][j]) || data[[rlang::quo_name(menses)]][j] != 1)
+      ) {
         data$m2mcount[j] <- data$m2mcount[j - 1] + 1
         j <- j + 1
-      }
-      
-      if (j <= nrow(data) && data$id[j] == data$id[i] && !is.na(dplyr::pull(data, !!menses)[j]) && dplyr::pull(data, !!menses)[j] == 1) {
-        data$m2mcount[j] <- data$m2mcount[j - 1] + 1
       }
     }
   }
