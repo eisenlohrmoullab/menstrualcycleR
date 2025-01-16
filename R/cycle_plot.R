@@ -37,7 +37,7 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
   `%>%` <- magrittr::`%>%`
   `:=` <- rlang::`:=`
   data <- data %>%
-    dplyr::mutate(symptom = as.numeric(symptom))
+    dplyr::mutate( (!!dplyr::sym(symptom)) := as.numeric(!!dplyr::sym(symptom)))
   
   # Function to create person means
   create_person_mean <- function(df, var, group_var) {
