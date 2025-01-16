@@ -73,7 +73,8 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   
   # Step 3: Fill missing dates within each group
   data <- data %>%
-    dplyr::group_by(!!id) %>%
+    dplyr::mutate(id_backup = !!id) %>%
+    dplyr::group_by(id_backup) %>%
     tidyr::complete(
       !!daterated := seq.Date(
         min(!!daterated, na.rm = TRUE),
@@ -81,13 +82,15 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
         by = "day"
       )
     ) %>%
-    tidyr::fill(!!id, .direction = "downup") %>%
+    dplyr::mutate(id = id_backup) %>%
+    tidyr::fill(id, .direction = "downup") %>%
     dplyr::ungroup()
   
-  # Ensure id column is present
-  if (!rlang::quo_name(id) %in% names(data)) {
-    stop(glue::glue("The column '{rlang::quo_name(id)}' is missing from the dataset."))
+  # Validate after complete
+  if (any(is.na(data$id))) {
+    stop("`id` column contains NA values after tidyr::complete and tidyr::fill.")
   }
+  
   
   data <- data %>%
     dplyr::mutate(
