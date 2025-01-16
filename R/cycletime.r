@@ -95,17 +95,17 @@ calculate_cycletime <- function(data, id, daterated, menses, ovtoday) {
   data <- create_scaled_cycleday(id, data)
   
   #Select and return the relevant columns
-  data <- data %>%
-    dplyr::select(
-      c(
-        dplyr::all_of(varnames),
-        ovtoday_impute,
-        scaled_cycleday,
-        scaled_cycleday_ov,
-        scaled_cycleday_impute,
-        scaled_cycleday_imp_ov
-      )
-    )
+  # data <- data %>%
+  #   dplyr::select(
+  #     c(
+  #       dplyr::all_of(varnames),
+  #       ovtoday_impute,
+  #       scaled_cycleday,
+  #       scaled_cycleday_ov,
+  #       scaled_cycleday_impute,
+  #       scaled_cycleday_imp_ov
+  #     )
+  #   )
 
   return(data)
 }
