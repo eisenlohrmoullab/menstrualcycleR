@@ -128,13 +128,6 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
     y = if (y_scale == "person-centered") mean_dev else if (y_scale == "person-centered_roll") mean_dev_roll else mean_sx
   )) +
     ggplot2::scale_x_continuous(limits = c(0, 1), breaks = x_breaks, labels = x_labels) +
-    ggplot2::geom_rug(
-      data = data,  # Use the original dataset
-      ggplot2::aes(x = cycleday_5perc),
-      sides = "top",  
-      alpha = 0.5,  
-      inherit.aes = FALSE
-    ) +
     ggplot2::geom_rect(
       ggplot2::aes(xmin = ifelse(centering == "ovulation", 0.48, 0.48), xmax = ifelse(centering == "ovulation", 0.52, 0.52), ymin = -Inf, ymax = Inf),
       fill = ifelse(centering == "ovulation", "grey87", "grey70"), alpha = 0.2, color = "white"
