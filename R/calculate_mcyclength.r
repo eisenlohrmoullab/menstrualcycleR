@@ -43,22 +43,31 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   
   
   # Ensure variable and daterated are evaluated correctly
+  # Capture column names
   menses <- rlang::enquo(menses)
   daterated <- rlang::enquo(daterated)
   id <- rlang::enquo(id)
   ovtoday <- rlang::enquo(ovtoday)
   
-  data <- data %>%
-    dplyr::mutate(!!rlang::quo_name(id) := !!id)
+  # Print column names to debug
+  print(glue::glue("id: {rlang::quo_name(id)}"))
+  print(glue::glue("daterated: {rlang::quo_name(daterated)}"))
+  print(glue::glue("menses: {rlang::quo_name(menses)}"))
+  print(glue::glue("ovtoday: {rlang::quo_name(ovtoday)}"))
   
-  data <- data %>%
-    dplyr::mutate(!!rlang::quo_name(ovtoday) := !!ovtoday)
+  # Ensure id column is present
+  if (!rlang::quo_name(id) %in% names(data)) {
+    stop(glue::glue("The column '{rlang::quo_name(id)}' is missing from the dataset."))
+  }
   
+  # Initialize columns
   data <- data %>%
-    dplyr::mutate(!!rlang::quo_name(menses) := !!menses)
-  
-  data <- data %>%
-    dplyr::mutate(!!rlang::quo_name(daterated) := !!daterated)
+    dplyr::mutate(
+      !!rlang::quo_name(id) := !!id,
+      !!rlang::quo_name(daterated) := as.Date(!!daterated),
+      !!rlang::quo_name(menses) := !!menses,
+      !!rlang::quo_name(ovtoday) := !!ovtoday
+    )
   
   # Ensure daterated is in Date format
   data <- data %>%
