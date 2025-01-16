@@ -139,7 +139,7 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   
   # Set cycle_incomplete = 1 if m2mcount restarts when id changes
   data <- data %>%
-    dplyr::group_by!!id) %>%
+    dplyr::group_by(!!id) %>%
     dplyr::mutate(cycle_incomplete = ifelse(
       !!id != dplyr::lag(!!id, default = dplyr::first(id)) & m2mcount == 1, 1, cycle_incomplete
     )) %>%
