@@ -110,6 +110,14 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
       cycle_incomplete = 0
     )
   
+  if (any(is.na(data$id))) {
+    stop("Error: `id` column contains NA values.")
+  }
+  
+  if (any(is.na(data$menses))) {
+    stop("Error: `menses` column contains NA values.")
+  }
+  
   # Loop to calculate m2mcount
   for (i in seq_len(nrow(data))) {
     if (!is.na(dplyr::pull(data, !!menses)[i]) && dplyr::pull(data, !!menses)[i] == 1) {
