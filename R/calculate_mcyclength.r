@@ -112,14 +112,7 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
       cycle_incomplete = 0
     )
   
-  if (any(is.na(data$id))) {
-    stop("Error: `id` column contains NA values.")
-  }
-  
-  if (any(is.na(data$menses))) {
-    stop("Error: `menses` column contains NA values.")
-  }
-  
+
   # Loop to calculate m2mcount
   for (i in seq_len(nrow(data))) {
     if (!is.na(data[[rlang::quo_name(menses)]][i]) && data[[rlang::quo_name(menses)]][i] == 1) {
