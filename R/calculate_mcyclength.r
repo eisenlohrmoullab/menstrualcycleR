@@ -63,14 +63,14 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   # Initialize columns
   data <- data %>%
     dplyr::mutate(id = !!id, 
-                  dateraed = !!daterated, 
+                  daterated = !!daterated, 
                   menses = !!menses, 
                   ovtoday = !!ovtoday)
   
   
   # Ensure daterated is in Date format
   data <- data %>%
-    dplyr::mutate(!!rlang::quo_name(daterated) := as.Date(!!daterated))
+    dplyr::mutate(!!daterated := as.Date(!!daterated))
   
   # Group and complete daterated sequence
   data <- data %>%
