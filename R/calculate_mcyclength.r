@@ -57,11 +57,11 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
 
   
   # Initialize columns
-  # data <- data %>%
-  #   dplyr::mutate(id = !!id, 
-  #                 daterated = !!daterated, 
-  #                 menses = !!menses, 
-  #                 ovtoday = !!ovtoday)
+  data <- data %>%
+    dplyr::mutate(id = !!id, 
+                  daterated = !!daterated, 
+                  menses = !!menses, 
+                  ovtoday = !!ovtoday)
   
   
   # Step 1: Ensure daterated is in Date format
@@ -90,7 +90,10 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
       !!menses := ifelse(is.na(!!menses), 0, !!menses),
       !!ovtoday := ifelse(is.na(!!ovtoday), 0, !!ovtoday)
     )
-
+  data <- data %>%
+    dplyr::mutate(menses = ifelse(is.na(!!menses), 0, !!menses))
+  data <- data %>%
+    dplyr::mutate(ovtoday = ifelse(is.na(!!ovtoday), 0, !!ovtoday))
   
   
   # Step 4: Ensure data is grouped and sorted properly
@@ -136,7 +139,7 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   
   # Set cycle_incomplete = 1 if m2mcount restarts when id changes
   data <- data %>%
-    dplyr::group_by(!!id) %>%
+    dplyr::group_by!!id) %>%
     dplyr::mutate(cycle_incomplete = ifelse(
       !!id != dplyr::lag(!!id, default = dplyr::first(id)) & m2mcount == 1, 1, cycle_incomplete
     )) %>%
