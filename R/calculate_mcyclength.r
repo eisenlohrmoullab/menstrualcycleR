@@ -48,18 +48,17 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   id <- rlang::enquo(id)
   ovtoday <- rlang::enquo(ovtoday)
   
-  data <- data %>% 
-    dplyr::mutate(ovtoday = !!ovtoday)
+  data <- data %>%
+    dplyr::mutate(!!rlang::quo_name(id) := !!id)
   
-  data <- data %>% 
-    dplyr::mutate(menses = !!menses)
+  data <- data %>%
+    dplyr::mutate(!!rlang::quo_name(ovtoday) := !!ovtoday)
   
-  data <- data %>% 
-    dplyr::mutate(daterated = !!daterated)
+  data <- data %>%
+    dplyr::mutate(!!rlang::quo_name(menses) := !!menses)
   
-  data <- data %>% 
-    dplyr::mutate(id = !!id)
-  
+  data <- data %>%
+    dplyr::mutate(!!rlang::quo_name(daterated) := !!daterated)
   
   # Ensure daterated is in Date format
   data <- data %>%
@@ -68,7 +67,8 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   # Group and complete daterated sequence
   data <- data %>%
     dplyr::group_by(!!id) %>%
-    tidyr::complete(!!daterated := seq.Date(min(!!daterated), max(!!daterated), by = "day"))
+    tidyr::complete(!!daterated := seq.Date(min(!!daterated, na.rm = TRUE), max(!!daterated, na.rm = TRUE), by = "day"))
+  
   
   #Create ovtoday 
   # data <- data %>% dplyr::arrange(id, daterated) %>%
