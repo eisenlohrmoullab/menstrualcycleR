@@ -87,8 +87,8 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
  
   data <- data %>%
     dplyr::mutate(
-      !!rlang::quo_name(menses) := ifelse(is.na(!!menses), 0, !!menses),
-      !!rlang::quo_name(ovtoday) := ifelse(is.na(!!ovtoday), 0, !!ovtoday)
+      !!menses := ifelse(is.na(!!menses), 0, !!menses),
+      !!ovtoday := ifelse(is.na(!!ovtoday), 0, !!ovtoday)
     )
   
 
