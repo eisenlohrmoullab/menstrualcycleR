@@ -535,8 +535,8 @@ create_scaled_cycleday <- function(id, data) {
           dplyr::lag(is.na(perclut_impute), default = TRUE) != is.na(perclut_impute)
       )
     ) %>%
-    dplyr::group_by(!!id, group) %>%
-    dplyr::mutate(percentlut_impute = if (any(!is.na(lutperc1))) lutperc1 else perclut_impute) %>%
+    dplyr::group_by(!!id, group, cyclenum) %>%
+    dplyr::mutate(percentlut_impute = if (any(!is.na(lutperc1) & lutperc1 != 0)) lutperc1 else perclut_impute) %>% #besides 0 
     dplyr::ungroup() %>%
     dplyr::select(-group)
   
