@@ -522,8 +522,8 @@ create_scaled_cycleday <- function(id, data) {
           dplyr::lag(is.na(lutperc_imp_ov), default = TRUE) != is.na(lutperc_imp_ov)
       )
     ) %>%
-    dplyr::group_by(!!id, group) %>%
-    dplyr::mutate(perclut_ov_imp = if (any(!is.na(lutperc_ov))) lutperc_ov else lutperc_imp_ov) %>%
+    dplyr::group_by(!!id, group, cyclenum) %>%
+    dplyr::mutate(perclut_ov_imp = if (any(!is.na(lutperc_ov) & lutperc_ov != 0)) lutperc_ov else lutperc_imp_ov) %>%
     dplyr::ungroup() %>%
     dplyr::select(-group)
   
@@ -536,7 +536,7 @@ create_scaled_cycleday <- function(id, data) {
       )
     ) %>%
     dplyr::group_by(!!id, group, cyclenum) %>%
-    dplyr::mutate(percentlut_impute = if (any(!is.na(lutperc1) & lutperc1 != 0)) lutperc1 else perclut_impute) %>% #besides 0 
+    dplyr::mutate(percentlut_impute = if (any(!is.na(lutperc1) & lutperc1 != -1)) lutperc1 else perclut_impute) %>% #besides 0 
     dplyr::ungroup() %>%
     dplyr::select(-group)
   
