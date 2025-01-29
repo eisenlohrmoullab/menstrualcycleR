@@ -189,7 +189,7 @@ process_follicular_phase_base <- function(data, id, daterated, menses) {
     group_by(id, cyclenum) %>%
     mutate(
       next_id = lead(id),  # Capture the ID of the next row
-      valid_group = any(foldaycount == folmax & id != next_id),  # Check if the condition is met for the group
+      valid_group = any(foldaycount == folmax & id == next_id),  # Check if the condition is met for the group
       folperc = ifelse(
         follength >= 8 & follength <= 25 & valid_group, 
         foldaycount / folmax, 
