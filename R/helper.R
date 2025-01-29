@@ -183,19 +183,25 @@ process_follicular_phase_base <- function(data, id, daterated, menses) {
   # Calculate folperc (only when follicular length is between 8 and 25)
   # data <- data %>%
   #   dplyr::mutate(folperc = ifelse(follength >= 8 & follength <= 25, foldaycount / folmax, NA))
+  
   data <- data %>%
-    arrange(id, daterated) %>%  # Ensure data is sorted by id and foldaycount
+    arrange(id, cyclenum, foldaycount) %>%  # Ensure proper ordering
+    group_by(id, cyclenum) %>%  # Group by id and cyclenum
     mutate(
-      next_id = lead(id),  # Get the id of the next row
-      next_foldaycount = lead(foldaycount),  # Get the foldaycount of the next row
+      next_id = lead(id),  
+      next_foldaycount = lead(foldaycount),
+      flag_exclude_group = any(id == next_id & next_foldaycount == folmax)  # Flag entire (id, cyclenum) group
+    ) %>%
+    mutate(
       folperc = ifelse(
-        follength >= 8 & follength <= 25 & 
-          id == next_id & next_foldaycount != folmax,  # Condition for same ID and next foldaycount ≠ folmax
+        follength >= 8 & follength <= 25 & !flag_exclude_group,  # Exclude entire (id, cyclenum) group
         foldaycount / folmax, 
         NA
       )
     ) %>%
-    select(-next_id, -next_foldaycount)
+    ungroup() %>%
+    select(-next_id, -next_foldaycount, -flag_exclude_group)  # Clean up helper columns
+  
   
   # Calculate percfol and percfol_ov
   data <- data %>% 
