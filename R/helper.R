@@ -86,11 +86,11 @@ process_luteal_phase_base <- function(data, id, daterated, menses) {
   
   
   data <- data %>%
-    dplyr::arrange(id, daterated) %>%  # Ensure correct order
-    dplyr::group_by(id, cyclenum) %>%
+    dplyr::arrange(!!id, !!daterated) %>%  # Ensure correct order
+    dplyr::group_by(!!id, cyclenum) %>%
     dplyr::mutate(
-      next_id = lead(id),  # Capture the ID of the next row
-      valid_group = any(lutdaycount1 == lutmax & id == next_id),  # Check if the condition is met for the group
+      next_id = dplyr::lead(!!id),  # Capture the ID of the next row
+      valid_group = any(lutdaycount1 == lutmax & !!id == next_id),  # Check if the condition is met for the group
       lutperc = ifelse(
         lutmax <= 18 & lutmax >=7 & valid_group,
         lutdaycount / lutmax,
@@ -110,7 +110,7 @@ process_luteal_phase_base <- function(data, id, daterated, menses) {
         is.na(lutdaycount_ov) | !!id != dplyr::lead(!!id) ~ NA,
         TRUE ~ lutdaycount_ov
       ),
-      next_id = lead(id),  # Capture the ID of the next row
+      next_id = dplyr::lead(!!id),  # Capture the ID of the next row
       valid_group = any(lutdaycount_ov == lutmax & id == next_id), 
       lutperc_ov = ifelse(lutmax <= 18 & lutmax >= 7 & valid_group, lutdaycount_ov / lutmax, NA),
       lutperc_ov = ifelse(lutdaycount_ov == 0, 0, lutperc_ov)
@@ -206,11 +206,11 @@ process_follicular_phase_base <- function(data, id, daterated, menses) {
   #   dplyr::mutate(folperc = ifelse(follength >= 8 & follength <= 25, foldaycount / folmax, NA))
   
   data <- data %>%
-    dplyr::arrange(id, cyclenum, daterated) %>%  # Ensure correct order
-    dplyr::group_by(id, cyclenum) %>%
+    dplyr::arrange(!!id, cyclenum,!!daterated) %>%  # Ensure correct order
+    dplyr::group_by(!!id, cyclenum) %>%
     dplyr::mutate(
-      next_id = lead(id),  # Capture the ID of the next row
-      valid_group = any(foldaycount == folmax & id == next_id),  # Check if the condition is met for the group
+      next_id = dplyr::lead(!!id),  # Capture the ID of the next row
+      valid_group = any(foldaycount == folmax & !!id == next_id),  # Check if the condition is met for the group
       folperc = ifelse(
         follength >= 8 & follength <= 25 & valid_group, 
         foldaycount / folmax, 
