@@ -185,7 +185,7 @@ process_follicular_phase_base <- function(data, id, daterated, menses) {
   #   dplyr::mutate(folperc = ifelse(follength >= 8 & follength <= 25, foldaycount / folmax, NA))
   
   data <- data %>%
-    arrange(id, cyclenum, foldaycount) %>%  # Ensure proper ordering
+    arrange(id, daterated) %>%  # Ensure proper ordering
     group_by(id, cyclenum) %>%  # Group by id and cyclenum
     mutate(
       next_id = lead(id),  
