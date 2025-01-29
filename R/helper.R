@@ -86,9 +86,9 @@ process_luteal_phase_base <- function(data, id, daterated, menses) {
   
   
   data <- data %>%
-    arrange(id, cyclenum, daterated) %>%  # Ensure correct order
-    group_by(id, cyclenum) %>%
-    mutate(
+    dplyr::arrange(id, daterated) %>%  # Ensure correct order
+    dplyr::group_by(id, cyclenum) %>%
+    dplyr::mutate(
       next_id = lead(id),  # Capture the ID of the next row
       valid_group = any(lutdaycount == lutmax-1 & id == next_id),  # Check if the condition is met for the group
       lutperc = ifelse(
@@ -98,8 +98,8 @@ process_luteal_phase_base <- function(data, id, daterated, menses) {
       ),
       lutperc1 = lutperc - 1
     ) %>%
-    ungroup() %>%
-    select(-next_id, -valid_group)
+    dplyr::ungroup() %>%
+    dplyr::select(-next_id, -valid_group)
   
   # Calculate lutdaycount_ov and lutperc_ov
   data <- data %>%
@@ -114,8 +114,9 @@ process_luteal_phase_base <- function(data, id, daterated, menses) {
       valid_group = any(lutdaycount_ov == lutmax & id == next_id), 
       lutperc_ov = ifelse(lutmax <= 18 & lutmax >= 7 & valid_group, lutdaycount_ov / lutmax, NA),
       lutperc_ov = ifelse(lutdaycount_ov == 0, 0, lutperc_ov)
-    ) %>% ungroup() %>%
-    select(-next_id, -valid_group)
+    ) %>% 
+    dplyr::ungroup() %>%
+    dplyr::select(-next_id, -valid_group)
   
   return(data)
 }
@@ -205,9 +206,9 @@ process_follicular_phase_base <- function(data, id, daterated, menses) {
   #   dplyr::mutate(folperc = ifelse(follength >= 8 & follength <= 25, foldaycount / folmax, NA))
   
   data <- data %>%
-    arrange(id, cyclenum, daterated) %>%  # Ensure correct order
-    group_by(id, cyclenum) %>%
-    mutate(
+    dplyr::arrange(id, cyclenum, daterated) %>%  # Ensure correct order
+    dplyr::group_by(id, cyclenum) %>%
+    dplyr::mutate(
       next_id = lead(id),  # Capture the ID of the next row
       valid_group = any(foldaycount == folmax & id == next_id),  # Check if the condition is met for the group
       folperc = ifelse(
@@ -216,8 +217,8 @@ process_follicular_phase_base <- function(data, id, daterated, menses) {
         NA_real_
       )
     ) %>%
-    ungroup() %>%
-    select(-next_id, -valid_group)
+    dplyr::ungroup() %>%
+    dplyr::select(-next_id, -valid_group)
   
   
   # Calculate percfol and percfol_ov
