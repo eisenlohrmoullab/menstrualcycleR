@@ -403,7 +403,7 @@ process_luteal_phase_impute <- function(data, id, daterated, menses) {
       NA,
       dplyr::if_else(
         is.na(lutlength1_impute) &
-          !is.na(lutmax_impute) & cycle_incomplete == 0 & mcyclength > 20 & mcyclength < 36,
+          !is.na(lutmax_impute) & cycle_incomplete != 1 & mcyclength > 20 & mcyclength < 36,
         lutdaycount_impute / lutmax_impute,
         lutdaycount_impute / round(lutlength1_impute)
       )
@@ -429,7 +429,7 @@ process_luteal_phase_impute <- function(data, id, daterated, menses) {
       is.na(lutlength1_impute) ,
       NA,
       dplyr::if_else(
-        is.na(lutlength1_impute) & !is.na(lutmax) & cycle_incomplete == 0 & mcyclength > 20 & mcyclength < 36,
+        is.na(lutlength1_impute) & !is.na(lutmax) & cycle_incomplete != 1 & mcyclength > 20 & mcyclength < 36,
         lutdaycount_imp_ov / lutmax_impute,
         lutdaycount_imp_ov / round(lutlength1_impute)
       )
@@ -515,7 +515,7 @@ process_follicular_phase_impute <- function(data, id, daterated, menses) {
   
   # Create `percfol_impute`, based on Bull 2019 norms
   data <- data %>%
-    dplyr::mutate(percfol_impute = ifelse(mcyclength >= 21 & mcyclength <= 35, foldaycount_impute / folmax_impute, NA))
+    dplyr::mutate(percfol_impute = ifelse(mcyclength >= 21 & mcyclength <= 35 & cycle_incomplete != 1, foldaycount_impute / folmax_impute, NA))
   
   return(data)
 }
