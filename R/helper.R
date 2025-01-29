@@ -78,11 +78,28 @@ process_luteal_phase_base <- function(data, id, daterated, menses) {
   }
   
   # Calculate lutperc and lutperc1
+  # data <- data %>%
+  #   dplyr::mutate(
+  #     lutperc = ifelse(lutmax <= 18 & lutmax >= 7, lutdaycount / lutmax, NA),
+  #     lutperc1 = lutperc - 1
+  #   )
+  
+  
   data <- data %>%
-    dplyr::mutate(
-      lutperc = ifelse(lutmax <= 18 & lutmax >= 7, lutdaycount / lutmax, NA),
+    arrange(id, cyclenum, daterated) %>%  # Ensure correct order
+    group_by(id, cyclenum) %>%
+    mutate(
+      next_id = lead(id),  # Capture the ID of the next row
+      valid_group = any(lutdaycount-1 == lutmax & id == next_id),  # Check if the condition is met for the group
+      lutperc = ifelse(
+        lutlength <= 18 & lutmax >=7 & valid_group,
+        lutdaycount / lutmax,
+        NA
+      ),
       lutperc1 = lutperc - 1
-    )
+    ) %>%
+    ungroup() %>%
+    select(-next_id, -valid_group)
   
   # Calculate lutdaycount_ov and lutperc_ov
   data <- data %>%
@@ -93,9 +110,12 @@ process_luteal_phase_base <- function(data, id, daterated, menses) {
         is.na(lutdaycount_ov) | !!id != dplyr::lead(!!id) ~ NA,
         TRUE ~ lutdaycount_ov
       ),
-      lutperc_ov = ifelse(lutmax <= 18 & lutmax >= 7, lutdaycount_ov / lutmax, NA),
+      next_id = lead(id),  # Capture the ID of the next row
+      valid_group = any(lutdaycount_ov == lutmax & id == next_id), 
+      lutperc_ov = ifelse(lutmax <= 18 & lutmax >= 7 & valid_group, lutdaycount_ov / lutmax, NA),
       lutperc_ov = ifelse(lutdaycount_ov == 0, 0, lutperc_ov)
-    )
+    ) %>% ungroup() %>%
+    select(-next_id, -valid_group)
   
   return(data)
 }
