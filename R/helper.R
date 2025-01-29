@@ -90,9 +90,9 @@ process_luteal_phase_base <- function(data, id, daterated, menses) {
     group_by(id, cyclenum) %>%
     mutate(
       next_id = lead(id),  # Capture the ID of the next row
-      valid_group = any(lutdaycount-1 == lutmax & id == next_id),  # Check if the condition is met for the group
+      valid_group = any(lutdaycount == lutmax-1 & id == next_id),  # Check if the condition is met for the group
       lutperc = ifelse(
-        lutlength <= 18 & lutmax >=7 & valid_group,
+        lutmax <= 18 & lutmax >=7 & valid_group,
         lutdaycount / lutmax,
         NA
       ),
