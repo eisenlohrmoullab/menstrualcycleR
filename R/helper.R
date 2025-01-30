@@ -246,7 +246,7 @@ calculate_ovtoday_impute <- function(data, id, daterated, menses) {
   # Step 1: Calculate `lutlength_impute` and `follength_impute`
   data <- data %>%
     dplyr::mutate(
-      lutlength_impute = if_else(
+      lutlength_impute = dplyr::if_else(
         cycle_incomplete != 1,
         dplyr::case_when(
           mcyclength == 21 ~ (mcyclength * 0.433), # 9.1/21
@@ -269,7 +269,7 @@ calculate_ovtoday_impute <- function(data, id, daterated, menses) {
         NA_real_  # If cycle_incomplete == 1, assign NA
       ),
       
-      follength_impute = if_else(
+      follength_impute = dplyr::if_else(
         cycle_incomplete != 1,
         dplyr::case_when(
           mcyclength == 21 ~ (mcyclength * 0.567), # 11.9/21
