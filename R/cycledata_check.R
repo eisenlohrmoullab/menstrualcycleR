@@ -128,8 +128,7 @@ cycledata_check <- function(data, symptom_columns) {
       ) +  
       ggplot2::scale_y_discrete(
         limits = unique(filtered_data$id),  # Maintain ID order
-        labels = function(x) x  # Ensures IDs appear as labels
-      ) +  
+        labels = unique(filtered_data$id)) +
       ggplot2::labs(
         title = paste("Data Availability for", symptom),
         x = "Cycle Time (Including Imputed Ovulation from NC Norms)",
