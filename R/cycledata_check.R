@@ -132,7 +132,7 @@ cycledata_check <- function(data, symptom_columns) {
       ) +
       ggplot2::labs(
         title = paste("Data Availability for", symptom),
-        x = "Cycle Time (Including Imputed Ovulation from NC Norms)",
+        x = "Cycle Time (Based on confirmed and estimated ovulation)",
         y = "ID",
         fill = "ID",
         color = "ID"
