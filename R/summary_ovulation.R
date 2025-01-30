@@ -31,7 +31,7 @@ summary_ovulation <- function(data){
   `%>%` <- magrittr::`%>%`
   ovstatus_total <- data.frame(
     "Total Confirmed Ovulation" = sum(data$ovtoday == 1, na.rm = TRUE),
-    "Total Imputed Ovulation via Natural Cycles Norms" = data %>%
+    "Total Estimated Ovulation via 15day Backward Count" = data %>%
       dplyr::group_by(id, .data$cyclenum) %>%
       dplyr::filter(all(.data$ovtoday == 0) & any(.data$ovtoday_impute == 1)) %>%
       dplyr::summarise(count = 1, .groups = "drop") %>%
@@ -43,7 +43,7 @@ summary_ovulation <- function(data){
   
   
   ovstatus_id <- data %>%
-    dplyr::filter(.data$cycle_incomplete == 0) %>%
+    #dplyr::filter(.data$cycle_incomplete != 0) %>%
     dplyr::group_by(id, .data$cyclenum) %>%
     dplyr::summarise(
       # Total cycles with cycle length < 21 or > 35 and ovtoday == 0, ovtoday_impute == 0
@@ -67,7 +67,7 @@ summary_ovulation <- function(data){
     dplyr::summarise(
       #`Total cycles with cycle length < 21 or > 35` = sum(cycles_outside_norm),
       `Total cycles with confirmed ovulation` = sum(confirmed_ovulation),
-      `Total cycles with imputed ovulation via Natural Cycles Norms` = sum(imputed_ovulation),
+      `Total cycles with imputed ovulation via 15day Backward Count` = sum(imputed_ovulation),
       .groups = "drop"
     )
   
