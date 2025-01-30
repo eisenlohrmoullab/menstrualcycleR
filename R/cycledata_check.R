@@ -120,7 +120,7 @@ cycledata_check <- function(data, symptom_columns) {
     symptom_plot <- filtered_data %>%
       ggplot2::ggplot(ggplot2::aes(x = .data$scaled_cycleday_impute, y = factor(id), color = as.numeric(id), fill = as.numeric(id))) +
       ggplot2::geom_point(shape = 21, size = 3, alpha = 0.5, stroke = 0.2) +  
-      ggplot2::geom_text(aes(label = id), hjust = -0.3, size = 3, color = "black") + 
+      ggplot2::geom_text(ggplot2::aes(label = id), hjust = -0.3, size = 3, color = "black") + 
       ggplot2::scale_fill_gradientn(colors = viridis::viridis(256)) +  
       ggplot2::scale_color_gradientn(colors = viridis::viridis(256)) +  
       ggplot2::scale_x_continuous(
