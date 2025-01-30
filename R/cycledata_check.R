@@ -126,8 +126,9 @@ cycledata_check <- function(data, symptom_columns) {
         breaks = c(-1, -0.5, 0, 0.5, 1),
         labels = c("0% L", "50% L \nLuteal Phase", "Menses", "50% F \nFollicular Phase", "Ovulation")
       ) +  
-      ggplot2::scale_y_discrete(  # Ensure ID labels appear on the y-axis
-        limits = rev(unique(filtered_data$id))  # Reverse order for better readability
+      ggplot2::scale_y_discrete(
+        limits = levels(filtered_data$id),  # Ensure ID labels are maintained
+        labels = function(x) x  # Explicitly set labels to display
       ) +
       ggplot2::labs(
         title = paste("Data Availability for", symptom),
