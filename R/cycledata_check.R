@@ -127,7 +127,10 @@ cycledata_check <- function(data, symptom_columns) {
         breaks = c(-1, -0.5, 0, 0.5, 1),
         labels = c("0% L", "50% L \nLuteal Phase", "Menses", "50% F \nFollicular Phase", "Ovulation")
       ) +  
-      ggplot2::scale_y_discrete(limits = unique(filtered_data$id)) +  
+      ggplot2::scale_y_discrete(
+        limits = unique(filtered_data$id),  # Maintain ID order
+        labels = function(x) x  # Ensures IDs appear as labels
+      ) +  
       ggplot2::labs(
         title = paste("Data Availability for", symptom),
         x = "Cycle Time (Including Imputed Ovulation from NC Norms)",
