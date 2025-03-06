@@ -1,7 +1,7 @@
 library(shiny)
 
 ui <- fluidPage(
-  titlePanel("Menstrual Cycle Tracker"),
+  titlePanel("Phase Aligned Cycle Time Scaling (PACTS) with menstrualcycleR"),
   
   sidebarLayout(
     sidebarPanel(
