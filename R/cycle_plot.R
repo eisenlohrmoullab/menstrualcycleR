@@ -87,7 +87,7 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
       dplyr::mutate(cycleday_5perc = round(cycleday_perc / 0.05) * 0.05)
   } else if (centering == "menses" & !include_impute) {
     data <- data %>%
-      dplyr::mutate(cycleday_perc = (.data$scaled_cycleday_impute + 1) / 2) %>%
+      dplyr::mutate(cycleday_perc = (.data$scaled_cycleday + 1) / 2) %>%
       dplyr::mutate(cycleday_5perc = round(cycleday_perc / 0.05) * 0.05)
   } else if (centering == "ovulation" & include_impute) {
     data <- data %>%
