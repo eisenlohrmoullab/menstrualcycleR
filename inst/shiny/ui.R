@@ -7,6 +7,7 @@ ui <- fluidPage(
     sidebarPanel(
       fileInput("file", "Upload CSV Data:", accept = ".csv"),
       actionButton("load_data", "Load Data", class = "btn-primary"),
+      actionButton("process_data", "Process Data", class = "btn-success"), # New button
       hr(),
       selectInput("id_col", "Select ID Column:", choices = NULL),
       selectInput("date_col", "Select Date Column:", choices = NULL),
