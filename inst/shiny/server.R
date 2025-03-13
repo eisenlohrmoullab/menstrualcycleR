@@ -1,7 +1,7 @@
 library(shiny)
 library(menstrualcycleR)
-library(dplyr)  # Ensure tidy evaluation works
-library(rlang)  # For handling column selection dynamically
+library(dplyr)
+library(rlang)
 
 server <- function(input, output, session) {
   
@@ -18,6 +18,7 @@ server <- function(input, output, session) {
     updateSelectInput(session, "date_col", choices = names(data))
     updateSelectInput(session, "menses_col", choices = names(data))
     updateSelectInput(session, "ovtoday_col", choices = names(data))
+    updateSelectInput(session, "symptom_col", choices = names(data))  # Update symptom selector
   })
   
   # Show Data Preview
@@ -32,16 +33,16 @@ server <- function(input, output, session) {
   observeEvent(input$process_data, {
     req(user_data(), input$id_col, input$date_col, input$menses_col, input$ovtoday_col)
     
-    # Convert input selections (strings) into symbols for column referencing
+    # Convert input selections to symbols
     id_col <- sym(input$id_col)
     date_col <- sym(input$date_col)
     menses_col <- sym(input$menses_col)
     ovtoday_col <- sym(input$ovtoday_col)
     
-    # Apply functions with correct column references
+    # Apply functions with dynamic column referencing
     processed <- user_data() %>%
       menstrualcycleR::calculate_mcyclength(
-        data = .,  # Pipe input dataframe into function
+        data = .,
         id = !!id_col,
         daterated = !!date_col,
         menses = !!menses_col,
@@ -82,10 +83,13 @@ server <- function(input, output, session) {
   
   # Symptom Data Analysis
   symptom_analysis <- reactive({
-    req(processed_data())
+    req(processed_data(), input$symptom_col)
+    
+    symptom_col <- sym(input$symptom_col)  # Convert input to symbol
+    
     menstrualcycleR::cycledata_check(
       processed_data(),
-      symptom_columns = c("symptom")  # Can make dynamic
+      symptom_columns = c(!!symptom_col)  # Use selected symptom column dynamically
     )
   })
   
@@ -95,14 +99,26 @@ server <- function(input, output, session) {
   })
   
   # Cycle Plot
-  output$cycle_plot <- renderPlot({
-    req(processed_data())
-    result <- menstrualcycleR::cycle_plot(
+  cycle_plot_data <- reactiveVal(NULL)
+  
+  observeEvent(input$update_plot, {
+    req(processed_data(), input$symptom_col, input$plot_centering, input$plot_impute)
+    
+    symptom_col <- sym(input$symptom_col)
+    
+    plot_result <- menstrualcycleR::cycle_plot(
       processed_data(),
-      symptom = "symptom",
-      centering = "menses"
+      symptom = !!symptom_col,  # Use dynamic symptom selection
+      centering = input$plot_centering,  # Use user-selected centering
+      include_impute = input$plot_impute  # Use user-selected imputation option
     )
-    result$plot
+    
+    cycle_plot_data(plot_result$plot)  # Store the plot
+  })
+  
+  output$cycle_plot <- renderPlot({
+    req(cycle_plot_data())
+    cycle_plot_data()
   })
   
   # Download Processed Data
