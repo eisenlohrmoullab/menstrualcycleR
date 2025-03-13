@@ -3,7 +3,7 @@ library(menstrualcycleR)
 
 server <- function(input, output, session) {
   
-  # Reactive: Load Data
+  # Reactive Value for User Data
   user_data <- reactiveVal(NULL)
   
   observeEvent(input$load_data, {
@@ -11,7 +11,7 @@ server <- function(input, output, session) {
     data <- read.csv(input$file$datapath)
     user_data(data)
     
-    # Update column selectors
+    # Update Column Selectors
     updateSelectInput(session, "id_col", choices = names(data))
     updateSelectInput(session, "date_col", choices = names(data))
     updateSelectInput(session, "menses_col", choices = names(data))
@@ -24,34 +24,47 @@ server <- function(input, output, session) {
     head(user_data())
   })
   
-  # Calculate Cycle Lengths
-  cycle_data <- reactive({
-    req(user_data())
-    req(input$id_col, input$date_col, input$menses_col, input$ovtoday_col)
+  # Reactive Processed Data
+  processed_data <- reactiveVal(NULL)
+  
+  observeEvent(input$process_data, {
+    req(user_data(), input$id_col, input$date_col, input$menses_col, input$ovtoday_col)
     
-    menstrualcycleR::calculate_mcyclength(
+    # Apply the menstrualcycleR functions in order
+    processed <- menstrualcycleR::calculate_mcyclength(
       data = user_data(),
       id = input$id_col,
       daterated = input$date_col,
       menses = input$menses_col,
       ovtoday = input$ovtoday_col
     )
+    
+    processed <- menstrualcycleR::calculate_cycletime(
+      data = processed,
+      id = input$id_col,
+      daterated = input$date_col,
+      menses = input$menses_col,
+      ovtoday = input$ovtoday_col
+    )
+    
+    processed_data(processed)  # Store processed data
   })
   
+  # Display Processed Data
   output$cycle_data <- renderTable({
-    req(cycle_data())
-    head(cycle_data())
+    req(processed_data())
+    head(processed_data())
   })
   
   output$cycle_summary <- renderPrint({
-    req(cycle_data())
-    summary(cycle_data())
+    req(processed_data())
+    summary(processed_data())
   })
   
   # Ovulation Analysis
   ovulation_summary <- reactive({
-    req(cycle_data())
-    menstrualcycleR::summary_ovulation(cycle_data())
+    req(processed_data())
+    menstrualcycleR::summary_ovulation(processed_data())
   })
   
   output$ovulation_summary <- renderTable({
@@ -61,9 +74,9 @@ server <- function(input, output, session) {
   
   # Symptom Data Analysis
   symptom_analysis <- reactive({
-    req(cycle_data())
+    req(processed_data())
     menstrualcycleR::cycledata_check(
-      cycle_data(),
+      processed_data(),
       symptom_columns = c("symptom")  # Can make dynamic
     )
   })
@@ -75,9 +88,9 @@ server <- function(input, output, session) {
   
   # Cycle Plot
   output$cycle_plot <- renderPlot({
-    req(cycle_data())
+    req(processed_data())
     result <- menstrualcycleR::cycle_plot(
-      cycle_data(),
+      processed_data(),
       symptom = "symptom",
       centering = "menses"
     )
@@ -87,6 +100,6 @@ server <- function(input, output, session) {
   # Download Processed Data
   output$download_results <- downloadHandler(
     filename = function() { paste("processed_cycle_data_", Sys.Date(), ".csv", sep = "") },
-    content = function(file) { write.csv(cycle_data(), file, row.names = FALSE) }
+    content = function(file) { write.csv(processed_data(), file, row.names = FALSE) }
   )
 }
