@@ -1,5 +1,7 @@
 library(shiny)
 library(menstrualcycleR)
+library(dplyr)  # Ensure tidy evaluation works
+library(rlang)  # For handling column selection dynamically
 
 server <- function(input, output, session) {
   
@@ -30,22 +32,28 @@ server <- function(input, output, session) {
   observeEvent(input$process_data, {
     req(user_data(), input$id_col, input$date_col, input$menses_col, input$ovtoday_col)
     
-    # Apply the menstrualcycleR functions in order
-    processed <- menstrualcycleR::calculate_mcyclength(
-      data = user_data(),
-      id = input$id_col,
-      daterated = input$date_col,
-      menses = input$menses_col,
-      ovtoday = input$ovtoday_col
-    )
+    # Convert input selections (strings) into symbols for column referencing
+    id_col <- sym(input$id_col)
+    date_col <- sym(input$date_col)
+    menses_col <- sym(input$menses_col)
+    ovtoday_col <- sym(input$ovtoday_col)
     
-    processed <- menstrualcycleR::calculate_cycletime(
-      data = processed,
-      id = input$id_col,
-      daterated = input$date_col,
-      menses = input$menses_col,
-      ovtoday = input$ovtoday_col
-    )
+    # Apply functions with correct column references
+    processed <- user_data() %>%
+      menstrualcycleR::calculate_mcyclength(
+        data = .,  # Pipe input dataframe into function
+        id = !!id_col,
+        daterated = !!date_col,
+        menses = !!menses_col,
+        ovtoday = !!ovtoday_col
+      ) %>%
+      menstrualcycleR::calculate_cycletime(
+        data = .,
+        id = !!id_col,
+        daterated = !!date_col,
+        menses = !!menses_col,
+        ovtoday = !!ovtoday_col
+      )
     
     processed_data(processed)  # Store processed data
   })
