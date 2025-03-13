@@ -27,7 +27,7 @@ ui <- fluidPage(
                    selectInput("symptom_col", "Select Symptom Column:", choices = NULL)
                  ),
                  mainPanel(
-                   tableOutput("symptom_analysis")
+                   tableOutput("symptom_check")
                  )
         ),
         

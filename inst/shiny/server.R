@@ -81,21 +81,19 @@ server <- function(input, output, session) {
     ovulation_summary()$ovstatus_total
   })
   
-  # Symptom Data Analysis
-  symptom_analysis <- reactive({
+  # Symptom Check
+  symptom_check <- reactive({
     req(processed_data(), input$symptom_col)
-    
-    symptom_col <- sym(input$symptom_col)  # Convert input to symbol
     
     menstrualcycleR::cycledata_check(
       processed_data(),
-      symptom_columns = c(!!symptom_col)  # Use selected symptom column dynamically
+      symptom_columns = input$symptom_col  # Pass as a string
     )
   })
   
-  output$symptom_analysis <- renderTable({
-    req(symptom_analysis())
-    symptom_analysis()$overall
+  output$symptom_check <- renderTable({
+    req(symptom_check())
+    symptom_check()$overall
   })
   
   # Cycle Plot
