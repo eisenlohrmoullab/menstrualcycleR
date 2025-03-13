@@ -2,6 +2,7 @@ library(shiny)
 library(menstrualcycleR)
 library(dplyr)
 library(rlang)
+library(ggplot2)  # Ensure ggplot2 is loaded for saving plots
 
 server <- function(input, output, session) {
   
@@ -18,7 +19,8 @@ server <- function(input, output, session) {
     updateSelectInput(session, "date_col", choices = names(data))
     updateSelectInput(session, "menses_col", choices = names(data))
     updateSelectInput(session, "ovtoday_col", choices = names(data))
-    updateSelectInput(session, "symptom_col", choices = names(data))  # Update symptom selector
+    updateSelectInput(session, "symptom_col_analysis", choices = names(data))  # Symptom selection for analysis
+    updateSelectInput(session, "symptom_col_plot", choices = names(data))  # Symptom selection for plotting
   })
   
   # Show Data Preview
@@ -81,34 +83,32 @@ server <- function(input, output, session) {
     ovulation_summary()$ovstatus_total
   })
   
-  # Symptom Check
-  symptom_check <- reactive({
-    req(processed_data(), input$symptom_col)
+  # Symptom Data Analysis (Uses separate symptom selector)
+  symptom_analysis <- reactive({
+    req(processed_data(), input$symptom_col_analysis)
     
     menstrualcycleR::cycledata_check(
       processed_data(),
-      symptom_columns = input$symptom_col  # Pass as a string
+      symptom_columns = input$symptom_col_analysis  # Pass as a string
     )
   })
   
-  output$symptom_check <- renderTable({
-    req(symptom_check())
-    symptom_check()$overall
+  output$symptom_analysis <- renderTable({
+    req(symptom_analysis())
+    symptom_analysis()$overall
   })
   
-  # Cycle Plot
+  # Cycle Plot (Uses separate symptom selector)
   cycle_plot_data <- reactiveVal(NULL)
   
   observeEvent(input$update_plot, {
-    req(processed_data(), input$symptom_col, input$plot_centering, input$plot_impute)
-    
-    symptom_col <- sym(input$symptom_col)
+    req(processed_data(), input$symptom_col_plot, input$plot_centering, input$plot_impute)
     
     plot_result <- menstrualcycleR::cycle_plot(
       processed_data(),
-      symptom = !!symptom_col,  # Use dynamic symptom selection
-      centering = input$plot_centering,  # Use user-selected centering
-      include_impute = input$plot_impute  # Use user-selected imputation option
+      symptom = input$symptom_col_plot,  # Use separate symptom selection for plotting
+      centering = input$plot_centering,  # User-selected centering
+      include_impute = input$plot_impute  # User-selected imputation option
     )
     
     cycle_plot_data(plot_result$plot)  # Store the plot
@@ -118,6 +118,16 @@ server <- function(input, output, session) {
     req(cycle_plot_data())
     cycle_plot_data()
   })
+  
+  # Download Cycle Plot
+  output$download_plot <- downloadHandler(
+    filename = function() { paste("cycle_plot_", Sys.Date(), ".png", sep = "") },
+    content = function(file) {
+      req(cycle_plot_data())
+      
+      ggsave(file, plot = cycle_plot_data(), device = "png", width = 8, height = 6, dpi = 300)
+    }
+  )
   
   # Download Processed Data
   output$download_results <- downloadHandler(
