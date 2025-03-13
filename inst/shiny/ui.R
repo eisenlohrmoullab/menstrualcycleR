@@ -36,7 +36,7 @@ ui <- fluidPage(
         tabPanel("Cycle Plot",
                  sidebarPanel(
                    selectInput("symptom_col_plot", "Select Symptom Column for Plot:", choices = NULL),
-                   selectInput("plot_centering", "Centering Phase:", choices = c("menses", "ovulation")),
+                   selectInput("plot_centering", "Centering:", choices = c("menses", "ovulation")),
                    checkboxInput("plot_impute", "Include Imputed Data", value = TRUE),
                    actionButton("update_plot", "Update Plot", class = "btn-primary"),
                    hr(),
