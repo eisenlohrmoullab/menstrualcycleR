@@ -52,7 +52,7 @@
 
 
 
-calculate_cycletime <- function(data, id, daterated, menses, ovtoday) {
+calculate_cycletime <- function(data, id, daterated, menses, ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35) {
   `%>%` <- magrittr::`%>%`
   # Check if input data is a data frame
   if (!is.data.frame(data)) {
