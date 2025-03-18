@@ -4,7 +4,15 @@
 \alias{calculate_cycletime}
 \title{Create Cycle Time Variables}
 \usage{
-calculate_cycletime(data, id, daterated, menses, ovtoday)
+calculate_cycletime(
+  data,
+  id,
+  daterated,
+  menses,
+  ovtoday,
+  lower_cyclength_bound = 21,
+  upper_cyclength_bound = 35
+)
 }
 \arguments{
 \item{data}{A data frame containing the required input variables.}
