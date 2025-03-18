@@ -81,6 +81,11 @@ calculate_cycletime <- function(data, id, daterated, menses, ovtoday, lower_cycl
   data <- data %>% 
     dplyr::mutate(id = !!id)
   
+  data <- data %>% 
+    dplyr::mutate(lower_cyclength_bound = lower_cyclength_bound)
+  
+  data <- data %>% 
+    dplyr::mutate(upper_cyclength_bound = upper_cyclength_bound)
   # Group and arrange data by ID and date
   data <- data %>%
     dplyr::group_by(!!id) %>%
