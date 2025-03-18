@@ -67,7 +67,6 @@ calculate_cycletime <- function(data, id, daterated, menses, ovtoday, lower_cycl
   daterated <- rlang::enquo(daterated)
   menses <- rlang::enquo(menses)
   ovtoday <- rlang::enquo(ovtoday)
-  
   # Create ovtoday 
   data <- data %>% 
     dplyr::mutate(ovtoday = !!ovtoday)
