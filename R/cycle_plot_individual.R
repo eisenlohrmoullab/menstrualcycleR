@@ -4,11 +4,12 @@
 #' storing both in a named list for easy access.
 #'
 #' @param data A dataframe containing menstrual cycle data, including `id` and `cyclenum` columns.
-#' @param id The specific individual for whom cycle plots should be generated.
+#' @param id Numeric id number for the specific individual for whom cycle plots should be generated.
 #' @param symptom A string specifying the symptom variable to analyze.
 #' @param centering A string indicating the centering phase of the cycle ("menses" or "ovulation").
 #' @param y_scale A string specifying the y-axis scale ("person-centered", "person-centered_roll", or "means").
 #' @param include_impute A boolean indicating whether to use imputed cycle time values.
+#' @param rollingavg A numeric indicating how many days of a rolling average to use, the default is 5
 #'
 #' @return A list where each cycle contains:
 #' - `$plot`: The cycle-specific ggplot object with the ID displayed
