@@ -21,7 +21,14 @@ server <- function(input, output, session) {
     updateSelectInput(session, "ovtoday_col", choices = names(data))
     updateSelectInput(session, "symptom_col_plot", choices = names(data))
     updateCheckboxGroupInput(session, "symptom_cols_individual", choices = names(data))
-    updateSelectInput(session, "id_selected", choices = unique(data[[1]])) # Assuming the first column is ID
+  })
+  
+  # Update ID Selection Dropdown when id_col is chosen
+  observeEvent(input$id_col, {
+    req(user_data(), input$id_col)
+    updateSelectInput(session, "id_selected", 
+                      choices = unique(user_data()[[input$id_col]]), 
+                      selected = unique(user_data()[[input$id_col]])[1])
   })
   
   # Show Data Preview
@@ -36,16 +43,9 @@ server <- function(input, output, session) {
   observeEvent(input$process_data, {
     req(user_data(), input$id_col, input$date_col, input$menses_col, input$ovtoday_col, input$lower_bound, input$upper_bound)
     
-    # Convert input selections to symbols
-    id_col <- sym(input$id_col)
-    date_col <- sym(input$date_col)
-    menses_col <- sym(input$menses_col)
-    ovtoday_col <- sym(input$ovtoday_col)
-    
-    # Retrieve dataset
     data <- user_data()
     
-    # Ensure date column is properly formatted as Date
+    # Ensure date column is properly formatted
     if (!inherits(data[[input$date_col]], "Date")) {
       data[[input$date_col]] <- lubridate::ymd(data[[input$date_col]])
     }
@@ -53,16 +53,16 @@ server <- function(input, output, session) {
     # Apply menstrualcycleR functions
     processed <- data %>%
       menstrualcycleR::calculate_mcyclength(
-        id = !!id_col,
-        daterated = !!date_col,
-        menses = !!menses_col,
-        ovtoday = !!ovtoday_col
+        id = data[[input$id_col]],
+        daterated = data[[input$date_col]],
+        menses = data[[input$menses_col]],
+        ovtoday = data[[input$ovtoday_col]]
       ) %>%
       menstrualcycleR::calculate_cycletime(
-        id = !!id_col,
-        daterated = !!date_col,
-        menses = !!menses_col,
-        ovtoday = !!ovtoday_col,
+        id = data[[input$id_col]],
+        daterated = data[[input$date_col]],
+        menses = data[[input$menses_col]],
+        ovtoday = data[[input$ovtoday_col]],
         lower_cyclength_bound = as.numeric(input$lower_bound),
         upper_cyclength_bound = as.numeric(input$upper_bound)
       )
