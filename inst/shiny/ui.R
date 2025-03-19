@@ -19,7 +19,6 @@ ui <- fluidPage(
     mainPanel(
       tabsetPanel(
         tabPanel("View Data", tableOutput("data_preview")),
-        tabPanel("Data Availability", verbatimTextOutput("cycle_summary"), tableOutput("cycle_data")),
         tabPanel("Ovulation Analysis", tableOutput("ovulation_summary")),
         
         # Symptom Analysis Tab
