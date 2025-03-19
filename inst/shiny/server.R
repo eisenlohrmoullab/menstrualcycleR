@@ -87,23 +87,6 @@ server <- function(input, output, session) {
     summary(processed_data())
   })
   
-  # Ovulation Analysis
-  
-  ovulation_summary <- reactive({
-    req(processed_data())
-    menstrualcycleR::summary_ovulation(processed_data())
-  })
-  output$ovulation_summary <- renderTable({
-    req(ovulation_summary())
-    ovulation_summary()$ovstatus_total
-  })
-  
-  output$ovulation_summary <- renderTable({
-    req(ovulation_summary())
-    ovulation_summary()$ovstatus_id
-  })
-  
-  
   # **Cycle Plot**
   cycle_plot_data <- reactiveVal(NULL)
   
@@ -135,7 +118,7 @@ server <- function(input, output, session) {
     }
   )
   
-  # **Final Fix for Individual Cycle Plots**
+  # **Individual Cycle Plots with Fixes for Overwriting**
   observeEvent(input$update_individual_plot, {
     req(processed_data(), input$id_selected, input$symptom_cols_individual, input$individual_y_scale, input$individual_rollingavg)
     
@@ -185,11 +168,13 @@ server <- function(input, output, session) {
             }
           )
           
+          # Append UI elements separately for each cycle
           plot_list <- append(plot_list, list(
             h3(paste("Cycle", cycle, "for", symptom)),
             plotOutput(plot_id),
-            actionButton(summary_id, paste("View Summary for", symptom, "Cycle", cycle)),
+            actionButton(summary_id, paste("View Summary for", symptom, "Cycle", cycle), onclick = paste0("$('#", summary_id, "_table').toggle();")),
             downloadButton(download_id, paste("Download Summary for", symptom, "Cycle", cycle)),
+            tableOutput(summary_id),
             hr()
           ))
         }
@@ -199,5 +184,3 @@ server <- function(input, output, session) {
     })
   })
 }
-
-
