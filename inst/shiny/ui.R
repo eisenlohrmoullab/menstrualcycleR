@@ -17,8 +17,6 @@ ui <- fluidPage(
     
     mainPanel(
       tabsetPanel(
-        tabPanel("View Data", tableOutput("data_preview")),
-        
         tabPanel("Cycle Plot",
                  selectInput("symptom_col_plot", "Select Symptom:", choices = NULL),
                  selectInput("plot_centering", "Centering:", choices = c("menses", "ovulation")),
@@ -32,6 +30,12 @@ ui <- fluidPage(
         
         tabPanel("Individual Cycle Plots",
                  selectInput("id_selected", "Select Participant ID:", choices = NULL),
+                 checkboxGroupInput("symptom_cols_individual", "Select Symptoms:", choices = NULL),
+                 selectInput("plot_centering_individual", "Centering:", choices = c("menses", "ovulation")),
+                 selectInput("individual_y_scale", "Y Scale:", choices = c("person-centered", "person-centered_roll", "raw", "roll")),
+                 checkboxInput("plot_impute_individual", "Include Imputed Data", TRUE),
+                 numericInput("individual_rollingavg", "Rolling Day Average:", 5, min = 1),
+                 actionButton("update_individual_plot", "Update Plot"),
                  uiOutput("individual_cycle_plots")
         )
       )
