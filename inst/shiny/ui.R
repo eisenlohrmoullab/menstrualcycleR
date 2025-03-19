@@ -8,6 +8,11 @@ ui <- fluidPage(
       fileInput("file", "Upload CSV Data:", accept = ".csv"),
       actionButton("load_data", "Load Data", class = "btn-primary"),
       hr(),
+      
+      # New cycle length bounds input
+      numericInput("lower_bound", "Lower Bound of Cycle Length:", value = 21, min = 10, max = 40),
+      numericInput("upper_bound", "Upper Bound of Cycle Length:", value = 35, min = 10, max = 40),
+      
       selectInput("id_col", "Select ID Column:", choices = NULL),
       selectInput("date_col", "Select Date Column:", choices = NULL),
       selectInput("menses_col", "Select Menses Column:", choices = NULL),
@@ -20,32 +25,6 @@ ui <- fluidPage(
       tabsetPanel(
         tabPanel("View Data", tableOutput("data_preview")),
         tabPanel("Ovulation Analysis", tableOutput("ovulation_summary")),
-        
-        # Symptom Analysis Tab
-        tabPanel("Symptom Data",
-                 sidebarPanel(
-                   selectInput("symptom_col_analysis", "Select Symptom Column for Analysis:", choices = NULL)
-                 ),
-                 mainPanel(
-                   tableOutput("symptom_analysis")
-                 )
-        ),
-        
-        # Cycle Plot Tab with separate symptom selection
-        tabPanel("Cycle Plot",
-                 sidebarPanel(
-                   selectInput("symptom_col_plot", "Select Symptom Column for Plot:", choices = NULL),
-                   selectInput("plot_centering", "Centering:", choices = c("menses", "ovulation")),
-                   checkboxInput("plot_impute", "Include Imputed Data", value = TRUE),
-                   actionButton("update_plot", "Update Plot", class = "btn-primary"),
-                   hr(),
-                   downloadButton("download_plot", "Download Cycle Plot")
-                 ),
-                 mainPanel(
-                   plotOutput("cycle_plot")
-                 )
-        ),
-        
         tabPanel("Download", downloadButton("download_results", "Download Processed Data"))
       )
     )

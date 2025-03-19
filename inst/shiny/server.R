@@ -19,8 +19,7 @@ server <- function(input, output, session) {
     updateSelectInput(session, "date_col", choices = names(data))
     updateSelectInput(session, "menses_col", choices = names(data))
     updateSelectInput(session, "ovtoday_col", choices = names(data))
-    updateSelectInput(session, "symptom_col_analysis", choices = names(data))  # Symptom selection for analysis
-    updateSelectInput(session, "symptom_col_plot", choices = names(data))  # Symptom selection for plotting
+    updateCheckboxGroupInput(session, "symptom_cols_individual", "Select Symptoms for Individual Plots:", choices = names(data))
   })
   
   # Show Data Preview
@@ -33,7 +32,7 @@ server <- function(input, output, session) {
   processed_data <- reactiveVal(NULL)
   
   observeEvent(input$process_data, {
-    req(user_data(), input$id_col, input$date_col, input$menses_col, input$ovtoday_col)
+    req(user_data(), input$id_col, input$date_col, input$menses_col, input$ovtoday_col, input$lower_bound, input$upper_bound)
     
     # Convert input selections to symbols
     id_col <- sym(input$id_col)
@@ -41,7 +40,7 @@ server <- function(input, output, session) {
     menses_col <- sym(input$menses_col)
     ovtoday_col <- sym(input$ovtoday_col)
     
-    # Apply functions with dynamic column referencing
+    # Apply functions with user-defined cycle length bounds
     processed <- user_data() %>%
       menstrualcycleR::calculate_mcyclength(
         data = .,
@@ -55,7 +54,9 @@ server <- function(input, output, session) {
         id = !!id_col,
         daterated = !!date_col,
         menses = !!menses_col,
-        ovtoday = !!ovtoday_col
+        ovtoday = !!ovtoday_col,
+        lower_cyclength_bound = input$lower_bound,  # User-defined lower bound
+        upper_cyclength_bound = input$upper_bound   # User-defined upper bound
       )
     
     processed_data(processed)  # Store processed data
@@ -82,52 +83,6 @@ server <- function(input, output, session) {
     req(ovulation_summary())
     ovulation_summary()$ovstatus_total
   })
-  
-  # Symptom Data Analysis (Uses separate symptom selector)
-  symptom_analysis <- reactive({
-    req(processed_data(), input$symptom_col_analysis)
-    
-    menstrualcycleR::cycledata_check(
-      processed_data(),
-      symptom_columns = input$symptom_col_analysis  # Pass as a string
-    )
-  })
-  
-  output$symptom_analysis <- renderTable({
-    req(symptom_analysis())
-    symptom_analysis()$overall
-  })
-  
-  # Cycle Plot (Uses separate symptom selector)
-  cycle_plot_data <- reactiveVal(NULL)
-  
-  observeEvent(input$update_plot, {
-    req(processed_data(), input$symptom_col_plot, input$plot_centering, input$plot_impute)
-    
-    plot_result <- menstrualcycleR::cycle_plot(
-      processed_data(),
-      symptom = input$symptom_col_plot,  # Use separate symptom selection for plotting
-      centering = input$plot_centering,  # User-selected centering
-      include_impute = input$plot_impute  # User-selected imputation option
-    )
-    
-    cycle_plot_data(plot_result$plot)  # Store the plot
-  })
-  
-  output$cycle_plot <- renderPlot({
-    req(cycle_plot_data())
-    cycle_plot_data()
-  })
-  
-  # Download Cycle Plot
-  output$download_plot <- downloadHandler(
-    filename = function() { paste("cycle_plot_", Sys.Date(), ".png", sep = "") },
-    content = function(file) {
-      req(cycle_plot_data())
-      
-      ggsave(file, plot = cycle_plot_data(), device = "png", width = 8, height = 6, dpi = 300)
-    }
-  )
   
   # Download Processed Data
   output$download_results <- downloadHandler(
