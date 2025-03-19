@@ -50,5 +50,5 @@ result <- cycle_plot_individual(
   include_impute = TRUE,
   y_scale = "person-centered_roll"
 )
-result$plot
+
 }
