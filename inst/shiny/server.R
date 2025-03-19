@@ -6,6 +6,9 @@ library(ggplot2)  # Ensure ggplot2 is loaded for saving plots
 
 server <- function(input, output, session) {
   
+  # Reactive Value for User Data
+  user_data <- reactiveVal(NULL)
+  
   observeEvent(input$load_data, {
     req(input$file)
     data <- read.csv(input$file$datapath)
@@ -16,8 +19,8 @@ server <- function(input, output, session) {
     updateSelectInput(session, "date_col", choices = names(data))
     updateSelectInput(session, "menses_col", choices = names(data))
     updateSelectInput(session, "ovtoday_col", choices = names(data))
-    updateSelectInput(session, "symptom_col_analysis", choices = names(data))  # Symptom selection for analysis
-    updateSelectInput(session, "symptom_col_plot", choices = names(data))  # Symptom selection for plotting
+    updateSelectInput(session, "symptom_col_plot", choices = names(data))
+    updateCheckboxGroupInput(session, "symptom_cols_individual", choices = names(data))
   })
   
   # Show Data Preview
@@ -151,7 +154,6 @@ server <- function(input, output, session) {
           plot_results[[cycle]]$plot
         })
         
-        # Add summary table and download buttons
         plot_list[[paste0("btn_", summary_id)]] <- tagList(
           actionButton(summary_id, paste("View Summary for", symptom, "Cycle", cycle)),
           downloadButton(download_id, paste("Download Summary for", symptom, "Cycle", cycle))
@@ -174,10 +176,4 @@ server <- function(input, output, session) {
     
     do.call(tagList, plot_list)
   })
-  
-  # Download Processed Data
-  output$download_results <- downloadHandler(
-    filename = function() { paste("processed_cycle_data_", Sys.Date(), ".csv", sep = "") },
-    content = function(file) { write.csv(processed_data(), file, row.names = FALSE) }
-  )
 }
