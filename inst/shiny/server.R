@@ -45,24 +45,30 @@ server <- function(input, output, session) {
     
     data <- user_data()
     
+    # Convert input selections to symbols
+    id_col <- rlang::sym(input$id_col)
+    date_col <- rlang::sym(input$date_col)
+    menses_col <- rlang::sym(input$menses_col)
+    ovtoday_col <- rlang::sym(input$ovtoday_col)
+    
     # Ensure date column is properly formatted
     if (!inherits(data[[input$date_col]], "Date")) {
       data[[input$date_col]] <- lubridate::ymd(data[[input$date_col]])
     }
     
-    # Apply menstrualcycleR functions
+    # Apply menstrualcycleR functions **with correct syntax**
     processed <- data %>%
       menstrualcycleR::calculate_mcyclength(
-        id = data[[input$id_col]],
-        daterated = data[[input$date_col]],
-        menses = data[[input$menses_col]],
-        ovtoday = data[[input$ovtoday_col]]
+        id = !!id_col,
+        daterated = !!date_col,
+        menses = !!menses_col,
+        ovtoday = !!ovtoday_col
       ) %>%
       menstrualcycleR::calculate_cycletime(
-        id = data[[input$id_col]],
-        daterated = data[[input$date_col]],
-        menses = data[[input$menses_col]],
-        ovtoday = data[[input$ovtoday_col]],
+        id = !!id_col,
+        daterated = !!date_col,
+        menses = !!menses_col,
+        ovtoday = !!ovtoday_col,
         lower_cyclength_bound = as.numeric(input$lower_bound),
         upper_cyclength_bound = as.numeric(input$upper_bound)
       )
