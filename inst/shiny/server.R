@@ -19,7 +19,7 @@ server <- function(input, output, session) {
     updateSelectInput(session, "date_col", choices = names(data))
     updateSelectInput(session, "menses_col", choices = names(data))
     updateSelectInput(session, "ovtoday_col", choices = names(data))
-    updateSelectInput(session, "symptom_col_plot", "Select Symptom for Cycle Plot:", choices = names(data))
+    updateSelectInput(session, "symptom_col_plot", choices = names(data))
     updateCheckboxGroupInput(session, "symptom_cols_individual", "Select Symptoms for Individual Plots:", choices = names(data))
   })
   
@@ -35,67 +35,40 @@ server <- function(input, output, session) {
   observeEvent(input$process_data, {
     req(user_data(), input$id_col, input$date_col, input$menses_col, input$ovtoday_col, input$lower_bound, input$upper_bound)
     
-    # Convert input selections to symbols
-    id_col <- sym(input$id_col)
-    date_col <- sym(input$date_col)
-    menses_col <- sym(input$menses_col)
-    ovtoday_col <- sym(input$ovtoday_col)
-    
-    # Apply functions with user-defined cycle length bounds
     processed <- user_data() %>%
       menstrualcycleR::calculate_mcyclength(
         data = .,
-        id = !!id_col,
-        daterated = !!date_col,
-        menses = !!menses_col,
-        ovtoday = !!ovtoday_col
+        id = sym(input$id_col),
+        daterated = sym(input$date_col),
+        menses = sym(input$menses_col),
+        ovtoday = sym(input$ovtoday_col)
       ) %>%
       menstrualcycleR::calculate_cycletime(
         data = .,
-        id = !!id_col,
-        daterated = !!date_col,
-        menses = !!menses_col,
-        ovtoday = !!ovtoday_col,
-        lower_cyclength_bound = input$lower_bound,  # User-defined lower bound
-        upper_cyclength_bound = input$upper_bound   # User-defined upper bound
+        id = sym(input$id_col),
+        daterated = sym(input$date_col),
+        menses = sym(input$menses_col),
+        ovtoday = sym(input$ovtoday_col),
+        lower_cyclength_bound = input$lower_bound,
+        upper_cyclength_bound = input$upper_bound
       )
     
-    processed_data(processed)  # Store processed data
-  })
-  
-  # Display Processed Data
-  output$cycle_data <- renderTable({
-    req(processed_data())
-    head(processed_data())
-  })
-  
-  output$cycle_summary <- renderPrint({
-    req(processed_data())
-    summary(processed_data())
-  })
-  
-  # Ovulation Analysis
-  ovulation_summary <- reactive({
-    req(processed_data())
-    menstrualcycleR::summary_ovulation(processed_data())
-  })
-  
-  output$ovulation_summary <- renderTable({
-    req(ovulation_summary())
-    ovulation_summary()$ovstatus_total
+    processed_data(processed)
   })
   
   # Cycle Plot
   cycle_plot_data <- reactiveVal(NULL)
   
   observeEvent(input$update_plot, {
-    req(processed_data(), input$symptom_col_plot, input$plot_centering, input$plot_impute)
+    req(processed_data(), input$symptom_col_plot, input$plot_centering, input$plot_impute, input$rollingavg)
     
     plot_result <- menstrualcycleR::cycle_plot(
       processed_data(),
       symptom = input$symptom_col_plot,
       centering = input$plot_centering,
-      include_impute = input$plot_impute
+      include_impute = input$plot_impute,
+      y_scale = input$plot_y_scale,
+      rollingavg = input$rollingavg
     )
     
     cycle_plot_data(plot_result$plot)
@@ -123,7 +96,6 @@ server <- function(input, output, session) {
     symptoms_selected <- input$symptom_cols_individual
     
     plot_list <- list()
-    summary_list <- list()
     
     for (symptom in symptoms_selected) {
       plot_results <- menstrualcycleR::cycle_plot_individual(
@@ -131,7 +103,9 @@ server <- function(input, output, session) {
         id = id_selected,
         symptom = symptom,
         centering = input$plot_centering_individual,
-        include_impute = input$plot_impute_individual
+        include_impute = input$plot_impute_individual,
+        y_scale = input$individual_y_scale,
+        rollingavg = input$individual_rollingavg
       )
       
       for (cycle in names(plot_results)) {
@@ -145,7 +119,12 @@ server <- function(input, output, session) {
           plot_results[[cycle]]$plot
         })
         
-        summary_list[[summary_id]] <- tableOutput(summary_id)
+        # Add summary table and download buttons
+        plot_list[[paste0("btn_", summary_id)]] <- tagList(
+          actionButton(summary_id, paste("View Summary for", symptom, "Cycle", cycle)),
+          downloadButton(download_id, paste("Download Summary for", symptom, "Cycle", cycle))
+        )
+        
         output[[summary_id]] <- renderTable({
           req(plot_results[[cycle]]$summary)
           plot_results[[cycle]]$summary
@@ -158,18 +137,10 @@ server <- function(input, output, session) {
             write.csv(plot_results[[cycle]]$summary, file, row.names = FALSE)
           }
         )
-        
-        summary_list[[paste0("btn_", summary_id)]] <- tagList(
-          actionButton(summary_id, paste("View Summary for", symptom, "Cycle", cycle)),
-          downloadButton(download_id, paste("Download Summary for", symptom, "Cycle", cycle))
-        )
       }
     }
     
-    tagList(
-      plot_list,
-      summary_list
-    )
+    do.call(tagList, plot_list)
   })
   
   # Download Processed Data
