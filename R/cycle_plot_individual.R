@@ -16,17 +16,11 @@
 #' @export
 #'
 #' @examples
-#' data(cycledata)
-#' data = calculate_mcyclength(data, id, daterated, menses, ovtoday)
-#' data = calculate_cycletime(data, id, daterated, menses, ovtoday)
-#' result <- cycle_plot_individual(
-#'   data,
-#'   id = 1,
-#'   "symptom",
-#'   centering = "menses",
-#'   include_impute = TRUE,
-#'   y_scale = "person-centered_roll"
-#' )
+#' data("cycledata")
+#' data = calculate_mcyclength(data, id = id, daterated , menses = menses, ovtoday = ovtoday)
+#' data = calculate_cycletime(data, id = id, daterated , menses = menses, ovtoday = ovtoday)
+# results <- cycle_plot_individual(data, id = 1, symptom = "symptom", centering = "menses", y_scale = "person-centered")
+#' 
 #' 
 
 
