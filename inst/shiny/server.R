@@ -20,7 +20,7 @@ server <- function(input, output, session) {
     updateSelectInput(session, "menses_col", choices = names(data))
     updateSelectInput(session, "ovtoday_col", choices = names(data))
     updateSelectInput(session, "symptom_col_plot", choices = names(data))
-    updateCheckboxGroupInput(session, "symptom_cols_individual", "Select Symptoms for Individual Plots:", choices = names(data))
+    updateCheckboxGroupInput(session, "symptom_cols_individual", choices = names(data))
   })
   
   # Show Data Preview
@@ -38,22 +38,44 @@ server <- function(input, output, session) {
     processed <- user_data() %>%
       menstrualcycleR::calculate_mcyclength(
         data = .,
-        id = sym(input$id_col),
-        daterated = sym(input$date_col),
-        menses = sym(input$menses_col),
-        ovtoday = sym(input$ovtoday_col)
+        id = input$id_col,   
+        daterated = input$date_col,
+        menses = input$menses_col,
+        ovtoday = input$ovtoday_col
       ) %>%
       menstrualcycleR::calculate_cycletime(
         data = .,
-        id = sym(input$id_col),
-        daterated = sym(input$date_col),
-        menses = sym(input$menses_col),
-        ovtoday = sym(input$ovtoday_col),
+        id = input$id_col,   
+        daterated = input$date_col,
+        menses = input$menses_col,
+        ovtoday = input$ovtoday_col,
         lower_cyclength_bound = input$lower_bound,
         upper_cyclength_bound = input$upper_bound
       )
     
     processed_data(processed)
+  })
+  
+  # Display Processed Data
+  output$cycle_data <- renderTable({
+    req(processed_data())
+    head(processed_data())
+  })
+  
+  output$cycle_summary <- renderPrint({
+    req(processed_data())
+    summary(processed_data())
+  })
+  
+  # Ovulation Analysis
+  ovulation_summary <- reactive({
+    req(processed_data())
+    menstrualcycleR::summary_ovulation(processed_data())
+  })
+  
+  output$ovulation_summary <- renderTable({
+    req(ovulation_summary())
+    ovulation_summary()$ovstatus_total
   })
   
   # Cycle Plot
