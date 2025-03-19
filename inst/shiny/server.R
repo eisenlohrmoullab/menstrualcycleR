@@ -87,17 +87,6 @@ server <- function(input, output, session) {
     summary(processed_data())
   })
   
-  # Ovulation Analysis
-  ovulation_summary <- reactive({
-    req(processed_data())
-    menstrualcycleR::summary_ovulation(processed_data())
-  })
-  
-  output$ovulation_summary <- renderTable({
-    req(ovulation_summary())
-    ovulation_summary()$ovstatus_total
-  })
-  
   # **Cycle Plot**
   cycle_plot_data <- reactiveVal(NULL)
   
@@ -129,7 +118,7 @@ server <- function(input, output, session) {
     }
   )
   
-  # **Individual Cycle Plots (Fixes the multiple cycle plotting issue!)**
+  # **Individual Cycle Plots (Final Fix for Multiple Cycle Plotting)**
   observeEvent(input$update_individual_plot, {
     req(processed_data(), input$id_selected, input$symptom_cols_individual, input$individual_y_scale, input$individual_rollingavg)
     
@@ -149,7 +138,6 @@ server <- function(input, output, session) {
         rollingavg = as.numeric(input$individual_rollingavg)
       )
       
-      # Store each cycle plot separately instead of overwriting it
       results[[symptom]] <- plot_results
     }
     
@@ -180,9 +168,8 @@ server <- function(input, output, session) {
             }
           )
           
-          # Append individual plots, summaries, and download buttons
           plot_list <- append(plot_list, list(
-            h3(paste("Cycle", cycle, "for", symptom)),
+            h3(paste(cycle, "for", symptom)),
             plotOutput(plot_id),
             actionButton(summary_id, paste("View Summary for", symptom, cycle)),
             downloadButton(download_id, paste("Download Summary for", symptom, cycle)),
