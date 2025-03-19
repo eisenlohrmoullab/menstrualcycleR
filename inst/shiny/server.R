@@ -35,30 +35,26 @@ server <- function(input, output, session) {
   observeEvent(input$process_data, {
     req(user_data(), input$id_col, input$date_col, input$menses_col, input$ovtoday_col, input$lower_bound, input$upper_bound)
     
-    # Get the data
+    # Ensure the dataset is loaded
     data <- user_data()
-    
-    # Validate data before processing
     validate(need(!is.null(data), "No data loaded. Please upload a file."))
     
-    # Apply menstrualcycleR functions **without renaming columns**
+    # Apply menstrualcycleR functions
     processed <- menstrualcycleR::calculate_mcyclength(
       data = data,
-      id = input$id_col,
+      id = input$id_col,  # Pass input column names correctly
       daterated = input$date_col,
       menses = input$menses_col,
       ovtoday = input$ovtoday_col
-    )
-    
-    processed <- menstrualcycleR::calculate_cycletime(
-      data = processed,
-      id = input$id_col,
-      daterated = input$date_col,
-      menses = input$menses_col,
-      ovtoday = input$ovtoday_col,
-      lower_cyclength_bound = input$lower_bound,
-      upper_cyclength_bound = input$upper_bound
-    )
+    ) %>%
+      menstrualcycleR::calculate_cycletime(
+        id = input$id_col,
+        daterated = input$date_col,
+        menses = input$menses_col,
+        ovtoday = input$ovtoday_col,
+        lower_cyclength_bound = as.numeric(input$lower_bound),  # Ensure numeric input
+        upper_cyclength_bound = as.numeric(input$upper_bound)
+      )
     
     processed_data(processed)
   })
@@ -92,12 +88,12 @@ server <- function(input, output, session) {
     req(processed_data(), input$symptom_col_plot, input$plot_centering, input$plot_impute, input$rollingavg)
     
     plot_result <- menstrualcycleR::cycle_plot(
-      processed_data(),
+      data = processed_data(),
       symptom = input$symptom_col_plot,
       centering = input$plot_centering,
       include_impute = input$plot_impute,
       y_scale = input$plot_y_scale,
-      rollingavg = input$rollingavg
+      rollingavg = as.numeric(input$rollingavg)
     )
     
     cycle_plot_data(plot_result$plot)
@@ -134,7 +130,7 @@ server <- function(input, output, session) {
         centering = input$plot_centering_individual,
         include_impute = input$plot_impute_individual,
         y_scale = input$individual_y_scale,
-        rollingavg = input$individual_rollingavg
+        rollingavg = as.numeric(input$individual_rollingavg)
       )
       
       for (cycle in names(plot_results)) {
