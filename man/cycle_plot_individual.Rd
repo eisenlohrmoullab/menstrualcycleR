@@ -23,7 +23,7 @@ cycle_plot_individual(
 
 \item{centering}{A string indicating the centering phase of the cycle ("menses" or "ovulation").}
 
-\item{y_scale}{A string specifying the y-axis scale ("person-centered", "person-centered_roll", or "means").}
+\item{y_scale}{A string specifying the y-axis scale ("person-centered", "person-centered_roll", "raw", or "roll").}
 
 \item{include_impute}{A boolean indicating whether to use imputed cycle time values.}
 
