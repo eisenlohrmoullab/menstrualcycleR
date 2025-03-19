@@ -53,6 +53,33 @@ cycle_plot_individual <- function(data, id, symptom, centering = "menses",
     df <- df %>%
       dplyr::mutate((!!dplyr::sym(symptom)) := as.numeric(!!dplyr::sym(symptom)))
     
+    forwardCount <- function(x) {
+      # Get the indices where mensdayonefirst == 1 (cycle starts)
+      inds <- which(x == 1)
+      if (!length(inds)) return(rep(NA, length(x)))
+      
+      # Initialize a numeric vector to store the day count
+      num <- rep(NA, length(x))
+      
+      # Loop through each cycle start index and count forward
+      for (i in seq_along(inds)) {
+        # Assign 0 to the cycle start day
+        num[inds[i]] <- 0
+        
+        # Define the range to count forward up to +27 or until the next cycle
+        cycle_end <- ifelse(i < length(inds), inds[i + 1] - 1, length(x))
+        count_range <- (inds[i] + 1):min(cycle_end, inds[i] + (df$mcyclength - 1))
+        
+        # Assign values +1, +2, ..., up to +27 for the days following the cycle start
+        num[count_range] <- seq(1, length(count_range), by = 1)
+      }
+      
+      return(num)
+    }
+    # Apply the cycleCount function to each person in the dataset
+    df$forwardcount <- ave(df$menses, df$id, FUN = forwardCount)  
+    
+    
     # Create person mean and deviation
     df <- df %>%
       dplyr::mutate(
@@ -119,6 +146,7 @@ cycle_plot_individual <- function(data, id, symptom, centering = "menses",
         mean_dev_roll = mean(!!dplyr::sym(paste0(symptom, ".d.roll")), na.rm = TRUE),
         raw_sx = mean(!!dplyr::sym(symptom), na.rm = TRUE),
         sx_roll = mean(!!dplyr::sym(paste0(symptom, ".roll")), na.rm = TRUE),
+        cycleday = (mean(forwardcount, na.rm = TRUE) + 1),
         mcyclength = first(mcyclength),  # Ensure mcyclength is retained
         .groups = "drop"
       ) 
@@ -176,4 +204,3 @@ cycle_plot_individual <- function(data, id, symptom, centering = "menses",
   
   return(results)
 }
-
