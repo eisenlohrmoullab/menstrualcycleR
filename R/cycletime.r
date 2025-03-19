@@ -12,6 +12,8 @@
 #' @param daterated A date column indicating when the data was recorded.
 #' @param menses A binary column (`0`/`1`) indicating the first day of menses onset, where `1` represents menses onset.
 #' @param ovtoday A binary column (`0`/`1`) indicating the estimated day of ovulation, where `1` represents ovulation.
+#' @param lower_cyclength_bound A numeric that indicates the lower bound of cycle lengths that the function will scale, the default is 21 
+#' @param upper_cyclength_bound A numeric that indicates the upper bound of cycle lengths that the function will scale, the default is 35
 #'
 #' @return The input data frame with the following additional variables:
 #' 
