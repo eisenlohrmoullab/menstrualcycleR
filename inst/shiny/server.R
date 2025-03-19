@@ -4,8 +4,6 @@ library(dplyr)
 library(rlang)
 library(ggplot2)  # Ensure ggplot2 is loaded for saving plots
 
-
-
 server <- function(input, output, session) {
   
   # Reactive Value for User Data
@@ -137,7 +135,7 @@ server <- function(input, output, session) {
     }
   )
   
-  # **Final Fix for Individual Cycle Plots (Each Cycle Displays Correctly)**
+  # **Final Fix for Individual Cycle Plots**
   observeEvent(input$update_individual_plot, {
     req(processed_data(), input$id_selected, input$symptom_cols_individual, input$individual_y_scale, input$individual_rollingavg)
     
@@ -201,6 +199,5 @@ server <- function(input, output, session) {
     })
   })
 }
-
 
 
