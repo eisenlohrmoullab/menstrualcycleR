@@ -87,6 +87,22 @@ server <- function(input, output, session) {
     summary(processed_data())
   })
   
+  # Ovulation Analysis
+  ovulation_summary <- reactive({
+    req(processed_data())
+    menstrualcycleR::summary_ovulation(processed_data())
+  })
+  
+  output$ovulation_summary <- renderTable({
+    req(ovulation_summary())
+    ovulation_summary()$ovstatus_total
+  })
+  
+  output$ovulation_summary_id <- renderTable({
+    req(ovulation_summary())
+    ovulation_summary()$ovstatus_id
+  })
+  
   # **Cycle Plot**
   cycle_plot_data <- reactiveVal(NULL)
   
