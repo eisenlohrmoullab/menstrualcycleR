@@ -32,7 +32,7 @@
 #' @export
 #' 
 
-cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRUE, y_scale = "person-centered") {
+cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRUE, y_scale = "person-centered_roll", rollingavg = 5) {
   
   `%>%` <- magrittr::`%>%`
   `:=` <- rlang::`:=`
@@ -62,7 +62,7 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
         } else {
           zoo::rollapply(
             {{var.d}}, 
-            5, 
+            rollingavg, 
             mean, 
             align = "center", 
             fill = NA  # Use NA instead of "extend" to avoid interpolation
