@@ -9,7 +9,8 @@ cycle_plot(
   symptom,
   centering = "menses",
   include_impute = TRUE,
-  y_scale = "person-centered"
+  y_scale = "person-centered_roll",
+  rollingavg = 5
 )
 }
 \arguments{
@@ -22,7 +23,9 @@ Scaled cycle day variables are added to your dataframe after applying the calcul
 
 \item{include_impute}{A boolean indicating whether to use imputed cycle time values based on NC cycle length norms. Default is TRUE.}
 
-\item{y_scale}{A string specifying the y-axis scale. Options are "person-centered", "person-centered_roll", or "means". Default is "person-centered".}
+\item{y_scale}{A string specifying the y-axis scale. Options are "person-centered", "person-centered_roll", or "means". Default is "person-centered_roll".}
+
+\item{rollingavg}{A numeric indicating how many days of a rolling average to use, the default is 5}
 }
 \value{
 A list containing the following elements:

@@ -17,7 +17,7 @@ cycle_plot_individual(
 \arguments{
 \item{data}{A dataframe containing menstrual cycle data, including \code{id} and \code{cyclenum} columns.}
 
-\item{id}{The specific individual for whom cycle plots should be generated.}
+\item{id}{Numeric id number for the specific individual for whom cycle plots should be generated.}
 
 \item{symptom}{A string specifying the symptom variable to analyze.}
 
@@ -26,6 +26,8 @@ cycle_plot_individual(
 \item{y_scale}{A string specifying the y-axis scale ("person-centered", "person-centered_roll", or "means").}
 
 \item{include_impute}{A boolean indicating whether to use imputed cycle time values.}
+
+\item{rollingavg}{A numeric indicating how many days of a rolling average to use, the default is 5}
 }
 \value{
 A list where each cycle contains:

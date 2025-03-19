@@ -24,6 +24,10 @@ calculate_cycletime(
 \item{menses}{A binary column (\code{0}/\code{1}) indicating the first day of menses onset, where \code{1} represents menses onset.}
 
 \item{ovtoday}{A binary column (\code{0}/\code{1}) indicating the estimated day of ovulation, where \code{1} represents ovulation.}
+
+\item{lower_cyclength_bound}{A numeric that indicates the lower bound of cycle lengths that the function will scale, the default is 21}
+
+\item{upper_cyclength_bound}{A numeric that indicates the upper bound of cycle lengths that the function will scale, the default is 35}
 }
 \value{
 The input data frame with the following additional variables:
