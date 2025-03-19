@@ -4,6 +4,8 @@ library(dplyr)
 library(rlang)
 library(ggplot2)  # Ensure ggplot2 is loaded for saving plots
 
+
+
 server <- function(input, output, session) {
   
   # Reactive Value for User Data
@@ -87,10 +89,9 @@ server <- function(input, output, session) {
     summary(processed_data())
   })
   
-  
   # Ovulation Analysis
-
-    ovulation_summary <- reactive({
+  
+  ovulation_summary <- reactive({
     req(processed_data())
     menstrualcycleR::summary_ovulation(processed_data())
   })
@@ -103,6 +104,7 @@ server <- function(input, output, session) {
     req(ovulation_summary())
     ovulation_summary()$ovstatus_id
   })
+  
   
   # **Cycle Plot**
   cycle_plot_data <- reactiveVal(NULL)
@@ -135,7 +137,7 @@ server <- function(input, output, session) {
     }
   )
   
-  # **Individual Cycle Plots (Final Fix for Multiple Cycle Plotting)**
+  # **Final Fix for Individual Cycle Plots (Each Cycle Displays Correctly)**
   observeEvent(input$update_individual_plot, {
     req(processed_data(), input$id_selected, input$symptom_cols_individual, input$individual_y_scale, input$individual_rollingavg)
     
@@ -186,10 +188,10 @@ server <- function(input, output, session) {
           )
           
           plot_list <- append(plot_list, list(
-            h3(paste(cycle, "for", symptom)),
+            h3(paste("Cycle", cycle, "for", symptom)),
             plotOutput(plot_id),
-            actionButton(summary_id, paste("View Summary for", symptom, cycle)),
-            downloadButton(download_id, paste("Download Summary for", symptom, cycle)),
+            actionButton(summary_id, paste("View Summary for", symptom, "Cycle", cycle)),
+            downloadButton(download_id, paste("Download Summary for", symptom, "Cycle", cycle)),
             hr()
           ))
         }
@@ -199,3 +201,6 @@ server <- function(input, output, session) {
     })
   })
 }
+
+
+
