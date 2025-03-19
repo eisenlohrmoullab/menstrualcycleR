@@ -6,9 +6,6 @@ library(ggplot2)  # Ensure ggplot2 is loaded for saving plots
 
 server <- function(input, output, session) {
   
-  # Reactive Value for User Data
-  user_data <- reactiveVal(NULL)
-  
   observeEvent(input$load_data, {
     req(input$file)
     data <- read.csv(input$file$datapath)
@@ -19,8 +16,8 @@ server <- function(input, output, session) {
     updateSelectInput(session, "date_col", choices = names(data))
     updateSelectInput(session, "menses_col", choices = names(data))
     updateSelectInput(session, "ovtoday_col", choices = names(data))
-    updateSelectInput(session, "symptom_col_plot", choices = names(data))
-    updateCheckboxGroupInput(session, "symptom_cols_individual", choices = names(data))
+    updateSelectInput(session, "symptom_col_analysis", choices = names(data))  # Symptom selection for analysis
+    updateSelectInput(session, "symptom_col_plot", choices = names(data))  # Symptom selection for plotting
   })
   
   # Show Data Preview
@@ -35,28 +32,38 @@ server <- function(input, output, session) {
   observeEvent(input$process_data, {
     req(user_data(), input$id_col, input$date_col, input$menses_col, input$ovtoday_col, input$lower_bound, input$upper_bound)
     
-    # Ensure the dataset is loaded
-    data <- user_data()
-    validate(need(!is.null(data), "No data loaded. Please upload a file."))
+    # Convert input selections to symbols
+    id_col <- sym(input$id_col)
+    date_col <- sym(input$date_col)
+    menses_col <- sym(input$menses_col)
+    ovtoday_col <- sym(input$ovtoday_col)
     
-    # Apply menstrualcycleR functions
-    processed <- menstrualcycleR::calculate_mcyclength(
-      data = data,
-      id = input$id_col,  # Pass input column names correctly
-      daterated = input$date_col,
-      menses = input$menses_col,
-      ovtoday = input$ovtoday_col
-    ) %>%
+    # Retrieve the dataset
+    data <- user_data()
+    
+    # Ensure date column is properly formatted as Date
+    if (!inherits(data[[input$date_col]], "Date")) {
+      data[[input$date_col]] <- lubridate::ymd(data[[input$date_col]])
+    }
+    
+    # Apply menstrualcycleR functions **with correct column references**
+    processed <- data %>%
+      menstrualcycleR::calculate_mcyclength(
+        id = !!id_col,
+        daterated = !!date_col,
+        menses = !!menses_col,
+        ovtoday = !!ovtoday_col
+      ) %>%
       menstrualcycleR::calculate_cycletime(
-        id = input$id_col,
-        daterated = input$date_col,
-        menses = input$menses_col,
-        ovtoday = input$ovtoday_col,
-        lower_cyclength_bound = as.numeric(input$lower_bound),  # Ensure numeric input
+        id = !!id_col,
+        daterated = !!date_col,
+        menses = !!menses_col,
+        ovtoday = !!ovtoday_col,
+        lower_cyclength_bound = as.numeric(input$lower_bound),
         upper_cyclength_bound = as.numeric(input$upper_bound)
       )
     
-    processed_data(processed)
+    processed_data(processed)  # Store processed data
   })
   
   # Display Processed Data
