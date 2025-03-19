@@ -3,6 +3,7 @@
 export(calculate_cycletime)
 export(calculate_mcyclength)
 export(cycle_plot)
+export(cycle_plot_individual)
 export(cycledata_check)
 export(launch_app)
 export(summary_ovulation)
