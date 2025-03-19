@@ -9,7 +9,8 @@
 #' @param symptom A string specifying the symptom variable to analyze.
 #' @param centering A string indicating the centering phase of the cycle ("menses" or "ovulation"). Default is "menses".
 #' @param include_impute A boolean indicating whether to use imputed cycle time values based on NC cycle length norms. Default is TRUE.
-#' @param y_scale A string specifying the y-axis scale. Options are "person-centered", "person-centered_roll", or "means". Default is "person-centered".
+#' @param y_scale A string specifying the y-axis scale. Options are "person-centered", "person-centered_roll", or "means". Default is "person-centered_roll".
+#' @param rollingavg A numeric indicating how many days of a rolling average to use, the default is 5
 #'
 #' @return A list containing the following elements:
 #' 	1. A dataframe: The input dataframe augmented with person-centered mean (.m) and deviation (.d) values for the symptom variable.
