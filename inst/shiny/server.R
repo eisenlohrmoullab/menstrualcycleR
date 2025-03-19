@@ -35,23 +35,30 @@ server <- function(input, output, session) {
   observeEvent(input$process_data, {
     req(user_data(), input$id_col, input$date_col, input$menses_col, input$ovtoday_col, input$lower_bound, input$upper_bound)
     
-    processed <- user_data() %>%
-      menstrualcycleR::calculate_mcyclength(
-        data = .,
-        id = input$id_col,   
-        daterated = input$date_col,
-        menses = input$menses_col,
-        ovtoday = input$ovtoday_col
-      ) %>%
-      menstrualcycleR::calculate_cycletime(
-        data = .,
-        id = input$id_col,   
-        daterated = input$date_col,
-        menses = input$menses_col,
-        ovtoday = input$ovtoday_col,
-        lower_cyclength_bound = input$lower_bound,
-        upper_cyclength_bound = input$upper_bound
-      )
+    # Get the data
+    data <- user_data()
+    
+    # Validate data before processing
+    validate(need(!is.null(data), "No data loaded. Please upload a file."))
+    
+    # Apply menstrualcycleR functions **without renaming columns**
+    processed <- menstrualcycleR::calculate_mcyclength(
+      data = data,
+      id = input$id_col,
+      daterated = input$date_col,
+      menses = input$menses_col,
+      ovtoday = input$ovtoday_col
+    )
+    
+    processed <- menstrualcycleR::calculate_cycletime(
+      data = processed,
+      id = input$id_col,
+      daterated = input$date_col,
+      menses = input$menses_col,
+      ovtoday = input$ovtoday_col,
+      lower_cyclength_bound = input$lower_bound,
+      upper_cyclength_bound = input$upper_bound
+    )
     
     processed_data(processed)
   })
