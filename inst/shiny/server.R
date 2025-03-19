@@ -49,7 +49,7 @@ server <- function(input, output, session) {
       data[[input$date_col]] <- lubridate::ymd(data[[input$date_col]])
     }
     
-    # Apply menstrualcycleR functions **with correct column references**
+    # Apply menstrualcycleR functions
     processed <- data %>%
       menstrualcycleR::calculate_mcyclength(
         id = !!id_col,
@@ -66,7 +66,7 @@ server <- function(input, output, session) {
         upper_cyclength_bound = as.numeric(input$upper_bound)
       )
     
-    processed_data(processed)  # Store processed data
+    processed_data(processed)
   })
   
   # Display Processed Data
@@ -91,7 +91,7 @@ server <- function(input, output, session) {
     ovulation_summary()$ovstatus_total
   })
   
-  # Cycle Plot
+  # **Cycle Plot (for all participants)**
   cycle_plot_data <- reactiveVal(NULL)
   
   observeEvent(input$update_plot, {
@@ -123,7 +123,7 @@ server <- function(input, output, session) {
     }
   )
   
-  # Individual Cycle Plots
+  # **Individual Cycle Plots (for selected ID)**
   output$individual_cycle_plots <- renderUI({
     req(processed_data(), input$id_selected, input$symptom_cols_individual)
     
