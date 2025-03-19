@@ -34,6 +34,7 @@ cycle_plot_individual <- function(data, id, symptom, centering = "menses",
                                   y_scale = "person-centered_roll", 
                                   include_impute = TRUE, rollingavg = 5) {
   `:=` <- rlang::`:=`
+  `%>%` <- magrittr::`%>%`
   
   # Ensure 'id' and 'cyclenum' columns exist
   if (!"id" %in% colnames(data) | !"cyclenum" %in% colnames(data)) {
