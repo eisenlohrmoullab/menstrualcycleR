@@ -27,7 +27,7 @@
 #'   include_impute = TRUE,
 #'   y_scale = "person-centered_roll"
 #' )
-#' result$plot
+#' 
 
 
 cycle_plot_individual <- function(data, id, symptom, centering = "menses", 
