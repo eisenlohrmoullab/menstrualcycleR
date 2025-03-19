@@ -19,6 +19,7 @@ server <- function(input, output, session) {
     updateSelectInput(session, "date_col", choices = names(data))
     updateSelectInput(session, "menses_col", choices = names(data))
     updateSelectInput(session, "ovtoday_col", choices = names(data))
+    updateSelectInput(session, "symptom_col_plot", "Select Symptom for Cycle Plot:", choices = names(data))
     updateCheckboxGroupInput(session, "symptom_cols_individual", "Select Symptoms for Individual Plots:", choices = names(data))
   })
   
@@ -82,6 +83,93 @@ server <- function(input, output, session) {
   output$ovulation_summary <- renderTable({
     req(ovulation_summary())
     ovulation_summary()$ovstatus_total
+  })
+  
+  # Cycle Plot
+  cycle_plot_data <- reactiveVal(NULL)
+  
+  observeEvent(input$update_plot, {
+    req(processed_data(), input$symptom_col_plot, input$plot_centering, input$plot_impute)
+    
+    plot_result <- menstrualcycleR::cycle_plot(
+      processed_data(),
+      symptom = input$symptom_col_plot,
+      centering = input$plot_centering,
+      include_impute = input$plot_impute
+    )
+    
+    cycle_plot_data(plot_result$plot)
+  })
+  
+  output$cycle_plot <- renderPlot({
+    req(cycle_plot_data())
+    cycle_plot_data()
+  })
+  
+  # Download Cycle Plot
+  output$download_plot <- downloadHandler(
+    filename = function() { paste("cycle_plot_", Sys.Date(), ".png", sep = "") },
+    content = function(file) {
+      req(cycle_plot_data())
+      ggsave(file, plot = cycle_plot_data(), device = "png", width = 8, height = 6, dpi = 300)
+    }
+  )
+  
+  # Individual Cycle Plots
+  output$individual_cycle_plots <- renderUI({
+    req(processed_data(), input$id_selected, input$symptom_cols_individual)
+    
+    id_selected <- input$id_selected
+    symptoms_selected <- input$symptom_cols_individual
+    
+    plot_list <- list()
+    summary_list <- list()
+    
+    for (symptom in symptoms_selected) {
+      plot_results <- menstrualcycleR::cycle_plot_individual(
+        data = processed_data(),
+        id = id_selected,
+        symptom = symptom,
+        centering = input$plot_centering_individual,
+        include_impute = input$plot_impute_individual
+      )
+      
+      for (cycle in names(plot_results)) {
+        plot_id <- paste0("plot_", symptom, "_", cycle)
+        summary_id <- paste0("summary_", symptom, "_", cycle)
+        download_id <- paste0("download_summary_", symptom, "_", cycle)
+        
+        plot_list[[plot_id]] <- plotOutput(plot_id)
+        output[[plot_id]] <- renderPlot({
+          req(plot_results[[cycle]]$plot)
+          plot_results[[cycle]]$plot
+        })
+        
+        summary_list[[summary_id]] <- tableOutput(summary_id)
+        output[[summary_id]] <- renderTable({
+          req(plot_results[[cycle]]$summary)
+          plot_results[[cycle]]$summary
+        })
+        
+        output[[download_id]] <- downloadHandler(
+          filename = function() { paste0("summary_", symptom, "_", cycle, "_", Sys.Date(), ".csv") },
+          content = function(file) {
+            req(plot_results[[cycle]]$summary)
+            write.csv(plot_results[[cycle]]$summary, file, row.names = FALSE)
+          }
+        )
+        
+        summary_list[[paste0("btn_", summary_id)]] <- tagList(
+          actionButton(summary_id, paste("View Summary for", symptom, "Cycle", cycle)),
+          downloadButton(download_id, paste("Download Summary for", symptom, "Cycle", cycle))
+        )
+      }
+    }
+    
+    tagList(
+      plot_list,
+      summary_list
+    )
   })
   
   # Download Processed Data
