@@ -7,9 +7,9 @@
 cycle_plot_individual(
   data,
   id,
-  symptom,
+  symptoms,
   centering = "menses",
-  y_scale = "person-centered_roll",
+  y_scale = "person-centered",
   include_impute = TRUE,
   rollingavg = 5
 )
@@ -19,7 +19,7 @@ cycle_plot_individual(
 
 \item{id}{Numeric id number for the specific individual for whom cycle plots should be generated.}
 
-\item{symptom}{A string specifying the symptom variable to analyze.}
+\item{symptoms}{A vector of strings specifying the symptom variable to analyze that exist in \code{data}.}
 
 \item{centering}{A string indicating the centering phase of the cycle ("menses" or "ovulation").}
 
