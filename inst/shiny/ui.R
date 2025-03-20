@@ -58,6 +58,9 @@ ui <- fluidPage(
                  )
         ),
         
+        # CPASS Tab Panel 
+        tabPanel("CPASS"),
+        
         # Download Processed Data
         tabPanel("Download Data", downloadButton("download_results", "Download Processed Data"))
       )
