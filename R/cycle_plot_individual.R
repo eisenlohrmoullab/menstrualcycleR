@@ -5,7 +5,7 @@
 #'
 #' @param data A dataframe containing menstrual cycle data, including `id` and `cyclenum` columns.
 #' @param id Numeric id number for the specific individual for whom cycle plots should be generated.
-#' @param symptom A string specifying the symptom variable to analyze.
+#' @param symptoms A vector of strings specifying the symptom variable to analyze that exist in `data`.
 #' @param centering A string indicating the centering phase of the cycle ("menses" or "ovulation").
 #' @param y_scale A string specifying the y-axis scale ("person-centered", "person-centered_roll", "raw", or "roll").
 #' @param include_impute A boolean indicating whether to use imputed cycle time values.
@@ -25,99 +25,81 @@
 #' 
 
 
-cycle_plot_individual <- function(data, id, symptom, centering = "menses", 
-                                  y_scale = "person-centered_roll", 
-                                  include_impute = TRUE, rollingavg = 5) {
+cycle_plot_individual <- function(data, id, symptoms, centering = "menses", 
+                                       y_scale = "person-centered", 
+                                       include_impute = TRUE, rollingavg = 5) {
   `:=` <- rlang::`:=`
   `%>%` <- magrittr::`%>%`
   
-  # Ensure 'id' and 'cyclenum' columns exist
-  if (!"id" %in% colnames(data) | !"cyclenum" %in% colnames(data)) {
+  # Ensure required columns exist
+  required_cols <- c("id", "cyclenum")
+  if (!all(required_cols %in% colnames(data))) {
     stop("Error: The dataset must contain 'id' and 'cyclenum' columns.")
   }
   
-  # Filter data for the specified ID
-  data <- data %>% filter(id == !!id)
+  # Convert id to numeric (if applicable)
+  id <- as.numeric(id)
   
-  # Check if data is available for the specified ID
+  # Filter data for the specified ID
+  data_filtered <- data %>% filter(id == !!id)
+  data_filtered = as.data.frame(data_filtered)
+  data_filtered <- data_filtered %>% dplyr::filter(!is.na(cyclenum))
+  
+  # Ensure data is still a dataframe after filtering
   if (nrow(data) == 0) {
     stop(paste("Error: No data found for ID", id))
   }
   
-  # Function to process cycle data
+  # Function to process cycle data for each symptom
   process_cycle_data <- function(df, symptom) {
     df <- df %>%
-      dplyr::mutate((!!dplyr::sym(symptom)) := as.numeric(!!dplyr::sym(symptom)))
+      dplyr::mutate(!!symptom := as.numeric(!!sym(symptom)))
     
     forwardCount <- function(x) {
-      # Get the indices where mensdayonefirst == 1 (cycle starts)
       inds <- which(x == 1)
-      if (!length(inds)) return(rep(NA, length(x)))
+      if (length(inds) == 0) return(rep(NA, length(x)))
       
-      # Initialize a numeric vector to store the day count
       num <- rep(NA, length(x))
       
-      # Loop through each cycle start index and count forward
       for (i in seq_along(inds)) {
-        # Assign 0 to the cycle start day
         num[inds[i]] <- 0
-        
-        # Define the range to count forward up to +27 or until the next cycle
         cycle_end <- ifelse(i < length(inds), inds[i + 1] - 1, length(x))
         count_range <- (inds[i] + 1):min(cycle_end, inds[i] + (df$mcyclength - 1))
-        
-        # Assign values +1, +2, ..., up to +27 for the days following the cycle start
         num[count_range] <- seq(1, length(count_range), by = 1)
       }
       
       return(num)
     }
-    # Apply the cycleCount function to each person in the dataset
-    df$forwardcount <- ave(df$menses, df$id, FUN = forwardCount)  
     
+    df$forwardcount <- ave(df$menses, df$id, FUN = forwardCount)
     
-    # Create person mean and deviation
     df <- df %>%
       dplyr::mutate(
-        "{symptom}.m" := mean(!!dplyr::sym(symptom), na.rm = TRUE),
-        "{symptom}.d" := !!dplyr::sym(symptom) - !!dplyr::sym(paste0(symptom, ".m"))
+        !!paste0(symptom, ".m") := mean(!!sym(symptom), na.rm = TRUE),
+        !!paste0(symptom, ".d") := !!sym(symptom) - !!sym(paste0(symptom, ".m"))
       ) %>%
       dplyr::ungroup()
     
-    # Create rolling deviation
     df <- df %>%
       dplyr::mutate(
-        "{symptom}.d.roll" := if (sum(!is.na(!!dplyr::sym(paste0(symptom, ".d")))) < 2) {
+        !!paste0(symptom, ".d.roll") := if (sum(!is.na(!!sym(paste0(symptom, ".d")))) < 2) {
           NA_real_
         } else {
-          zoo::rollapply(!!dplyr::sym(paste0(symptom, ".d")), rollingavg, mean, align = "center", fill = NA)
+          zoo::rollapply(!!sym(paste0(symptom, ".d")), rollingavg, mean, align = "center", fill = NA)
+        },
+        !!paste0(symptom, ".m.roll") := if (sum(!is.na(!!sym(paste0(symptom, ".m")))) < 2) {
+          NA_real_
+        } else {
+          zoo::rollapply(!!sym(paste0(symptom, ".m")), rollingavg, mean, align = "center", fill = NA)
+        },
+        !!paste0(symptom, ".roll") := if (sum(!is.na(!!sym(symptom))) < 2) {
+          NA_real_
+        } else {
+          zoo::rollapply(!!sym(symptom), rollingavg, mean, align = "center", fill = NA)
         }
       ) %>%
       dplyr::ungroup()
     
-    # Create rolling mean
-    df <- df %>%
-      dplyr::mutate(
-        "{symptom}.m.roll" := if (sum(!is.na(!!dplyr::sym(paste0(symptom, ".m")))) < 2) {
-          NA_real_
-        } else {
-          zoo::rollapply(!!dplyr::sym(paste0(symptom, ".m")), rollingavg, mean, align = "center", fill = NA)
-        }
-      ) %>%
-      dplyr::ungroup()
-    
-    # Create rolling sx
-    df <- df %>%
-      dplyr::mutate(
-        "{symptom}.roll" := if (sum(!is.na(!!dplyr::sym(paste0(symptom)))) < 2) {
-          NA_real_
-        } else {
-          zoo::rollapply(!!dplyr::sym(paste0(symptom)), rollingavg, mean, align = "center", fill = NA)
-        }
-      ) %>%
-      dplyr::ungroup()
-    
-    # Add cycle percentage variable
     df <- df %>%
       dplyr::mutate(
         cycleday_perc = case_when(
@@ -132,22 +114,20 @@ cycle_plot_individual <- function(data, id, symptom, centering = "menses",
     return(df)
   }
   
-  # Function to create a plot and summary data for a given cycle
+  # Function to create plots for each cycle
   create_cycle_plot <- function(df, symptom, cycle, id) {
-    # Summarize data for plotting
     dat_summary <- df %>%
       dplyr::group_by(cycleday_5perc) %>%
       dplyr::summarise(
-        mean_dev = mean(!!dplyr::sym(paste0(symptom, ".d")), na.rm = TRUE),
-        mean_dev_roll = mean(!!dplyr::sym(paste0(symptom, ".d.roll")), na.rm = TRUE),
-        raw_sx = mean(!!dplyr::sym(symptom), na.rm = TRUE),
-        sx_roll = mean(!!dplyr::sym(paste0(symptom, ".roll")), na.rm = TRUE),
-        cycleday = (mean(forwardcount, na.rm = TRUE) + 1),
-        mcyclength = first(mcyclength),  # Ensure mcyclength is retained
+        mean_dev = mean(!!sym(paste0(symptom, ".d")), na.rm = TRUE),
+        mean_dev_roll = mean(!!sym(paste0(symptom, ".d.roll")), na.rm = TRUE),
+        raw_sx = mean(!!sym(symptom), na.rm = TRUE),
+        sx_roll = mean(!!sym(paste0(symptom, ".roll")), na.rm = TRUE),
+        cycleday = mean(forwardcount, na.rm = TRUE) + 1,
+        mcyclength = first(mcyclength),
         .groups = "drop"
-      ) 
+      )
     
-    # X-axis breaks and labels
     x_breaks <- seq(0, 1, by = 0.05)
     x_labels <- if (centering == "menses") {
       c("0%L", rep("", 4), "50%L", rep("", 4), "Menses Onset", rep("", 4), "50%F", rep("", 4), "Ovulation")
@@ -155,10 +135,9 @@ cycle_plot_individual <- function(data, id, symptom, centering = "menses",
       c("Menses Onset", rep("", 4), "50%F", rep("", 4), "Ovulation", rep("", 4), "50%L", rep("", 4), "100%L")
     }
     
-    # Generate the plot with ID in the title
     plot <- ggplot2::ggplot(dat_summary, ggplot2::aes(
       x = cycleday_5perc,
-      y = case_when(
+      y = dplyr::case_when(
         y_scale == "person-centered" ~ mean_dev,
         y_scale == "person-centered_roll" ~ mean_dev_roll,
         y_scale == "raw" ~ raw_sx,
@@ -176,7 +155,7 @@ cycle_plot_individual <- function(data, id, symptom, centering = "menses",
       ) +
       ggplot2::geom_line(size = 0.7) +
       ggplot2::labs(
-        title = paste("Cycle", cycle, "for ID:", id),
+        title = paste("Cycle", cycle, "for", symptom, "ID:", id),
         x = "Percentage of Phase Elapsed",
         y = y_scale
       ) +
@@ -185,17 +164,27 @@ cycle_plot_individual <- function(data, id, symptom, centering = "menses",
     return(list(plot = plot, summary = dat_summary))
   }
   
-  # Get unique cycle numbers for the specified ID
-  cycle_nums <- unique(data$cyclenum)
+  # Get unique cycle numbers
+  cycle_nums <- unique(data_filtered$cyclenum)
   
-  # Initialize an empty list to store results
   results <- list()
   
-  # Loop through each cycle and generate plots & summaries
-  for (cycle in cycle_nums) {
-    cycle_data <- data %>% filter(cyclenum == cycle)
-    processed_data <- process_cycle_data(cycle_data, symptom)
-    results[[paste0("Cycle_", cycle)]] <- create_cycle_plot(processed_data, symptom, cycle, id)
+  for (symptom in symptoms) {
+    symptom_results <- list()
+    
+    for (cycle in cycle_nums) {
+      cycle_data <- data_filtered %>% dplyr::filter(cyclenum == cycle)
+      
+      if (nrow(cycle_data) == 0) next  # Skip if no data for this cycle
+      
+      # Process cycle data
+      processed_data <- process_cycle_data(cycle_data, symptom)
+      
+      # Generate plot and summary
+      symptom_results[[paste0("Cycle_", cycle)]] <- create_cycle_plot(processed_data, symptom, cycle, id)
+    }
+    
+    results[[symptom]] <- symptom_results
   }
   
   return(results)
