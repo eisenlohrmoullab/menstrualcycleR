@@ -3,16 +3,13 @@ library(menstrualcycleR)
 library(dplyr)
 library(rlang)
 library(ggplot2)  # Ensure ggplot2 is loaded for saving plots
-# Ensure required packages are installed and loaded
-if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")
-# Install from GitHub only if necessary
-if (!requireNamespace("HiddenSemiMarkov", quietly = TRUE)) {
-  devtools::install_github("lasy/HiddenSemiMarkov")
-}
-if (!requireNamespace("cpass", quietly = TRUE)) {
-  devtools::install_github("lasy/cpass", dependencies = TRUE)
-}
-# Load the required library
+suppressMessages({
+  if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")
+  if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
+  if (!requireNamespace("geomnet", quietly = TRUE)) remotes::install_github("sctyner/geomnet")
+  if (!requireNamespace("HiddenSemiMarkov", quietly = TRUE)) devtools::install_github("lasy/HiddenSemiMarkov")
+  if (!requireNamespace("cpass", quietly = TRUE)) devtools::install_github("lasy/cpass", dependencies = TRUE)
+})
 library(cpass)
 
 
@@ -149,7 +146,7 @@ server <- function(input, output, session) {
   # **Individual Cycle Plots**
   observe({
     req(processed_data)
-    updateSelectInput(session, "selected_id", choices = unique(processed_data$id))
+    updateSelectInput(session, "selected_id", choices = unique(processed_data()$id))
     updateCheckboxGroupInput(session, "selected_symptoms",
                              choices = setdiff(names(processed_data), c("id", "cyclenum", "menses", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov")))
   })
