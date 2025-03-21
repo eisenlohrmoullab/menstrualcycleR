@@ -141,6 +141,7 @@ server <- function(input, output, session) {
             s_id <- summary_id
             d_id <- download_summary_id
             dp_id <- download_plot_id
+            toggle_id <- paste0(s_id, "_container")
             
             output[[p_id]] <- renderPlot({ results[[s]][[c]]$plot })
             output[[s_id]] <- renderTable({ results[[s]][[c]]$summary })
@@ -160,7 +161,7 @@ server <- function(input, output, session) {
             )
             
             observeEvent(input[[toggle_button_id]], {
-              toggle(paste0(summary_id, "_container"))
+              shinyjs::toggle(toggle_id)
             })
           })
           
