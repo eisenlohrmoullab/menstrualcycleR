@@ -61,7 +61,18 @@ ui <- fluidPage(
                  )
         ),
         
-        tabPanel("CPASS"),
+        tabPanel("CPASS",
+                 sidebarPanel(
+                   selectInput("cpass_id_select", "Select ID:", choices = NULL),
+                   selectInput("cpass_symptom_vars", "Select Symptom Variables:", choices = NULL, multiple = TRUE),
+                   textInput("cpass_number_mapping", "Enter Symptom Mapping (comma-separated numbers):",
+                             placeholder = "e.g., 1,4,7,9 for the selected symptoms"),
+                   actionButton("run_cpass", "Run CPASS", class = "btn-primary")
+                 ),
+                 mainPanel(
+                   plotOutput("cpass_plot")
+                 )
+        ),
         tabPanel("Download Data", downloadButton("download_results", "Download Processed Data"))
       )
     )
