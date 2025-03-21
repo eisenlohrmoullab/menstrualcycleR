@@ -65,8 +65,9 @@ ui <- fluidPage(
         ),
         
         # JS Script for Summary Toggle
-        tags$script(HTML("\n          Shiny.addCustomMessageHandler('toggleSummary', function(toggleId) {\n            $(toggleId).toggle();\n          });\n          Shiny.addCustomMessageHandler('initToggleScript', function(msg) {\n            $('.shiny-bound-output').each(function() {\n              const el = $(this).attr('id');\n              if (el && el.endsWith('_container')) {\n                $('#' + el).hide();\n              }\n            });\n          });\n        ")),
-        
+        tags$script(HTML("Shiny.addCustomMessageHandler('toggleSummary', function(id) {
+    $('#' + id).toggle();
+  });")),
         # CPASS Tab Panel 
         tabPanel("CPASS"),
         

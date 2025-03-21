@@ -122,63 +122,66 @@ server <- function(input, output, session) {
       include_impute = input$include_impute_toggle,
       rollingavg = as.numeric(input$rollingavg_input)
     )
+
+  })
+  
+  output$individual_plot_output <- renderUI({
+    req(results)
+    output_list <- list()
     
-    output$individual_plot_output <- renderUI({
-      output_list <- list()
-      
-      for (symptom in names(results)) {
-        for (cycle_name in names(results[[symptom]])) {
-          plot_id <- paste0("plot_", symptom, "_", cycle_name)
-          summary_id <- paste0("summary_", symptom, "_", cycle_name)
-          toggle_button_id <- paste0("toggle_", summary_id)
-          download_summary_id <- paste0("download_", summary_id)
-          download_plot_id <- paste0("download_plot_", symptom, "_", cycle_name)
+    for (symptom in names(results)) {
+      for (cycle_name in names(results[[symptom]])) {
+        plot_id <- paste0("plot_", symptom, "_", cycle_name)
+        summary_id <- paste0("summary_", symptom, "_", cycle_name)
+        container_id <- paste0("container_", summary_id)
+        toggle_button_id <- paste0("toggle_", summary_id)
+        download_summary_id <- paste0("download_", summary_id)
+        download_plot_id <- paste0("download_plot_", symptom, "_", cycle_name)
+        
+        local({
+          s <- symptom
+          c <- cycle_name
           
-          local({
-            s <- symptom
-            c <- cycle_name
-            p_id <- plot_id
-            s_id <- summary_id
-            d_id <- download_summary_id
-            dp_id <- download_plot_id
-            
-            output[[p_id]] <- renderPlot({ results[[s]][[c]]$plot })
-            output[[s_id]] <- renderTable({ results[[s]][[c]]$summary })
-            
-            output[[d_id]] <- downloadHandler(
-              filename = function() paste0("summary_", s, "_", c, ".csv"),
-              content = function(file) {
-                write.csv(results[[s]][[c]]$summary, file, row.names = FALSE)
-              }
-            )
-            
-            output[[dp_id]] <- downloadHandler(
-              filename = function() paste0("plot_", s, "_", c, ".png"),
-              content = function(file) {
-                ggsave(file, plot = results[[s]][[c]]$plot, device = "png", width = 8, height = 6, dpi = 300)
-              }
-            )
+          output[[plot_id]] <- renderPlot({
+            results[[s]][[c]]$plot
           })
           
-          output_list[[length(output_list) + 1]] <- tagList(
-            tags$h4(paste("Symptom:", symptom, "|", cycle_name)),
-            plotOutput(plot_id),
-            downloadButton(download_plot_id, "Download Plot"),
-            actionButton(toggle_button_id, "View Summary"),
-            hidden(div(id = paste0(summary_id, "_container"), tableOutput(summary_id))),
-            downloadButton(download_summary_id, "Download Summary"),
-            tags$hr()
+          output[[summary_id]] <- renderTable({
+            results[[s]][[c]]$summary
+          })
+          
+          output[[download_summary_id]] <- downloadHandler(
+            filename = function() paste0("summary_", s, "_", c, ".csv"),
+            content = function(file) {
+              write.csv(results[[s]][[c]]$summary, file, row.names = FALSE)
+            }
+          )
+          
+          output[[download_plot_id]] <- downloadHandler(
+            filename = function() paste0("plot_", s, "_", c, ".png"),
+            content = function(file) {
+              ggsave(file, plot = results[[s]][[c]]$plot, width = 8, height = 6, dpi = 300)
+            }
           )
           
           observeEvent(input[[toggle_button_id]], {
-            toggle_id <- paste0("#", summary_id, "_container")
-            session$sendCustomMessage(type = "toggleSummary", message = toggle_id)
+            session$sendCustomMessage("toggleSummary", message = container_id)
           })
-        }
+        })
+        
+        output_list[[length(output_list) + 1]] <- tagList(
+          tags$h4(paste("Symptom:", symptom, ",", cycle_name)),
+          plotOutput(plot_id),
+          downloadButton(download_plot_id, "Download Plot"),
+          actionButton(toggle_button_id, "View Summary"),
+          hidden(div(id = container_id, tableOutput(summary_id))),
+          downloadButton(download_summary_id, "Download Summary"),
+          tags$hr()
+        )
       }
-      
-      do.call(tagList, output_list)
-    })
+    }
+    
+    do.call(tagList, output_list)
   })
   
   session$onFlushed(function() {
