@@ -181,6 +181,40 @@ server <- function(input, output, session) {
     })
   })
   
+  observeEvent(input$run_cpass, {
+    req(processed_data(), input$cpass_id_select, input$cpass_symptom_vars, input$cpass_number_mapping)
+    
+    symptom_map <- setNames(as.numeric(unlist(strsplit(input$cpass_number_mapping, ","))), input$cpass_symptom_vars)
+    
+    cpass_data <- processed_data() %>%
+      mutate(subject = id, cycle = cyclenum) %>%
+      group_by(id) %>%
+      mutate(day = {
+        inds <- which(menses == 1)
+        if (!length(inds)) return(rep(0, length(menses)))
+        num <- lapply(inds, function(i) {
+          num <- seq_along(menses) - i
+          num[num >= 0] <- num[num >= 0] + 1
+          num[num < -15 | num > 10] <- NA
+          num
+        })
+        do.call(coalesce, num)
+      }) %>%
+      ungroup() %>%
+      pivot_longer(
+        cols = all_of(input$cpass_symptom_vars),
+        names_to = "symptom",
+        values_to = "drsp_score"
+      ) %>%
+      mutate(item = recode(as.character(symptom), !!!symptom_map, .default = NA_real_)) %>%
+      filter(!is.na(cycle), !is.na(item))
+    
+    input1 <- cpass::as_cpass_data(cpass_data, sep_event = "menses")
+    result <- cpass::plot_subject_data_and_dx(data = input1 %>% filter(subject == input$cpass_id_select), save_as_pdf = FALSE)
+    
+    output$cpass_plot <- renderPlot({ result })
+  })
+  
   output$download_results <- downloadHandler(
     filename = function() { paste("processed_cycle_data_", Sys.Date(), ".csv", sep = "") },
     content = function(file) { write.csv(processed_data(), file, row.names = FALSE) }
