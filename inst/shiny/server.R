@@ -171,7 +171,7 @@ server <- function(input, output, session) {
         })
         
         output_list[[length(output_list) + 1]] <- tagList(
-          tags$h4(paste("Symptom:", symptom, ",", cycle_name)),
+          tags$h4(paste("Symptom:", symptom, "|", cycle_name)),
           plotOutput(plot_id),
           downloadButton(download_plot_id, "Download Plot"),
           actionButton(toggle_button_id, "View Summary"),
