@@ -1,4 +1,7 @@
+library(shinyjs)
+
 ui <- fluidPage(
+  useShinyjs(),
   titlePanel("Phase Aligned Cycle Time Scaling (PACTS) with menstrualcycleR"),
   
   sidebarLayout(
