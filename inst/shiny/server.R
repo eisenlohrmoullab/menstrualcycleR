@@ -232,45 +232,29 @@ server <- function(input, output, session) {
   
   
   # CPASS MAPPING REACTIVE INPUTS
-  observeEvent(processed_data(), {
-    req(processed_data())
-    
-    updateSelectInput(session, "cpass_id_select", choices = unique(processed_data()$id))
-    
-    symptom_cols <- names(processed_data())
-    default_exclude <- c("id", "cyclenum", "menses", "scaled_cycleday", 
-                         "scaled_cycleday_impute", "scaled_cycleday_ov", 
-                         "scaled_cycleday_imp_ov", "ovtoday", "forwardcount", "mcyclength")
-    symptom_choices <- setdiff(symptom_cols, default_exclude)
-    
-    output$cpass_mapping_table <- renderUI({
-      mapping_ui <- lapply(symptom_choices, function(symptom) {
-        fluidRow(
-          column(6, tags$label(symptom)),
-          column(6, numericInput(inputId = paste0("drsp_map_", symptom), 
-                                 label = NULL, value = NA, min = 1, max = 24))
-        )
-      })
-      do.call(tagList, mapping_ui)
-    })
-  })
-  
-  # CPASS PROCESSING FUNCTION CALL
   observeEvent(input$run_cpass, {
     req(processed_data(), input$cpass_id_select)
     
-    # Build mapping from numericInputs
-    symptom_cols <- names(processed_data())
-    default_exclude <- c("id", "cyclenum", "menses", "scaled_cycleday", 
-                         "scaled_cycleday_impute", "scaled_cycleday_ov", 
-                         "scaled_cycleday_imp_ov", "ovtoday", "forwardcount", "mcyclength")
-    symptom_choices <- setdiff(symptom_cols, default_exclude)
+    # Get all possible symptom columns
+    all_symptoms <- names(processed_data())
+    all_symptoms <- setdiff(all_symptoms, c("id", "cyclenum", "menses", 
+                                            "scaled_cycleday", "scaled_cycleday_impute", 
+                                            "scaled_cycleday_ov", "scaled_cycleday_imp_ov"))
     
-    symptom_map <- purrr::map_chr(symptom_choices, ~ input[[paste0("drsp_map_", .x)]])
-    names(symptom_map) <- symptom_choices
-    symptom_map <- symptom_map[!is.na(symptom_map) & symptom_map != ""]  # Remove empty
-    symptom_map <- as.numeric(symptom_map)
-    names(symptom_map) <- names(symptom_map)
+    # Build symptom map: only include mappings where a valid number was entered
+    symptom_map <- list()
+    for (symptom in all_symptoms) {
+      map_value <- input[[paste0("map_", symptom)]]
+      if (!is.null(map_value) && !is.na(map_value) && map_value %in% 1:24) {
+        symptom_map[[symptom]] <- as.integer(map_value)
+      }
+    }
+    
+    # Check: at least one valid mapping
+    if (length(symptom_map) == 0) {
+      showNotification("Please map at least one symptom to a DRSP number (1–24).", type = "error")
+      return()
+    }
     
     # Run CPASS process
     tryCatch({
@@ -280,11 +264,10 @@ server <- function(input, output, session) {
         id_number = input$cpass_id_select
       )
       
-      output$cpass_plot <- renderPlot({
-        result
-      })
+      output$cpass_plot <- renderPlot({ result })
+      
     }, error = function(e) {
-      showNotification(paste("CPASS failed:", e$message), type = "error")
+      showNotification(paste("CPASS Error:", e$message), type = "error")
     })
   })
   
