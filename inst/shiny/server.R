@@ -235,9 +235,9 @@ server <- function(input, output, session) {
   }
   
   
-  updateSelectInput(session, "cpass_id_select", choices = unique(processed[[input$id_col]]))
+  updateSelectInput(session, "cpass_id_select", choices = unique(processed_data[[input$id_col]]))
   
-  symptom_candidates <- setdiff(names(processed), c(input$id_col, input$date_col, input$menses_col, input$ovtoday_col, "cyclenum", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov"))
+  symptom_candidates <- setdiff(names(processed_data), c(input$id_col, input$date_col, input$menses_col, input$ovtoday_col, "cyclenum", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov"))
   output$cpass_mapping_table <- renderUI({
     tagList(
       lapply(symptom_candidates, function(symptom) {
