@@ -43,20 +43,32 @@ ui <- fluidPage(
         ),
         
         # Individual Cycle Plot Tab
-        tabPanel("Individual Cycle Plot",
-                 sidebarPanel(
-                   selectInput("id_selected", "Select ID:", choices = NULL),
-                   checkboxGroupInput("symptom_cols_individual", "Select Symptoms:", choices = NULL),
-                   selectInput("plot_centering_individual", "Centering:", choices = c("menses", "ovulation")),
-                   checkboxInput("plot_impute_individual", "Include Imputed Data", value = TRUE),
-                   selectInput("individual_y_scale", "Y-Axis Scale:", choices = c("person-centered", "person-centered_roll", "raw", "roll")),
-                   numericInput("individual_rollingavg", "Rolling Day Average:", value = 5, min = 1, max = 10),
-                   actionButton("update_individual_plot", "Update Individual Plot", class = "btn-primary"),
-                 ),
-                 mainPanel(
-                   uiOutput("individual_cycle_plots")
-                 )
-        ),
+        tabPanel("Individual Cycle Plot Viewer"),
+          sidebarPanel(
+            selectInput("selected_id", "Select ID", choices = NULL),
+            checkboxGroupInput("selected_symptoms", "Select Symptoms", choices = NULL),
+            selectInput("centering_mode", "Centering", choices = c("menses", "ovulation"), selected = "menses"),
+            selectInput("y_scale_mode", "Y-axis Scale", choices = c("person-centered", "person-centered_roll", "raw", "roll")),
+            numericInput("rollingavg_input", "Rolling Day Average", value = 5, min = 1),
+            checkboxInput("include_impute_toggle", "Include Imputed Data", value = TRUE),
+            actionButton("run_individual_plot", "Generate Plots", class = "btn-primary")
+          ),
+          mainPanel(
+            uiOutput("individual_plot_output")
+          ),
+        tags$script(HTML("
+    Shiny.addCustomMessageHandler('toggleSummary', function(toggleId) {
+      $(toggleId).toggle();
+    });
+    Shiny.addCustomMessageHandler('initToggleScript', function(msg) {
+      $('.shiny-bound-output').each(function() {
+        const el = $(this).attr('id');
+        if (el && el.endsWith('_container')) {
+          $('#' + el).hide();
+        }
+      });
+    });
+  ")),
         
         # CPASS Tab Panel 
         tabPanel("CPASS"),
