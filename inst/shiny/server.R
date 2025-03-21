@@ -181,38 +181,70 @@ server <- function(input, output, session) {
     })
   })
   
+  observe({
+    req(processed_data())
+    updateSelectInput(session, "cpass_id_select", choices = unique(processed_data()$id))
+    updateCheckboxGroupInput(session, "cpass_symptom_vars", choices = names(processed_data()))
+  })
+  
+  output$cpass_mapping_inputs <- renderUI({
+    req(input$cpass_symptom_vars)
+    lapply(input$cpass_symptom_vars, function(symptom) {
+      numericInput(
+        inputId = paste0("map_", symptom),
+        label = paste("Map", symptom, "to DRSP item (1-24):"),
+        value = NA, min = 1, max = 24
+      )
+    })
+  })
+  
   observeEvent(input$run_cpass, {
-    req(processed_data(), input$cpass_id_select, input$cpass_symptom_vars, input$cpass_number_mapping)
+    req(processed_data(), input$cpass_id_select, input$cpass_symptom_vars)
     
-    symptom_map <- setNames(as.numeric(unlist(strsplit(input$cpass_number_mapping, ","))), input$cpass_symptom_vars)
+    # Build the named vector for symptom mapping
+    symptom_map <- setNames(
+      lapply(input$cpass_symptom_vars, function(symptom) {
+        input[[paste0("map_", symptom)]]
+      }),
+      input$cpass_symptom_vars
+    )
     
-    cpass_data <- processed_data() %>%
-      mutate(subject = id, cycle = cyclenum) %>%
-      group_by(id) %>%
-      mutate(day = {
-        inds <- which(menses == 1)
-        if (!length(inds)) return(rep(0, length(menses)))
-        num <- lapply(inds, function(i) {
-          num <- seq_along(menses) - i
-          num[num >= 0] <- num[num >= 0] + 1
-          num[num < -15 | num > 10] <- NA
-          num
-        })
-        do.call(coalesce, num)
-      }) %>%
-      ungroup() %>%
-      pivot_longer(
-        cols = all_of(input$cpass_symptom_vars),
-        names_to = "symptom",
-        values_to = "drsp_score"
-      ) %>%
-      mutate(item = recode(as.character(symptom), !!!symptom_map, .default = NA_real_)) %>%
-      filter(!is.na(cycle), !is.na(item))
+    df <- processed_data()
     
-    input1 <- cpass::as_cpass_data(cpass_data, sep_event = "menses")
-    result <- cpass::plot_subject_data_and_dx(data = input1 %>% filter(subject == input$cpass_id_select), save_as_pdf = FALSE)
-    
-    output$cpass_plot <- renderPlot({ result })
+    # Apply the cpass_process logic
+    try({
+      df <- df %>%
+        mutate(subject = id,
+               cycle = cyclenum) %>%
+        group_by(id) %>%
+        mutate(day = {
+          menses_vec <- menses
+          inds <- which(menses_vec == 1)
+          if (!length(inds)) return(rep(0, length(menses_vec)))
+          num <- lapply(inds, function(i) {
+            out <- seq_along(menses_vec) - i
+            out[out >= 0] <- out[out >= 0] + 1
+            out[out < -15 | out > 10] <- NA
+            out
+          })
+          do.call(coalesce, num)
+        }) %>%
+        ungroup()
+      
+      df_long <- df %>%
+        pivot_longer(cols = all_of(input$cpass_symptom_vars),
+                     names_to = "symptom", values_to = "drsp_score") %>%
+        mutate(item = recode(symptom, !!!symptom_map, .default = NA_real_)) %>%
+        filter(!is.na(cycle), !is.na(item))
+      
+      input1 <- cpass::as_cpass_data(df_long, sep_event = "menses")
+      filtered_data <- input1 %>% filter(subject == input$cpass_id_select)
+      
+      output$cpass_plot <- renderPlot({
+        plot_subject_data_and_dx(data = filtered_data, save_as_pdf = FALSE)
+      })
+      
+    }, silent = FALSE)
   })
   
   output$download_results <- downloadHandler(
