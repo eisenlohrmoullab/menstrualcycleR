@@ -165,8 +165,9 @@ server <- function(input, output, session) {
           )
           
           observeEvent(input[[toggle_button_id]], {
-            session$sendCustomMessage("toggleSummary", message = container_id)
+            shinyjs::toggle(id = paste0(summary_id, "_container"))
           })
+          
         })
         
         output_list[[length(output_list) + 1]] <- tagList(
@@ -184,9 +185,6 @@ server <- function(input, output, session) {
     do.call(tagList, output_list)
   })
   
-  session$onFlushed(function() {
-    session$sendCustomMessage(type = "initToggleScript", message = NULL)
-  })
   
   output$download_results <- downloadHandler(
     filename = function() { paste("processed_cycle_data_", Sys.Date(), ".csv", sep = "") },
