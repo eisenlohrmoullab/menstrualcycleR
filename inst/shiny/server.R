@@ -5,16 +5,6 @@ library(rlang)
 library(ggplot2)
 library(shinyjs)
 
-suppressMessages({
-  if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")
-  if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
-  if (!requireNamespace("geomnet", quietly = TRUE)) remotes::install_github("sctyner/geomnet")
-  if (!requireNamespace("HiddenSemiMarkov", quietly = TRUE)) devtools::install_github("lasy/HiddenSemiMarkov")
-  if (!requireNamespace("cpass", quietly = TRUE)) devtools::install_github("lasy/cpass", dependencies = TRUE)
-})
-
-library(cpass)
-
 server <- function(input, output, session) {
   user_data <- reactiveVal(NULL)
   
@@ -99,7 +89,6 @@ server <- function(input, output, session) {
   output$download_plot <- downloadHandler(
     filename = function() { paste("cycle_plot_", Sys.Date(), ".png", sep = "") },
     content = function(file) {
-      req(cycle_plot_data())
       ggsave(file, plot = cycle_plot_data(), device = "png", width = 8, height = 6, dpi = 300)
     }
   )
@@ -122,69 +111,63 @@ server <- function(input, output, session) {
       include_impute = input$include_impute_toggle,
       rollingavg = as.numeric(input$rollingavg_input)
     )
-
-  })
-  
-  output$individual_plot_output <- renderUI({
-    req(results)
-    output_list <- list()
     
-    for (symptom in names(results)) {
-      for (cycle_name in names(results[[symptom]])) {
-        plot_id <- paste0("plot_", symptom, "_", cycle_name)
-        summary_id <- paste0("summary_", symptom, "_", cycle_name)
-        container_id <- paste0("container_", summary_id)
-        toggle_button_id <- paste0("toggle_", summary_id)
-        download_summary_id <- paste0("download_", summary_id)
-        download_plot_id <- paste0("download_plot_", symptom, "_", cycle_name)
-        
-        local({
-          s <- symptom
-          c <- cycle_name
+    output$individual_plot_output <- renderUI({
+      output_list <- list()
+      
+      for (symptom in names(results)) {
+        for (cycle_name in names(results[[symptom]])) {
+          plot_id <- paste0("plot_", symptom, "_", cycle_name)
+          summary_id <- paste0("summary_", symptom, "_", cycle_name)
+          toggle_button_id <- paste0("toggle_", summary_id)
+          download_summary_id <- paste0("download_", summary_id)
+          download_plot_id <- paste0("download_plot_", symptom, "_", cycle_name)
           
-          output[[plot_id]] <- renderPlot({
-            results[[s]][[c]]$plot
+          local({
+            s <- symptom
+            c <- cycle_name
+            p_id <- plot_id
+            s_id <- summary_id
+            d_id <- download_summary_id
+            dp_id <- download_plot_id
+            
+            output[[p_id]] <- renderPlot({ results[[s]][[c]]$plot })
+            output[[s_id]] <- renderTable({ results[[s]][[c]]$summary })
+            
+            output[[d_id]] <- downloadHandler(
+              filename = function() paste0("summary_", s, "_", c, ".csv"),
+              content = function(file) {
+                write.csv(results[[s]][[c]]$summary, file, row.names = FALSE)
+              }
+            )
+            
+            output[[dp_id]] <- downloadHandler(
+              filename = function() paste0("plot_", s, "_", c, ".png"),
+              content = function(file) {
+                ggsave(file, plot = results[[s]][[c]]$plot, device = "png", width = 8, height = 6, dpi = 300)
+              }
+            )
+            
+            observeEvent(input[[toggle_button_id]], {
+              toggle(paste0(summary_id, "_container"))
+            })
           })
           
-          output[[summary_id]] <- renderTable({
-            results[[s]][[c]]$summary
-          })
-          
-          output[[download_summary_id]] <- downloadHandler(
-            filename = function() paste0("summary_", s, "_", c, ".csv"),
-            content = function(file) {
-              write.csv(results[[s]][[c]]$summary, file, row.names = FALSE)
-            }
+          output_list[[length(output_list) + 1]] <- tagList(
+            tags$h4(paste("Symptom:", symptom, "|", cycle_name)),
+            plotOutput(plot_id),
+            downloadButton(download_plot_id, "Download Plot"),
+            actionButton(toggle_button_id, "View Summary"),
+            hidden(div(id = paste0(summary_id, "_container"), tableOutput(summary_id))),
+            downloadButton(download_summary_id, "Download Summary"),
+            tags$hr()
           )
-          
-          output[[download_plot_id]] <- downloadHandler(
-            filename = function() paste0("plot_", s, "_", c, ".png"),
-            content = function(file) {
-              ggsave(file, plot = results[[s]][[c]]$plot, width = 8, height = 6, dpi = 300)
-            }
-          )
-          
-          observeEvent(input[[toggle_button_id]], {
-            shinyjs::toggle(id = paste0(summary_id, "_container"))
-          })
-          
-        })
-        
-        output_list[[length(output_list) + 1]] <- tagList(
-          tags$h4(paste("Symptom:", symptom, "|", cycle_name)),
-          plotOutput(plot_id),
-          downloadButton(download_plot_id, "Download Plot"),
-          actionButton(toggle_button_id, "View Summary"),
-          hidden(div(id = container_id, tableOutput(summary_id))),
-          downloadButton(download_summary_id, "Download Summary"),
-          tags$hr()
-        )
+        }
       }
-    }
-    
-    do.call(tagList, output_list)
+      
+      do.call(tagList, output_list)
+    })
   })
-  
   
   output$download_results <- downloadHandler(
     filename = function() { paste("processed_cycle_data_", Sys.Date(), ".csv", sep = "") },
