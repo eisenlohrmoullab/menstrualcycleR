@@ -234,10 +234,9 @@ server <- function(input, output, session) {
     return(result)
   }
   
+  updateSelectInput(session, "cpass_id_select", choices = unique(processed[[input$id_col]]))
   
-  updateSelectInput(session, "cpass_id_select", choices = unique(processed_data[[input$id_col]]))
-  
-  symptom_candidates <- setdiff(names(processed_data), c(input$id_col, input$date_col, input$menses_col, input$ovtoday_col, "cyclenum", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov"))
+  symptom_candidates <- setdiff(names(processed), c(input$id_col, input$date_col, input$menses_col, input$ovtoday_col, "cyclenum", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov"))
   output$cpass_mapping_table <- renderUI({
     tagList(
       lapply(symptom_candidates, function(symptom) {
@@ -248,37 +247,41 @@ server <- function(input, output, session) {
       })
     )
   })
+  
+  updateSelectInput(session, "selected_id", choices = unique(processed$id))
+  symptom_choices <- setdiff(names(processed), c("id", "cyclenum", "menses", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov"))
+  updateCheckboxGroupInput(session, "selected_symptoms", choices = symptom_choices)
+})
 
 observeEvent(input$run_cpass, {
   req(processed_data(), input$cpass_id_select)
   
-  # Dynamically gather the symptom map
-  isolate({
-    symptom_candidates <- names(input)[grepl("^map_", names(input))]
-    symptom_map <- setNames(
-      lapply(symptom_candidates, function(x) input[[x]]),
-      gsub("^map_", "", symptom_candidates)
+  symptom_candidates <- names(input)[grepl("^map_", names(input))]
+  symptom_map <- setNames(
+    lapply(symptom_candidates, function(x) input[[x]]),
+    gsub("^map_", "", symptom_candidates)
+  )
+  
+  symptom_map <- symptom_map[!is.na(unlist(symptom_map))]
+  
+  result <- tryCatch({
+    cpass_process(
+      dataframe = processed_data(),
+      symptom_map = unlist(symptom_map),
+      id_number = as.numeric(input$cpass_id_select)
     )
-    
-    # Remove empty entries
-    symptom_map <- symptom_map[!is.na(unlist(symptom_map))]
-    
-    result <- tryCatch({
-      cpass_process(
-        dataframe = processed_data(),
-        symptom_map = unlist(symptom_map),
-        id_number = as.numeric(input$cpass_id_select)
-      )
-    }, error = function(e) {
-      showNotification(paste("CPASS Error:", e$message), type = "error")
-      return(NULL)
-    })
-    
-    if (!is.null(result)) {
-      output$cpass_plot <- renderPlot({ result })
-    }
+  }, error = function(e) {
+    showNotification(paste("CPASS Error:", e$message), type = "error")
+    return(NULL)
   })
+  
+  if (!is.null(result)) {
+    output$cpass_plot <- renderPlot({ result })
+  }
 })
+
+  
+  
   output$download_results <- downloadHandler(
     filename = function() { paste("processed_cycle_data_", Sys.Date(), ".csv", sep = "") },
     content = function(file) { write.csv(processed_data(), file, row.names = FALSE) }
