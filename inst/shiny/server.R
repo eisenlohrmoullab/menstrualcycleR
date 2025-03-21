@@ -2,7 +2,8 @@ library(shiny)
 library(menstrualcycleR)
 library(dplyr)
 library(rlang)
-library(ggplot2)  # Ensure ggplot2 is loaded for saving plots
+library(ggplot2)
+
 suppressMessages({
   if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")
   if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
@@ -10,12 +11,10 @@ suppressMessages({
   if (!requireNamespace("HiddenSemiMarkov", quietly = TRUE)) devtools::install_github("lasy/HiddenSemiMarkov")
   if (!requireNamespace("cpass", quietly = TRUE)) devtools::install_github("lasy/cpass", dependencies = TRUE)
 })
+
 library(cpass)
 
-
 server <- function(input, output, session) {
-  
-  # Reactive Value for User Data
   user_data <- reactiveVal(NULL)
   
   observeEvent(input$load_data, {
@@ -23,49 +22,35 @@ server <- function(input, output, session) {
     data <- read.csv(input$file$datapath)
     user_data(data)
     
-    # Update Column Selectors
     updateSelectInput(session, "id_col", choices = names(data))
     updateSelectInput(session, "date_col", choices = names(data))
     updateSelectInput(session, "menses_col", choices = names(data))
     updateSelectInput(session, "ovtoday_col", choices = names(data))
     updateSelectInput(session, "symptom_col_plot", choices = names(data))
-    updateCheckboxGroupInput(session, "symptom_cols_individual", choices = names(data))
   })
   
-  # Update ID Selection Dropdown when id_col is chosen
   observeEvent(input$id_col, {
     req(user_data(), input$id_col)
-    updateSelectInput(session, "id_selected", 
-                      choices = unique(user_data()[[input$id_col]]), 
-                      selected = unique(user_data()[[input$id_col]])[1])
+    updateSelectInput(session, "selected_id", choices = unique(user_data()[[input$id_col]]))
   })
   
-  # Show Data Preview
-  output$data_preview <- renderTable({
-    req(user_data())
-    head(user_data())
-  })
+  output$data_preview <- renderTable({ req(user_data()); head(user_data()) })
   
-  # Reactive Processed Data
   processed_data <- reactiveVal(NULL)
   
   observeEvent(input$process_data, {
     req(user_data(), input$id_col, input$date_col, input$menses_col, input$ovtoday_col, input$lower_bound, input$upper_bound)
     
     data <- user_data()
+    id_col <- sym(input$id_col)
+    date_col <- sym(input$date_col)
+    menses_col <- sym(input$menses_col)
+    ovtoday_col <- sym(input$ovtoday_col)
     
-    # Convert input selections to symbols
-    id_col <- rlang::sym(input$id_col)
-    date_col <- rlang::sym(input$date_col)
-    menses_col <- rlang::sym(input$menses_col)
-    ovtoday_col <- rlang::sym(input$ovtoday_col)
-    
-    # Ensure date column is properly formatted
     if (!inherits(data[[input$date_col]], "Date")) {
       data[[input$date_col]] <- lubridate::ymd(data[[input$date_col]])
     }
     
-    # Apply menstrualcycleR functions **with correct syntax**
     processed <- data %>%
       menstrualcycleR::calculate_mcyclength(
         id = !!id_col,
@@ -85,34 +70,13 @@ server <- function(input, output, session) {
     processed_data(processed)
   })
   
-  # Display Processed Data
-  output$cycle_data <- renderTable({
-    req(processed_data())
-    head(processed_data())
-  })
+  output$cycle_data <- renderTable({ req(processed_data()); head(processed_data()) })
+  output$cycle_summary <- renderPrint({ req(processed_data()); summary(processed_data()) })
   
-  output$cycle_summary <- renderPrint({
-    req(processed_data())
-    summary(processed_data())
-  })
+  ovulation_summary <- reactive({ req(processed_data()); menstrualcycleR::summary_ovulation(processed_data()) })
+  output$ovulation_summary <- renderTable({ req(ovulation_summary()); ovulation_summary()$ovstatus_total })
+  output$ovulation_summary_id <- renderTable({ req(ovulation_summary()); ovulation_summary()$ovstatus_id })
   
-  # Ovulation Analysis
-  ovulation_summary <- reactive({
-    req(processed_data())
-    menstrualcycleR::summary_ovulation(processed_data())
-  })
-  
-  output$ovulation_summary <- renderTable({
-    req(ovulation_summary())
-    ovulation_summary()$ovstatus_total
-  })
-  
-  output$ovulation_summary_id <- renderTable({
-    req(ovulation_summary())
-    ovulation_summary()$ovstatus_id
-  })
-  
-  # **Cycle Plot**
   cycle_plot_data <- reactiveVal(NULL)
   
   observeEvent(input$update_plot, {
@@ -130,11 +94,7 @@ server <- function(input, output, session) {
     cycle_plot_data(plot_result$plot)
   })
   
-  output$cycle_plot <- renderPlot({
-    req(cycle_plot_data())
-    cycle_plot_data()
-  })
-  
+  output$cycle_plot <- renderPlot({ req(cycle_plot_data()); cycle_plot_data() })
   output$download_plot <- downloadHandler(
     filename = function() { paste("cycle_plot_", Sys.Date(), ".png", sep = "") },
     content = function(file) {
@@ -143,19 +103,17 @@ server <- function(input, output, session) {
     }
   )
   
-  # **Individual Cycle Plots**
-  observe({
-    req(processed_data)
+  observeEvent(processed_data(), {
     updateSelectInput(session, "selected_id", choices = unique(processed_data()$id))
-    updateCheckboxGroupInput(session, "selected_symptoms",
-                             choices = setdiff(names(processed_data), c("id", "cyclenum", "menses", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov")))
+    symptom_choices <- setdiff(names(processed_data()), c("id", "cyclenum", "menses", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov"))
+    updateCheckboxGroupInput(session, "selected_symptoms", choices = symptom_choices)
   })
   
   observeEvent(input$run_individual_plot, {
-    req(input$selected_id, input$selected_symptoms)
+    req(processed_data(), input$selected_id, input$selected_symptoms)
     
     results <- menstrualcycleR::cycle_plot_individual(
-      data = processed_data,
+      data = processed_data(),
       id = input$selected_id,
       symptoms = input$selected_symptoms,
       centering = input$centering_mode,
@@ -183,13 +141,8 @@ server <- function(input, output, session) {
             d_id <- download_summary_id
             dp_id <- download_plot_id
             
-            output[[p_id]] <- renderPlot({
-              results[[s]][[c]]$plot
-            })
-            
-            output[[s_id]] <- renderTable({
-              results[[s]][[c]]$summary
-            })
+            output[[p_id]] <- renderPlot({ results[[s]][[c]]$plot })
+            output[[s_id]] <- renderTable({ results[[s]][[c]]$summary })
             
             output[[d_id]] <- downloadHandler(
               filename = function() paste0("summary_", s, "_", c, ".csv"),
@@ -230,6 +183,9 @@ server <- function(input, output, session) {
   session$onFlushed(function() {
     session$sendCustomMessage(type = "initToggleScript", message = NULL)
   })
-
-   
+  
+  output$download_results <- downloadHandler(
+    filename = function() { paste("processed_cycle_data_", Sys.Date(), ".csv", sep = "") },
+    content = function(file) { write.csv(processed_data(), file, row.names = FALSE) }
+  )
 }
