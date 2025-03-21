@@ -64,9 +64,8 @@ ui <- fluidPage(
         tabPanel("CPASS",
                  sidebarPanel(
                    selectInput("cpass_id_select", "Select ID:", choices = NULL),
-                   checkboxGroupInput("cpass_symptom_vars", "Select Symptom Variables:", choices = NULL),
-                   textInput("cpass_number_mapping", "Enter Symptom Mapping (comma-separated numbers):",
-                             placeholder = "e.g., 1,4,7,9 for the selected symptoms"),
+                   helpText("Type a number (1–24) next to each symptom column to map it to a DRSP item number."),
+                   uiOutput("cpass_mapping_table"),
                    actionButton("run_cpass", "Run CPASS", class = "btn-primary")
                  ),
                  mainPanel(
