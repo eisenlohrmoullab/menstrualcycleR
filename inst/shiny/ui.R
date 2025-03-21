@@ -1,3 +1,4 @@
+library(shiny)
 library(shinyjs)
 
 ui <- fluidPage(
@@ -24,13 +25,10 @@ ui <- fluidPage(
         tabPanel("View Data", tableOutput("data_preview")),
         tabPanel("Processed Data", tableOutput("cycle_data")),
         tabPanel("Cycle Summary", verbatimTextOutput("cycle_summary")),
-        
-        # Ovulation Analysis
         tabPanel("Ovulation Analysis",
                  tableOutput("ovulation_summary"),
                  tableOutput("ovulation_summary_id")),
         
-        # Cycle Plot Tab
         tabPanel("Cycle Plot",
                  sidebarPanel(
                    selectInput("symptom_col_plot", "Select Symptom for Plot:", choices = NULL),
@@ -48,12 +46,11 @@ ui <- fluidPage(
                  )
         ),
         
-        # Individual Cycle Plot Tab
         tabPanel("Individual Cycle Plot Viewer",
                  sidebarPanel(
                    selectInput("selected_id", "Select ID", choices = NULL),
                    checkboxGroupInput("selected_symptoms", "Select Symptoms", choices = NULL),
-                   selectInput("centering_mode", "Centering", choices = c("menses", "ovulation"), selected = "menses"),
+                   selectInput("centering_mode", "Centering", choices = c("menses", "ovulation")),
                    selectInput("y_scale_mode", "Y-axis Scale", choices = c("person-centered", "person-centered_roll", "raw", "roll")),
                    numericInput("rollingavg_input", "Rolling Day Average", value = 5, min = 1),
                    checkboxInput("include_impute_toggle", "Include Imputed Data", value = TRUE),
@@ -64,10 +61,7 @@ ui <- fluidPage(
                  )
         ),
         
-        # CPASS Tab Panel 
         tabPanel("CPASS"),
-        
-        # Download Processed Data
         tabPanel("Download Data", downloadButton("download_results", "Download Processed Data"))
       )
     )
