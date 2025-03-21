@@ -235,46 +235,50 @@ server <- function(input, output, session) {
   }
   
   
-  observeEvent(input$run_cpass, {
-    req(processed_data(), input$cpass_id_select)
+  updateSelectInput(session, "cpass_id_select", choices = unique(processed[[input$id_col]]))
+  
+  symptom_candidates <- setdiff(names(processed), c(input$id_col, input$date_col, input$menses_col, input$ovtoday_col, "cyclenum", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov"))
+  output$cpass_mapping_table <- renderUI({
+    tagList(
+      lapply(symptom_candidates, function(symptom) {
+        numericInput(inputId = paste0("map_", symptom),
+                     label = paste0(symptom, ":"),
+                     value = NA,
+                     min = 1, max = 24, step = 1)
+      })
+    )
+  })
+
+observeEvent(input$run_cpass, {
+  req(processed_data(), input$cpass_id_select)
+  
+  # Dynamically gather the symptom map
+  isolate({
+    symptom_candidates <- names(input)[grepl("^map_", names(input))]
+    symptom_map <- setNames(
+      lapply(symptom_candidates, function(x) input[[x]]),
+      gsub("^map_", "", symptom_candidates)
+    )
     
-    # Get all possible symptom columns
-    all_symptoms <- names(processed_data())
-    all_symptoms <- setdiff(all_symptoms, c("id", "cyclenum", "menses", 
-                                            "scaled_cycleday", "scaled_cycleday_impute", 
-                                            "scaled_cycleday_ov", "scaled_cycleday_imp_ov"))
+    # Remove empty entries
+    symptom_map <- symptom_map[!is.na(unlist(symptom_map))]
     
-    # Build symptom map: only include mappings where a valid number was entered
-    symptom_map <- list()
-    for (symptom in all_symptoms) {
-      map_value <- input[[paste0("map_", symptom)]]
-      if (!is.null(map_value) && !is.na(map_value) && map_value %in% 1:24) {
-        symptom_map[[symptom]] <- as.integer(map_value)
-      }
-    }
-    
-    # Check: at least one valid mapping
-    if (length(symptom_map) == 0) {
-      showNotification("Please map at least one symptom to a DRSP number (1–24).", type = "error")
-      return()
-    }
-    
-    # Run CPASS process
-    tryCatch({
-      result <- cpass_process(
+    result <- tryCatch({
+      cpass_process(
         dataframe = processed_data(),
-        symptom_map = symptom_map,
-        id_number = input$cpass_id_select
+        symptom_map = unlist(symptom_map),
+        id_number = as.numeric(input$cpass_id_select)
       )
-      
-      output$cpass_plot <- renderPlot({ result })
-      
     }, error = function(e) {
       showNotification(paste("CPASS Error:", e$message), type = "error")
+      return(NULL)
     })
+    
+    if (!is.null(result)) {
+      output$cpass_plot <- renderPlot({ result })
+    }
   })
-  
-  
+})
   output$download_results <- downloadHandler(
     filename = function() { paste("processed_cycle_data_", Sys.Date(), ".csv", sep = "") },
     content = function(file) { write.csv(processed_data(), file, row.names = FALSE) }

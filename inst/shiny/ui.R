@@ -62,14 +62,16 @@ ui <- fluidPage(
         ),
         
         tabPanel("CPASS",
-                 sidebarPanel(
-                   selectInput("cpass_id_select", "Select ID:", choices = NULL),
-                   helpText("Type a number (1–24) next to each symptom column to map it to a DRSP item number."),
-                   uiOutput("cpass_mapping_table"),
-                   actionButton("run_cpass", "Run CPASS", class = "btn-primary")
-                 ),
-                 mainPanel(
-                   plotOutput("cpass_plot")
+                 sidebarLayout(
+                   sidebarPanel(
+                     selectInput("cpass_id_select", "Select ID:", choices = NULL),
+                     helpText("Type a number (1–24) next to each symptom column to map it to a DRSP item number."),
+                     uiOutput("cpass_mapping_table"),
+                     actionButton("run_cpass", "Run CPASS", class = "btn-primary")
+                   ),
+                   mainPanel(
+                     plotOutput("cpass_plot")
+                   )
                  )
         ),
         tabPanel("Download Data", downloadButton("download_results", "Download Processed Data"))
