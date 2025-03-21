@@ -3,6 +3,7 @@ library(menstrualcycleR)
 library(dplyr)
 library(rlang)
 library(ggplot2)
+library(shinyjs)
 
 suppressMessages({
   if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")
