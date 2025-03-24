@@ -264,9 +264,9 @@ server <- function(input, output, session) {
             column(6, tags$label(symptom)),
             column(6, selectInput(
               inputId = paste0("map_", symptom),
-              label = NULL,
-              choices = c("", 1:21),
-              selected = "",
+              label = paste0(symptom, ":"),
+              choices = c("", cpass_items),
+              selected = NULL,
               width = "100%"
             ))
           )
@@ -283,7 +283,7 @@ server <- function(input, output, session) {
       # Build symptom_map from dropdown selections
       symptom_inputs <- names(input)[grepl("^map_", names(input))]
       symptom_map <- setNames(
-        lapply(symptom_inputs, function(x) input[[x]]),
+        lapply(symptom_inputs, function(x) as.numeric(input[[x]])),
         gsub("^map_", "", symptom_inputs)
       )
       symptom_map <- symptom_map[!is.na(unlist(symptom_map))]
@@ -352,7 +352,7 @@ server <- function(input, output, session) {
 
 # CPASS item names and labels
 cpass_items <- setNames(
-  as.character(1:21),
+  as.character(1:24),
   c(
     "1 - Depressed, Blue",
     "2 - Hopelessness",
