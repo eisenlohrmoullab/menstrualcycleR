@@ -280,35 +280,16 @@ server <- function(input, output, session) {
     req(processed_data(), input$cpass_id_select)
     
     isolate({
-      # Get all input IDs that begin with map_
-      symptom_inputs <- grep("^map_", names(input), value = TRUE)
-      
-      # Create named vector: symptom -> item number
+      # Build symptom_map from dropdown selections
+      symptom_inputs <- names(input)[grepl("^map_", names(input))]
       symptom_map <- setNames(
-        lapply(symptom_inputs, function(id) {
-          val <- input[[id]]
-          if (val == "") return(NA) else return(as.numeric(val))
-        }),
+        lapply(symptom_inputs, function(x) input[[x]]),
         gsub("^map_", "", symptom_inputs)
       )
-      
-      # Remove unassigned symptoms
       symptom_map <- symptom_map[!is.na(unlist(symptom_map))]
       
-      # Check for duplicates
-      assigned_items <- unlist(symptom_map)
-      duplicated_items <- assigned_items[duplicated(assigned_items)]
-      
-      if (length(duplicated_items) > 0) {
-        showNotification(
-          paste("Error: Duplicate CPASS item assignments:", paste(unique(duplicated_items), collapse = ", ")),
-          type = "error"
-        )
-        return()
-      }
-      
-      # Run CPASS analysis
-      result_pdfpath <- tryCatch({
+      # Run CPASS and store plots
+      plots <- tryCatch({
         cpass_process(
           dataframe = processed_data(),
           symptom_map = unlist(symptom_map),
@@ -319,18 +300,26 @@ server <- function(input, output, session) {
         return(NULL)
       })
       
-      # Show result
-      if (!is.null(result_pdfpath)) {
-        # Expose to browser
-        shiny::addResourcePath("pdf_cpass", dirname(pdfpath))
-        output$cpass_pdf <- renderUI({
-          tags$iframe(style = "height:800px; width100%", src = paste0("pdf_cpass/", basename(pdfpath)))
+      # Display CPASS plots dynamically
+      output$cpass_plot_ui <- renderUI({
+        req(plots)
+        plot_uis <- lapply(names(plots), function(name) {
+          plot_id <- paste0("cpass_plot_", name)
+          local({
+            n <- name
+            pid <- plot_id
+            output[[pid]] <- renderPlot({ plots[[n]] })
           })
-      }
+          tagList(
+            tags$h4(name),
+            plotOutput(plot_id),
+            tags$hr()
+          )
+        })
+        do.call(tagList, plot_uis)
+      })
     })
   })
-  
-  
   
   output$download_results <- downloadHandler(
     filename = function() { paste("processed_cycle_data_", Sys.Date(), ".csv", sep = "") },
