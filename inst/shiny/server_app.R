@@ -320,15 +320,14 @@ server <- function(input, output, session) {
             )
           })
           
-          # UI layout for each plot 
-          fluidRow(column(
-            12,
-            tags$h4(paste("CPASS Plot:", name), style = "margin-top: 20px; margin-bottom: 10px;"),
+          # trying to space out plots using div()
+          div(
+            style = "margin-bottom: 50px;",  # space between plots
+            tags$h4(paste("CPASS Plot:", name), style = "margin-top: 20px;"),
             plotOutput(plot_id),
             tags$br(),
-            downloadButton(download_id, label = "Download Plot"),
-            tags$hr(style = "margin-top: 30px;")
-          ))
+            downloadButton(download_id, label = "Download Plot")
+          )
         })
         
         do.call(tagList, plot_uis)
