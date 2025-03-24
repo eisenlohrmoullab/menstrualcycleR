@@ -157,7 +157,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$run_individual_plot, {
     req(processed_data(), input$selected_id, input$selected_symptoms)
-    
+
     results <- menstrualcycleR::cycle_plot_individual(
       data = processed_data(),
       id = input$selected_id,
@@ -167,10 +167,10 @@ server <- function(input, output, session) {
       include_impute = input$include_impute_toggle,
       rollingavg = as.numeric(input$rollingavg_input)
     )
-    
+
     output$individual_plot_output <- renderUI({
       output_list <- list()
-      
+
       for (symptom in names(results)) {
         for (cycle_name in names(results[[symptom]])) {
           plot_id <- paste0("plot_", symptom, "_", cycle_name)
@@ -178,7 +178,7 @@ server <- function(input, output, session) {
           toggle_button_id <- paste0("toggle_", summary_id)
           download_summary_id <- paste0("download_", summary_id)
           download_plot_id <- paste0("download_plot_", symptom, "_", cycle_name)
-          
+
           local({
             s <- symptom
             c <- cycle_name
@@ -187,29 +187,29 @@ server <- function(input, output, session) {
             d_id <- download_summary_id
             dp_id <- download_plot_id
             toggle_id <- paste0(s_id, "_container")
-            
+
             output[[p_id]] <- renderPlot({ results[[s]][[c]]$plot })
             output[[s_id]] <- renderTable({ results[[s]][[c]]$summary })
-            
+
             output[[d_id]] <- downloadHandler(
               filename = function(){paste0("summary_", s, "_", c, ".csv")},
               content = function(file) {
                 write.csv(results[[s]][[c]]$summary, file, row.names = FALSE)
               }
             )
-            
+
             output[[dp_id]] <- downloadHandler(
               filename = function(){paste0("plot_", s, "_", c, ".png")},
               content = function(file) {
                 ggsave(file, plot = results[[s]][[c]]$plot, device = "png", width = 8, height = 6, dpi = 300)
               }
             )
-            
+
             observeEvent(input[[toggle_button_id]], {
               shinyjs::toggle(toggle_id)
             })
-          }) #closes local 
-          
+          }) #closes local
+
           output_list[[length(output_list) + 1]] <- tagList(
             tags$h4(paste("Symptom:", symptom, "|", cycle_name)),
             plotOutput(plot_id),
@@ -219,15 +219,14 @@ server <- function(input, output, session) {
             downloadButton(download_summary_id, "Download Summary"),
             tags$hr()
           )
-        } #closes cycle name in names 
+        } #closes cycle name in names
       } #closes symptom in names
-      
+
       do.call(tagList, output_list)
     }) # closes render UI
   }) # closes input$run_individual_plot observer
-  
-  
-  observeEvent(processed_data(), { #unmatched parentheses error
+
+  observeEvent(processed_data(), {
     req(processed_data())
     req(input$id_col)
     
@@ -263,6 +262,7 @@ server <- function(input, output, session) {
       )
     })
   })
+  
   
   observeEvent(input$run_cpass, {
     req(processed_data(), input$cpass_id_select)
