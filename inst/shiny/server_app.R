@@ -300,19 +300,28 @@ server <- function(input, output, session) {
         return(NULL)
       })
       
-      # Display CPASS plots dynamically
+      # Display CPASS plots dynamically with download buttons 
       output$cpass_plot_ui <- renderUI({
         req(plots)
         plot_uis <- lapply(names(plots), function(name) {
           plot_id <- paste0("cpass_plot_", name)
+          download_id <- paste0("download_plot_", name)
           local({
             n <- name
             pid <- plot_id
-            output[[pid]] <- renderPlot({ plots[[n]] })
+            output[[pid]] <- renderPlot({ plots[[n]] }, height = 700)
+            
+            output[[download_id]] <- downloadHandler(
+              filename = function() paste0("cpass_plot", n, "_", Sys.Date(), ".png"), 
+              content = function(file){
+                ggplot2::ggsave(file, plot = plots[[n]], device = "png", width = 8, height = 10, dpi = 300)
+              }
+            )
           })
           tagList(
             tags$h4(name),
             plotOutput(plot_id),
+            downloadButton(download_id, label = paste("Download", name, "Plot")),
             tags$hr()
           )
         })
