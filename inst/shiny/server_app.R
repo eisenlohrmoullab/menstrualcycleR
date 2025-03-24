@@ -190,7 +190,7 @@ server <- function(input, output, session) {
       data = processed_data(),
       symptom = input$symptom_col_plot,
       centering = input$plot_centering,
-      include_impute = input$plot_impute,
+      include_impute = isTRUE(input$plot_impute),
       y_scale = input$plot_y_scale,
       rollingavg = as.numeric(input$rollingavg)
     )
