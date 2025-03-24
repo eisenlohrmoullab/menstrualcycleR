@@ -14,50 +14,7 @@ suppressMessages({
 })
 
 library(cpass)
-utils::globalVariables(c("cyclenum", "menses", "symptom", "item", "subject"))
 
-cpass_process <- function(dataframe, symptom_map, id_number) {
-  library(dplyr)
-  library(tidyr)
-  library(cpass)
-  
-  dataframe <- dataframe %>%
-    mutate(subject = id, cycle = cyclenum)
-  
-  cycleCount <- function(x) {
-    inds <- which(x == 1)
-    if (!length(inds)) return(0)
-    num <- lapply(inds, function(i) {
-      num <- seq_along(x) - i
-      num[num >= 0] <- num[num >= 0] + 1
-      num[num < -15 | num > 10] <- NA
-      num
-    })
-    do.call(coalesce, num)
-  }
-  
-  dataframe <- dataframe %>%
-    group_by(id) %>%
-    mutate(day = cycleCount(menses)) %>%
-    ungroup()
-  
-  df1_long <- dataframe %>%
-    pivot_longer(
-      cols = all_of(names(symptom_map)),
-      names_to = "symptom",
-      values_to = "drsp_score"
-    )
-  
-  df1_long <- df1_long %>%
-    mutate(item = recode(as.character(symptom), !!!symptom_map, .default = NA_real_)) %>%
-    filter(!is.na(cycle), !is.na(item))
-  
-  input1 <- as_cpass_data(df1_long, sep_event = "menses")
-  
-  result <- plot_subject_data_and_dx(data = input1 %>% filter(subject == id_number), save_as_pdf = FALSE)
-  
-  return(result)
-}
 
 
 
@@ -151,11 +108,7 @@ server <- function(input, output, session) {
   
   observeEvent(processed_data(), {
     updateSelectInput(session, "selected_id", choices = unique(processed_data()$id))
-    symptom_choices <- setdiff(
-      names(processed_data()),
-      c("id", "cyclenum", "menses", "scaled_cycleday", "scaled_cycleday_impute",
-        "scaled_cycleday_ov", "scaled_cycleday_imp_ov")
-    )
+    symptom_choices <- setdiff(names(processed_data()), c("id", "cyclenum", "menses", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov"))
     updateCheckboxGroupInput(session, "selected_symptoms", choices = symptom_choices)
   })
   
@@ -196,14 +149,14 @@ server <- function(input, output, session) {
             output[[s_id]] <- renderTable({ results[[s]][[c]]$summary })
             
             output[[d_id]] <- downloadHandler(
-              filename = function() { paste0("summary_", s, "_", c, ".csv") },
+              filename = function() paste0("summary_", s, "_", c, ".csv"),
               content = function(file) {
                 write.csv(results[[s]][[c]]$summary, file, row.names = FALSE)
               }
             )
             
             output[[dp_id]] <- downloadHandler(
-              filename = function() { paste0("plot_", s, "_", c, ".png") },
+              filename = function() paste0("plot_", s, "_", c, ".png"),
               content = function(file) {
                 ggsave(file, plot = results[[s]][[c]]$plot, device = "png", width = 8, height = 6, dpi = 300)
               }
@@ -212,7 +165,7 @@ server <- function(input, output, session) {
             observeEvent(input[[toggle_button_id]], {
               shinyjs::toggle(toggle_id)
             })
-          }) # closes local
+          })
           
           output_list[[length(output_list) + 1]] <- tagList(
             tags$h4(paste("Symptom:", symptom, "|", cycle_name)),
@@ -223,14 +176,15 @@ server <- function(input, output, session) {
             downloadButton(download_summary_id, "Download Summary"),
             tags$hr()
           )
-        } # closes cycle_name loop
-      } # closes symptom loop
+        }
+      }
       
       do.call(tagList, output_list)
-    }) # closes renderUI
-  }) # closes input$run_individual_plot observer
+    })
+  })
   
-
+  
+  
   
   
   output$download_results <- downloadHandler(
