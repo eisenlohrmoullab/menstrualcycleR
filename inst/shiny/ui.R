@@ -31,9 +31,13 @@ ui <- fluidPage(
                    ),
                    mainPanel(
                      tags$h4("Symptom Coverage by ID"),
+                     downloadButton("download_cyclecheck_by_id", "Download by ID Table"),
                      tableOutput("cyclecheck_by_id"),
+                     
                      tags$h4("Overall Symptom Coverage"),
+                     downloadButton("download_cyclecheck_overall", "Download Overall Table"),
                      tableOutput("cyclecheck_overall"),
+                     
                      tags$h4("Symptom Data Plots"),
                      uiOutput("cyclecheck_plots")
                    )
