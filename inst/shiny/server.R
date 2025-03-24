@@ -229,18 +229,18 @@ server <- function(input, output, session) {
   observeEvent(processed_data(), {
     req(processed_data())
     req(input$id_col)
-    
+
     updateSelectInput(session, "cpass_id_select", choices = unique(processed_data()[[input$id_col]]))
-    
+
     req(input$id_col, input$date_col, input$menses_col, input$ovtoday_col)
-    
+
     symptom_candidates <- setdiff(
       names(processed_data()),
       c(input$id_col, input$date_col, input$menses_col, input$ovtoday_col,
         "cyclenum", "scaled_cycleday", "scaled_cycleday_impute",
         "scaled_cycleday_ov", "scaled_cycleday_imp_ov", "menses", "ovtoday")
     )
-    
+
     drsp_labels <- c(
       "1-Depressed", "2-Hopeless", "3-Worthless/Guilty", "4-Anxious", "5-Mood Swings",
       "6-Rejection Sensitivity", "7-Anger/Irritability", "8-Interpersonal Conflict", "9-Anhedonia",
@@ -248,9 +248,9 @@ server <- function(input, output, session) {
       "14-Hypersomnia", "15-Insomnia", "16-Overwhelm", "17-Out of control", "18-Breast Tenderness",
       "19-Bloated/weight gain", "20-Headache", "21-Joint/Muscle Pain"
     )
-    
+
     symptom_options <- setNames(as.character(1:21), drsp_labels)
-    
+
     output$cpass_mapping_table <- renderUI({
       tagList(
         lapply(symptom_candidates, function(symptom) {
@@ -264,7 +264,7 @@ server <- function(input, output, session) {
       )
     })
   })
-  
+
   
   observeEvent(input$run_cpass, {
     req(processed_data(), input$cpass_id_select)
