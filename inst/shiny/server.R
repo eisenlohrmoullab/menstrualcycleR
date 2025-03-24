@@ -151,13 +151,17 @@ server <- function(input, output, session) {
   
   observeEvent(processed_data(), {
     updateSelectInput(session, "selected_id", choices = unique(processed_data()$id))
-    symptom_choices <- setdiff(names(processed_data()), c("id", "cyclenum", "menses", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov"))
+    symptom_choices <- setdiff(
+      names(processed_data()),
+      c("id", "cyclenum", "menses", "scaled_cycleday", "scaled_cycleday_impute",
+        "scaled_cycleday_ov", "scaled_cycleday_imp_ov")
+    )
     updateCheckboxGroupInput(session, "selected_symptoms", choices = symptom_choices)
   })
   
   observeEvent(input$run_individual_plot, {
     req(processed_data(), input$selected_id, input$selected_symptoms)
-
+    
     results <- menstrualcycleR::cycle_plot_individual(
       data = processed_data(),
       id = input$selected_id,
@@ -167,10 +171,10 @@ server <- function(input, output, session) {
       include_impute = input$include_impute_toggle,
       rollingavg = as.numeric(input$rollingavg_input)
     )
-
+    
     output$individual_plot_output <- renderUI({
       output_list <- list()
-
+      
       for (symptom in names(results)) {
         for (cycle_name in names(results[[symptom]])) {
           plot_id <- paste0("plot_", symptom, "_", cycle_name)
@@ -178,7 +182,7 @@ server <- function(input, output, session) {
           toggle_button_id <- paste0("toggle_", summary_id)
           download_summary_id <- paste0("download_", summary_id)
           download_plot_id <- paste0("download_plot_", symptom, "_", cycle_name)
-
+          
           local({
             s <- symptom
             c <- cycle_name
@@ -187,29 +191,29 @@ server <- function(input, output, session) {
             d_id <- download_summary_id
             dp_id <- download_plot_id
             toggle_id <- paste0(s_id, "_container")
-
+            
             output[[p_id]] <- renderPlot({ results[[s]][[c]]$plot })
             output[[s_id]] <- renderTable({ results[[s]][[c]]$summary })
-
+            
             output[[d_id]] <- downloadHandler(
-              filename = function(){paste0("summary_", s, "_", c, ".csv")},
+              filename = function() { paste0("summary_", s, "_", c, ".csv") },
               content = function(file) {
                 write.csv(results[[s]][[c]]$summary, file, row.names = FALSE)
               }
             )
-
+            
             output[[dp_id]] <- downloadHandler(
-              filename = function(){paste0("plot_", s, "_", c, ".png")},
+              filename = function() { paste0("plot_", s, "_", c, ".png") },
               content = function(file) {
                 ggsave(file, plot = results[[s]][[c]]$plot, device = "png", width = 8, height = 6, dpi = 300)
               }
             )
-
+            
             observeEvent(input[[toggle_button_id]], {
               shinyjs::toggle(toggle_id)
             })
-          }) #closes local
-
+          }) # closes local
+          
           output_list[[length(output_list) + 1]] <- tagList(
             tags$h4(paste("Symptom:", symptom, "|", cycle_name)),
             plotOutput(plot_id),
@@ -219,84 +223,14 @@ server <- function(input, output, session) {
             downloadButton(download_summary_id, "Download Summary"),
             tags$hr()
           )
-        } #closes cycle name in names
-      } #closes symptom in names
-
+        } # closes cycle_name loop
+      } # closes symptom loop
+      
       do.call(tagList, output_list)
-<<<<<<< HEAD
-    }) # closes render UI
+    }) # closes renderUI
   }) # closes input$run_individual_plot observer
-
-  observeEvent(processed_data(), {
-    req(processed_data())
-    req(input$id_col)
-
-    updateSelectInput(session, "cpass_id_select", choices = unique(processed_data()[[input$id_col]]))
-
-    req(input$id_col, input$date_col, input$menses_col, input$ovtoday_col)
-
-    symptom_candidates <- setdiff(
-      names(processed_data()),
-      c(input$id_col, input$date_col, input$menses_col, input$ovtoday_col,
-        "cyclenum", "scaled_cycleday", "scaled_cycleday_impute",
-        "scaled_cycleday_ov", "scaled_cycleday_imp_ov", "menses", "ovtoday")
-    )
-
-    drsp_labels <- c(
-      "1-Depressed", "2-Hopeless", "3-Worthless/Guilty", "4-Anxious", "5-Mood Swings",
-      "6-Rejection Sensitivity", "7-Anger/Irritability", "8-Interpersonal Conflict", "9-Anhedonia",
-      "10-Difficulty Concentrating", "11-Low Energy", "12-Overeating", "13-Food Cravings",
-      "14-Hypersomnia", "15-Insomnia", "16-Overwhelm", "17-Out of control", "18-Breast Tenderness",
-      "19-Bloated/weight gain", "20-Headache", "21-Joint/Muscle Pain"
-    )
-
-    symptom_options <- setNames(as.character(1:21), drsp_labels)
-
-    output$cpass_mapping_table <- renderUI({
-      tagList(
-        lapply(symptom_candidates, function(symptom) {
-          selectInput(
-            inputId = paste0("map_", symptom),
-            label = paste0(symptom, ":"),
-            choices = c("" = "", symptom_options),
-            selected = ""
-          )
-        })
-      )
-    })
-  })
-
   
-  observeEvent(input$run_cpass, {
-    req(processed_data(), input$cpass_id_select)
-    
-    symptom_inputs <- names(input)[grepl("^map_", names(input))]
-    selected_map <- lapply(symptom_inputs, function(x) input[[x]])
-    names(selected_map) <- gsub("^map_", "", symptom_inputs)
-    selected_map <- selected_map[!vapply(selected_map, function(x) is.null(x) || x == "", logical(1))]
-    numeric_map <- setNames(as.numeric(selected_map), names(selected_map))
-    
-    result <- tryCatch({
-      cpass_process(
-        dataframe = processed_data(),
-        symptom_map = numeric_map,
-        id_number = as.numeric(input$cpass_id_select)
-      )
-    }, error = function(e) {
-      showNotification(paste("CPASS Error:", e$message), type = "error")
-      return(NULL)
-    })
-    
-    if (!is.null(result)) {
-      output$cpass_plot <- renderPlot({ print(result) })
-    }
-  })
-=======
-    })
-  })
-  
-  
->>>>>>> parent of 2b2bdec (adding cpass code back into server)
+
   
   
   output$download_results <- downloadHandler(
