@@ -320,7 +320,7 @@ server <- function(input, output, session) {
             
             # Download handler
             output[[did]] <- downloadHandler(
-              filename = function() paste0("cpass_plot_", n, "_", Sys.Date(), ".png"),
+              filename = function() paste0("cpass_plot_", n, "_", Sys.Date(), ".jpeg"),
               content = function(file) {
                 ggsave(file, plot = plots[[n]], width = 6, height = 9, dpi = 300)
               }
