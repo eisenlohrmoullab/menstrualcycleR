@@ -184,6 +184,56 @@ server <- function(input, output, session) {
   })
   
   
+  observeEvent(processed_data(), {
+    req(processed_data())
+    updateSelectInput(session, "cpass_id_select", choices = unique(processed_data()[[input$id_col]]))
+    
+    symptom_candidates <- setdiff(names(processed_data()), c(input$id_col, input$date_col, input$menses_col, input$ovtoday_col, "cyclenum", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov"))
+    
+    symptom_options <- setNames(as.character(1:21), c(
+      "1-Depressed", "2-Hopeless", "3-Worthless/Guilty", "4-Anxious", "5-Mood Swings",
+      "6-Rejection Sensitivity", "7-Anger/Irritability", "8-Interpersonal Conflict", "9-Anhedonia",
+      "10-Difficulty Concentrating", "11-Low Energy", "12-Overeating", "13-Food Cravings",
+      "14-Hypersomnia", "15-Insomnia", "16-Overwhelm", "17-Out of control", "18-Breast Tenderness",
+      "19-Bloated/weight gain", "20-Headache", "21-Joint/Muscle Pain"
+    ))
+    
+    output$cpass_mapping_table <- renderUI({
+      tagList(
+        lapply(symptom_candidates, function(symptom) {
+          selectInput(inputId = paste0("map_", symptom),
+                      label = paste0(symptom, ":"),
+                      choices = c("" = "", symptom_options),
+                      selected = "")
+        })
+      )
+    })
+  })
+  
+  observeEvent(input$run_cpass, {
+    req(processed_data(), input$cpass_id_select)
+    
+    symptom_inputs <- names(input)[grepl("^map_", names(input))]
+    selected_map <- lapply(symptom_inputs, function(x) input[[x]])
+    names(selected_map) <- gsub("^map_", "", symptom_inputs)
+    selected_map <- selected_map[!vapply(selected_map, function(x) is.null(x) || x == "", logical(1))]
+    numeric_map <- setNames(as.numeric(selected_map), names(selected_map))
+    
+    result <- tryCatch({
+      cpass_process(
+        dataframe = processed_data(),
+        symptom_map = numeric_map,
+        id_number = as.numeric(input$cpass_id_select)
+      )
+    }, error = function(e) {
+      showNotification(paste("CPASS Error:", e$message), type = "error")
+      return(NULL)
+    })
+    
+    if (!is.null(result)) {
+      output$cpass_plot <- renderPlot({ result })
+    }
+  })
   
   
   
@@ -192,3 +242,47 @@ server <- function(input, output, session) {
     content = function(file) { write.csv(processed_data(), file, row.names = FALSE) }
   )
 }
+
+cpass_process <- function(dataframe, symptom_map, id_number) {
+  library(dplyr)
+  library(tidyr)
+  library(cpass)
+  
+  dataframe <- dataframe %>%
+    mutate(subject = id, cycle = cyclenum)
+  
+  cycleCount <- function(x) {
+    inds <- which(x == 1)
+    if (!length(inds)) return(0)
+    num <- lapply(inds, function(i) {
+      num <- seq_along(x) - i
+      num[num >= 0] <- num[num >= 0] + 1
+      num[num < -15 | num > 10] <- NA
+      num
+    })
+    do.call(coalesce, num)
+  }
+  
+  dataframe <- dataframe %>%
+    group_by(id) %>%
+    mutate(day = cycleCount(menses)) %>%
+    ungroup()
+  
+  df1_long <- dataframe %>%
+    pivot_longer(
+      cols = all_of(names(symptom_map)),
+      names_to = "symptom",
+      values_to = "drsp_score"
+    )
+  
+  df1_long <- df1_long %>%
+    mutate(item = recode(as.character(symptom), !!!symptom_map, .default = NA_real_)) %>%
+    filter(!is.na(cycle), !is.na(item))
+  
+  input1 <- as_cpass_data(df1_long, sep_event = "menses")
+  
+  result <- plot_subject_data_and_dx(data = input1 %>% filter(subject == id_number), save_as_pdf = FALSE)
+  
+  return(result)
+}
+

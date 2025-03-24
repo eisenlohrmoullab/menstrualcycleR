@@ -61,11 +61,14 @@ ui <- fluidPage(
                  )
         ),
         
+        # Add this within your tabsetPanel() in the mainPanel section
+        
         tabPanel("CPASS",
                  sidebarLayout(
                    sidebarPanel(
-                     selectInput("cpass_id_select", "Select ID:", choices = NULL),
-                     helpText("Type a number (1–24) next to each symptom column to map it to a DRSP item number."),
+                     selectInput("cpass_id_select", "Select ID for CPASS Analysis:", choices = NULL),
+                     hr(),
+                     h4("Map Symptom Columns to DRSP Items"),
                      uiOutput("cpass_mapping_table"),
                      actionButton("run_cpass", "Run CPASS", class = "btn-primary")
                    ),
@@ -74,6 +77,7 @@ ui <- fluidPage(
                    )
                  )
         ),
+        
         tabPanel("Download Data", downloadButton("download_results", "Download Processed Data"))
       )
     )
