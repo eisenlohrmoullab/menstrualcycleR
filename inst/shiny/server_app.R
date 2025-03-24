@@ -313,12 +313,12 @@ server <- function(input, output, session) {
             pid <- plot_id
             did <- download_id
             
-            # Render plot with vertical aspect
+            # Render each plot
             output[[pid]] <- renderPlot({
               plots[[n]]
-            }, height = 600, width = 500)  # More vertical
+            }, height = 700, width = 500)  # More vertical
             
-            # Add download handler
+            # Download handler for plot
             output[[did]] <- downloadHandler(
               filename = function() paste0("cpass_plot_", n, "_", Sys.Date(), ".png"),
               content = function(file) {
@@ -327,24 +327,18 @@ server <- function(input, output, session) {
             )
           })
           
-          # UI layout using flex column
-          div(
-            style = "margin-bottom: 40px; padding: 10px; border-bottom: 1px solid #ccc;",
-            tags$h4(paste("CPASS Plot:", name), style = "margin-bottom: 10px;"),
-            div(
-              plotOutput(plot_id),
-              style = "margin-bottom: 15px;"
-            ),
-            div(
-              downloadButton(download_id, label = "Download Plot"),
-              style = "margin-bottom: 30px;"
-            )
+          # Return a nicely spaced UI container per plot
+          wellPanel(
+            style = "margin-bottom: 40px;",
+            tags$h4(paste("CPASS Plot:", name), style = "margin-bottom: 15px;"),
+            plotOutput(plot_id),
+            br(),
+            downloadButton(download_id, "Download Plot")
           )
         })
         
         do.call(tagList, plot_uis)
       })
-      
       
     })
   })
