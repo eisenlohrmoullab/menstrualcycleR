@@ -312,9 +312,9 @@ server <- function(input, output, session) {
             output[[pid]] <- renderPlot({ plots[[n]] }, height = 700)
             
             output[[download_id]] <- downloadHandler(
-              filename = function() paste0("cpass_plot", n, "_", Sys.Date(), ".png"), 
+              filename = function() paste0("cpass_plot", n, "_", Sys.Date(), ".jpeg"), 
               content = function(file){
-                ggplot2::ggsave(file, plot = plots[[n]], device = "png", width = 8, height = 10, dpi = 300)
+                ggplot2::ggsave(file, plot = plots[[n]], device = "jpeg", width = 8, height = 10, dpi = 300)
               }
             )
           })
