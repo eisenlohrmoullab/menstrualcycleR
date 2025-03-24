@@ -82,7 +82,7 @@ server <- function(input, output, session) {
     symptom_choices <- setdiff(
       names(processed_data()),
       c("id", "cyclenum", "menses", "scaled_cycleday", "scaled_cycleday_impute", 
-        "scaled_cycleday_ov", "scaled_cycleday_imp_ov", "ovtoday")
+        "scaled_cycleday_ov", "scaled_cycleday_imp_ov", "ovtoday", "m2mcount", "ovtoday_impute", "daterated", "cyclenum")
     )
     updateCheckboxGroupInput(session, "cyclecheck_symptoms", choices = symptom_choices)
   })
