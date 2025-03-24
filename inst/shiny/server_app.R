@@ -218,12 +218,15 @@ server <- function(input, output, session) {
     
     input1 <- cpass::as_cpass_data(df1_long, sep_event = "menses")
     
+    pdfpath <- tempfile(fileext = ".pdf")
+    
     result <- cpass::plot_subject_data_and_dx(
       data = input1 %>% filter(subject == id_number),
-      save_as_pdf = FALSE
+      save_as_pdf = T, 
+      pdf_path = pdfpath
     )
     
-    return(result)
+    return(pdfpath)
   }
   
   # ---- CPASS UI Rendering for Symptom Map ----
@@ -304,7 +307,7 @@ server <- function(input, output, session) {
       }
       
       # Run CPASS analysis
-      result <- tryCatch({
+      result_pdfpath <- tryCatch({
         cpass_process(
           dataframe = processed_data(),
           symptom_map = unlist(symptom_map),
@@ -316,8 +319,10 @@ server <- function(input, output, session) {
       })
       
       # Show result
-      if (!is.null(result)) {
-        output$cpass_plot <- renderPlot({ result })
+      if (!is.null(result_pdfpath)) {
+        output$cpass_pdf <- renderUI({
+          tags$iframe(style = "height:800px; width100%", src = result_pdfpath)
+          })
       }
     })
   })
