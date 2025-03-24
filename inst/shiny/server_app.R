@@ -74,6 +74,93 @@ server <- function(input, output, session) {
     processed_data(processed)
   })
   
+
+  # === CYCLE DATA CHECK TAB ===
+  
+  # Update available symptom checkboxes when processed_data is updated
+  observeEvent(processed_data(), {
+    symptom_choices <- setdiff(
+      names(processed_data()),
+      c("id", "cyclenum", "menses", "scaled_cycleday", "scaled_cycleday_impute", 
+        "scaled_cycleday_ov", "scaled_cycleday_imp_ov", "ovtoday")
+    )
+    updateCheckboxGroupInput(session, "cyclecheck_symptoms", choices = symptom_choices)
+  })
+  
+  # Reactive to store results of cycledata_check
+  cyclecheck_result <- reactiveVal(NULL)
+  
+  # Run cycledata_check when button clicked
+  observeEvent(input$run_cyclecheck, {
+    req(processed_data(), input$cyclecheck_symptoms)
+    
+    result <- menstrualcycleR::cycledata_check(
+      data = processed_data(),
+      symptom_columns = input$cyclecheck_symptoms
+    )
+    
+    cyclecheck_result(result)
+  })
+  
+  # Render summary tables
+  output$cyclecheck_by_id <- renderTable({
+    req(cyclecheck_result())
+    cyclecheck_result()$by_id
+  })
+  
+  output$cyclecheck_overall <- renderTable({
+    req(cyclecheck_result())
+    cyclecheck_result()$overall
+  })
+  
+  # Download handlers for tables
+  output$download_cyclecheck_by_id <- downloadHandler(
+    filename = function() paste0("cyclecheck_by_id_", Sys.Date(), ".csv"),
+    content = function(file) {
+      write.csv(cyclecheck_result()$by_id, file, row.names = FALSE)
+    }
+  )
+  
+  output$download_cyclecheck_overall <- downloadHandler(
+    filename = function() paste0("cyclecheck_overall_", Sys.Date(), ".csv"),
+    content = function(file) {
+      write.csv(cyclecheck_result()$overall, file, row.names = FALSE)
+    }
+  )
+  
+  # Dynamic rendering and downloading of plots
+  output$cyclecheck_plots <- renderUI({
+    req(cyclecheck_result())
+    plots <- cyclecheck_result()$data_symptom_plots
+    
+    plot_outputs <- lapply(names(plots), function(symptom_name) {
+      plot_id <- paste0("cycleplot_", symptom_name)
+      download_id <- paste0("download_", plot_id)
+      
+      # Assign outputs dynamically
+      local({
+        s <- symptom_name
+        output[[plot_id]] <- renderPlot({ plots[[s]] })
+        
+        output[[download_id]] <- downloadHandler(
+          filename = function() paste0("cyclecheck_plot_", s, "_", Sys.Date(), ".png"),
+          content = function(file) {
+            ggsave(file, plot = plots[[s]], device = "png", width = 8, height = 7, dpi = 300)
+          }
+        )
+      })
+      
+      tagList(
+        tags$h5(symptom_name),
+        plotOutput(plot_id),
+        downloadButton(download_id, "Download Plot"),
+        tags$hr()
+      )
+    })
+    
+    do.call(tagList, plot_outputs)
+  })
+  
   
   
   ovulation_summary <- reactive({ req(processed_data()); menstrualcycleR::summary_ovulation(processed_data()) })
