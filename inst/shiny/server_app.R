@@ -226,7 +226,35 @@ server <- function(input, output, session) {
     return(result)
   }
   
-  
+  # ---- CPASS UI Rendering for Symptom Map ----
+  observeEvent(processed_data(), {
+    req(processed_data())
+    
+    updateSelectInput(session, "cpass_id_select", choices = unique(processed_data()$id))
+    
+    symptom_candidates <- setdiff(
+      names(processed_data()),
+      c(input$id_col, input$date_col, input$menses_col, input$ovtoday_col,
+        "cyclenum", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov")
+    )
+    
+    output$cpass_mapping_table <- renderUI({
+      tagList(
+        lapply(symptom_candidates, function(symptom) {
+          fluidRow(
+            column(6, tags$label(symptom)),
+            column(6, selectInput(
+              inputId = paste0("map_", symptom),
+              label = NULL,
+              choices = c("", 1:21),
+              selected = "",
+              width = "100%"
+            ))
+          )
+        })
+      )
+    })
+  })
   
   
   output$download_results <- downloadHandler(
