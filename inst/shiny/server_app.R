@@ -350,4 +350,34 @@ server <- function(input, output, session) {
   )
 }
 
+# CPASS item names and labels
+cpass_items <- setNames(
+  as.character(1:21),
+  c(
+    "1 - Depressed, Blue",
+    "2 - Hopelessness",
+    "3 - Worthlessness or Guilt",
+    "4 - Anxiety",
+    "5 - Mood Swings",
+    "6 - Rejection Sensitivity",
+    "7 - Anger or Irritability",
+    "8 - Interpersonal Conflict",
+    "9 - Loss of Interest",
+    "10 - Difficulty Concentrating",
+    "11 - Lethargy",
+    "12 - Change in Appetite/ Overeating",
+    "13 - Food Cravings",
+    "14 - Hypersomnia",
+    "15 - Insomnia",
+    "16 - Overwhelmed",
+    "17 - Out of Control",
+    "18 - Breast Tenderness",
+    "19 - Swelling, Bloating",
+    "20 - Headache",
+    "21 - Joint, Muscle Pain", 
+    "22 - Work Interference", 
+    "23 - Hobby Interference", 
+    "24 - Relationship Interference"
+  )
+)
 
