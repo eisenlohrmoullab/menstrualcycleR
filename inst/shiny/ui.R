@@ -23,8 +23,22 @@ ui <- fluidPage(
     mainPanel(
       tabsetPanel(
         tabPanel("View Data", tableOutput("data_preview")),
-        tabPanel("Processed Data", tableOutput("cycle_data")),
-        tabPanel("Cycle Summary", verbatimTextOutput("cycle_summary")),
+        tabPanel("Cycle Data Check",
+                 sidebarLayout(
+                   sidebarPanel(
+                     checkboxGroupInput("cyclecheck_symptoms", "Select Symptoms to Check:", choices = NULL),
+                     actionButton("run_cyclecheck", "Run Cycle Data Check", class = "btn-primary")
+                   ),
+                   mainPanel(
+                     tags$h4("Symptom Coverage by ID"),
+                     tableOutput("cyclecheck_by_id"),
+                     tags$h4("Overall Symptom Coverage"),
+                     tableOutput("cyclecheck_overall"),
+                     tags$h4("Symptom Data Plots"),
+                     uiOutput("cyclecheck_plots")
+                   )
+                 )
+        ),
         tabPanel("Ovulation Analysis",
                  tableOutput("ovulation_summary"),
                  tableOutput("ovulation_summary_id")),
