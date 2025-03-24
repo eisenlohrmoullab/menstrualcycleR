@@ -241,13 +241,15 @@ server <- function(input, output, session) {
         "scaled_cycleday_ov", "scaled_cycleday_imp_ov", "menses", "ovtoday")
     )
     
-    symptom_options <- setNames(as.character(1:21), c(
+    drsp_labels <- c(
       "1-Depressed", "2-Hopeless", "3-Worthless/Guilty", "4-Anxious", "5-Mood Swings",
       "6-Rejection Sensitivity", "7-Anger/Irritability", "8-Interpersonal Conflict", "9-Anhedonia",
       "10-Difficulty Concentrating", "11-Low Energy", "12-Overeating", "13-Food Cravings",
       "14-Hypersomnia", "15-Insomnia", "16-Overwhelm", "17-Out of control", "18-Breast Tenderness",
       "19-Bloated/weight gain", "20-Headache", "21-Joint/Muscle Pain"
-    ))
+    )
+    
+    symptom_options <- setNames(as.character(1:21), drsp_labels)
     
     output$cpass_mapping_table <- renderUI({
       tagList(
