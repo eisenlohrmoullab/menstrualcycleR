@@ -218,9 +218,11 @@ server <- function(input, output, session) {
     
     input1 <- cpass::as_cpass_data(df1_long, sep_event = "menses")
     
-    pdfpath <- tempfile(fileext = ".pdf")
+    tmpdir = tempdir()
     
-    result <- cpass::plot_subject_data_and_dx(
+    pdfpath <- file.path(tmp.dir, paste0("CPASS_SUBJECT_", id_number, ".pdf"))
+    
+    cpass::plot_subject_data_and_dx(
       data = input1 %>% filter(subject == id_number),
       save_as_pdf = T, 
       pdf_path = pdfpath
@@ -320,8 +322,10 @@ server <- function(input, output, session) {
       
       # Show result
       if (!is.null(result_pdfpath)) {
+        # Expose to browser
+        shiny::addResourcePath("pdf_cpass", dirname(pdfpath))
         output$cpass_pdf <- renderUI({
-          tags$iframe(style = "height:800px; width100%", src = result_pdfpath)
+          tags$iframe(style = "height:800px; width100%", src = paste0("pdf_cpass/", basename(pdfpath)))
           })
       }
     })
