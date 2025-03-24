@@ -242,12 +242,11 @@ cpass_process <- function(dataframe, symptom_map, id_number) {
     filter(!is.na(cycle), !is.na(item))
   
   # Step 6: Convert to cpass data
-  input1 <- as_cpass_data(df1_long, sep_event = "menses")
+  input1 <- cpass::as_cpass_data(df1_long, sep_event = "menses")
   
   # Step 7: Filter data for the specified subject and plot the results
-  result <- plot_subject_data_and_dx(data = input1 %>% filter(subject == id_number),
+  result <- cpass::plot_subject_data_and_dx(data = input1 %>% filter(subject == id_number),
                                      save_as_pdf = F)
   
   return(result)
 }
-
