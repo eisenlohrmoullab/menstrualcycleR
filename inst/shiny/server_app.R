@@ -74,8 +74,7 @@ server <- function(input, output, session) {
     processed_data(processed)
   })
   
-  output$cycle_data <- renderTable({ req(processed_data()); head(processed_data()) })
-  output$cycle_summary <- renderPrint({ req(processed_data()); summary(processed_data()) })
+  
   
   ovulation_summary <- reactive({ req(processed_data()); menstrualcycleR::summary_ovulation(processed_data()) })
   output$ovulation_summary <- renderTable({ req(ovulation_summary()); ovulation_summary()$ovstatus_total })
