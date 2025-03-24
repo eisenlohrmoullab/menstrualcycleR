@@ -320,17 +320,15 @@ server <- function(input, output, session) {
             )
           })
           
-          # Organized layout: Title → Plot → Download Button → Divider
-          tagList(
-            tags$div(
-              style = "margin-bottom: 40px;",
-              tags$h4(paste("CPASS Plot:", name), style = "margin-bottom: 15px;"),
-              plotOutput(plot_id),
-              tags$br(),
-              downloadButton(download_id, label = paste("Download Plot")),
-              tags$hr()
-            )
-          )
+          # UI layout for each plot 
+          fluidRow(column(
+            12,
+            tags$h4(paste("CPASS Plot:", name), style = "margin-top: 20px; margin-bottom: 10px;"),
+            plotOutput(plot_id),
+            tags$br(),
+            downloadButton(download_id, label = "Download Plot"),
+            tags$hr(style = "margin-top: 30px;")
+          ))
         })
         
         do.call(tagList, plot_uis)
