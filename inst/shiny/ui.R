@@ -73,7 +73,7 @@ ui <- fluidPage(
                      actionButton("run_cpass", "Run CPASS", class = "btn-primary")
                    ),
                    mainPanel(
-                     uiOutput("cpass_pdf")
+                     uiOutput("cpass_plot_ui")
                    )
                  )
         ),
