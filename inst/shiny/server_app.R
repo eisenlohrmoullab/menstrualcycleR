@@ -264,7 +264,7 @@ server <- function(input, output, session) {
             column(6, tags$label(symptom)),
             column(6, selectInput(
               inputId = paste0("map_", symptom),
-              #label = paste0(symptom, ":"),
+              label = NULL,
               choices = c("", cpass_items),
               selected = NULL,
               width = "100%"
