@@ -266,7 +266,6 @@ server <- function(input, output, session) {
   })
   
   
-  
   observeEvent(input$run_cpass, {
     req(processed_data(), input$cpass_id_select)
     
