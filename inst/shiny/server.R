@@ -285,7 +285,7 @@ server <- function(input, output, session) {
     })
     
     if (!is.null(result)) {
-      output$cpass_plot <- renderPlot({ result })
+      output$cpass_plot <- renderPlot({ print(result) })
     }
   })
   
