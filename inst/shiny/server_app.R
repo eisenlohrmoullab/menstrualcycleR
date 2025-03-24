@@ -188,7 +188,7 @@ server <- function(input, output, session) {
   # ---- CPASS Helper Function ----
   cpass_process <- function(dataframe, symptom_map, id_number) {
     dataframe <- dataframe %>%
-      mutate(subject = id, cycle = cyclenum)
+      dplyr::mutate(subject = id, cycle = cyclenum)
     
     cycleCount <- function(x) {
       inds <- which(x == 1)
@@ -203,12 +203,12 @@ server <- function(input, output, session) {
     }
     
     dataframe <- dataframe %>%
-      group_by(id) %>%
-      mutate(day = cycleCount(menses)) %>%
-      ungroup()
+      dplyr::group_by(id) %>%
+      dplyr::mutate(day = cycleCount(menses)) %>%
+      dplyr::ungroup()
     
     df1_long <- dataframe %>%
-      pivot_longer(
+      tidyr::pivot_longer(
         cols = all_of(names(symptom_map)),
         names_to = "symptom",
         values_to = "drsp_score"
