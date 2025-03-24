@@ -186,9 +186,17 @@ server <- function(input, output, session) {
   
   observeEvent(processed_data(), {
     req(processed_data())
+    req(input$id_col)  # ensure input$id_col is available
     updateSelectInput(session, "cpass_id_select", choices = unique(processed_data()[[input$id_col]]))
     
-    symptom_candidates <- setdiff(names(processed_data()), c(input$id_col, input$date_col, input$menses_col, input$ovtoday_col, "cyclenum", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov"))
+    req(input$id_col, input$date_col, input$menses_col, input$ovtoday_col)
+    
+    symptom_candidates <- setdiff(
+      names(processed_data()),
+      c(input$id_col, input$date_col, input$menses_col, input$ovtoday_col,
+        "cyclenum", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov", "menses", "ovtoday")
+    )
+    
     
     symptom_options <- setNames(as.character(1:21), c(
       "1-Depressed", "2-Hopeless", "3-Worthless/Guilty", "4-Anxious", "5-Mood Swings",
