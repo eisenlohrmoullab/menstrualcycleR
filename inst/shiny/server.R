@@ -223,6 +223,7 @@ server <- function(input, output, session) {
       } #closes symptom in names
 
       do.call(tagList, output_list)
+<<<<<<< HEAD
     }) # closes render UI
   }) # closes input$run_individual_plot observer
 
@@ -290,6 +291,12 @@ server <- function(input, output, session) {
       output$cpass_plot <- renderPlot({ print(result) })
     }
   })
+=======
+    })
+  })
+  
+  
+>>>>>>> parent of 2b2bdec (adding cpass code back into server)
   
   
   output$download_results <- downloadHandler(
