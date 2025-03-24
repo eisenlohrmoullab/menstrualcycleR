@@ -234,8 +234,23 @@ server <- function(input, output, session) {
     
     symptom_candidates <- setdiff(
       names(processed_data()),
-      c(input$id_col, input$date_col, input$menses_col, input$ovtoday_col,
-        "cyclenum", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov")
+      c(
+        input$id_col,
+        input$date_col,
+        input$menses_col,
+        input$ovtoday_col,
+        "cyclenum",
+        "scaled_cycleday",
+        "scaled_cycleday_impute",
+        "scaled_cycleday_ov",
+        "scaled_cycleday_imp_ov",
+        "id",
+        "daterated",
+        "m2mcount",
+        "mcyclength",
+        "cycle_incomplete",
+        "ovtoday_impute"
+      )
     )
     
     output$cpass_mapping_table <- renderUI({
