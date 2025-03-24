@@ -81,8 +81,22 @@ server <- function(input, output, session) {
   observeEvent(processed_data(), {
     symptom_choices <- setdiff(
       names(processed_data()),
-      c("id", "cyclenum", "menses", "scaled_cycleday", "scaled_cycleday_impute", 
-        "scaled_cycleday_ov", "scaled_cycleday_imp_ov", "ovtoday", "m2mcount", "ovtoday_impute", "daterated", "cyclenum")
+      c(
+        "id",
+        "cyclenum",
+        "menses",
+        "scaled_cycleday",
+        "scaled_cycleday_impute",
+        "scaled_cycleday_ov",
+        "scaled_cycleday_imp_ov",
+        "ovtoday",
+        "m2mcount",
+        "ovtoday_impute",
+        "daterated",
+        "cyclenum",
+        "mcyclength",
+        "cycle_incomplete"
+      )
     )
     updateCheckboxGroupInput(session, "cyclecheck_symptoms", choices = symptom_choices)
   })
@@ -194,7 +208,24 @@ server <- function(input, output, session) {
   
   observeEvent(processed_data(), {
     updateSelectInput(session, "selected_id", choices = unique(processed_data()$id))
-    symptom_choices <- setdiff(names(processed_data()), c("id", "cyclenum", "menses", "scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov", "scaled_cycleday_imp_ov"))
+    symptom_choices <- setdiff(
+      names(processed_data()),
+      c(
+        "id",
+        "cyclenum",
+        "menses",
+        "scaled_cycleday",
+        "scaled_cycleday_impute",
+        "scaled_cycleday_ov",
+        "scaled_cycleday_imp_ov",
+        "m2mcount",
+        "mcyclength",
+        "ovtoday",
+        "ovtoday_impute",
+        "cycle_incomplete", 
+        "daterated"
+      )
+    )
     updateCheckboxGroupInput(session, "selected_symptoms", choices = symptom_choices)
   })
   
