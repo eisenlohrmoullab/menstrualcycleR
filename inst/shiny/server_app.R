@@ -310,28 +310,41 @@ server <- function(input, output, session) {
           
           local({
             n <- name
-            output[[plot_id]] <- renderPlot({ plots[[n]] }, height = 700)
+            pid <- plot_id
+            did <- download_id
             
-            output[[download_id]] <- downloadHandler(
-              filename = function() paste0("cpass_plot_", n, "_", Sys.Date(), ".jpeg"),
+            # Render plot with vertical aspect
+            output[[pid]] <- renderPlot({
+              plots[[n]]
+            }, height = 600, width = 500)  # More vertical
+            
+            # Add download handler
+            output[[did]] <- downloadHandler(
+              filename = function() paste0("cpass_plot_", n, "_", Sys.Date(), ".png"),
               content = function(file) {
-                ggsave(file, plot = plots[[n]], device = "jpeg", width = 8, height = 10, dpi = 300)
+                ggsave(file, plot = plots[[n]], width = 6, height = 8, dpi = 300)
               }
             )
           })
           
-          # trying to space out plots using div()
+          # UI layout using flex column
           div(
-            style = "margin-bottom: 50px;",  # space between plots
-            tags$h4(paste("CPASS Plot:", name), style = "margin-top: 20px;"),
-            plotOutput(plot_id),
-            tags$br(),
-            downloadButton(download_id, label = "Download Plot")
+            style = "margin-bottom: 40px; padding: 10px; border-bottom: 1px solid #ccc;",
+            tags$h4(paste("CPASS Plot:", name), style = "margin-bottom: 10px;"),
+            div(
+              plotOutput(plot_id),
+              style = "margin-bottom: 15px;"
+            ),
+            div(
+              downloadButton(download_id, label = "Download Plot"),
+              style = "margin-bottom: 30px;"
+            )
           )
         })
         
         do.call(tagList, plot_uis)
       })
+      
       
     })
   })
