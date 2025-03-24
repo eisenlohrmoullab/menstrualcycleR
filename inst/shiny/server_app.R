@@ -213,7 +213,7 @@ server <- function(input, output, session) {
         names_to = "symptom",
         values_to = "drsp_score"
       ) %>%
-      dplyr::mutate(item = dplyr::recode(as.character(symptom), !!!symptom_map, .default = NA_real_)) %>%
+      dplyr::mutate(item = as.numeric(symptom_map[symptom])) %>%
       dplyr::filter(!is.na(cycle), !is.na(item))
     
     input1 <- cpass::as_cpass_data(df1_long, sep_event = "menses")
