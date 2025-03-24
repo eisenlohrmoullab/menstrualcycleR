@@ -313,32 +313,33 @@ server <- function(input, output, session) {
             pid <- plot_id
             did <- download_id
             
-            # Render each plot
+            # Render plot (no need to specify height here)
             output[[pid]] <- renderPlot({
               plots[[n]]
-            }, height = 700, width = 500)  # More vertical
+            })
             
-            # Download handler for plot
+            # Download handler
             output[[did]] <- downloadHandler(
               filename = function() paste0("cpass_plot_", n, "_", Sys.Date(), ".png"),
               content = function(file) {
-                ggsave(file, plot = plots[[n]], width = 6, height = 8, dpi = 300)
+                ggsave(file, plot = plots[[n]], width = 6, height = 9, dpi = 300)
               }
             )
           })
           
-          # Return a nicely spaced UI container per plot
+          # Wrap each plot and controls in a panel with dynamic height
           wellPanel(
-            style = "margin-bottom: 40px;",
             tags$h4(paste("CPASS Plot:", name), style = "margin-bottom: 15px;"),
-            plotOutput(plot_id),
+            plotOutput(plot_id, height = "800px"),  # taller plot
             br(),
-            downloadButton(download_id, "Download Plot")
+            downloadButton(download_id, "Download Plot"),
+            style = "margin-bottom: 50px;"
           )
         })
         
         do.call(tagList, plot_uis)
       })
+      
       
     })
   })
