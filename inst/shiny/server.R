@@ -14,7 +14,7 @@ suppressMessages({
 })
 
 library(cpass)
-
+utils::globalVariables(c("cyclenum", "menses", "symptom", "item", "subject"))
 
 cpass_process <- function(dataframe, symptom_map, id_number) {
   library(dplyr)
@@ -58,9 +58,6 @@ cpass_process <- function(dataframe, symptom_map, id_number) {
   
   return(result)
 }
-
-
-
 
 
 
@@ -195,14 +192,14 @@ server <- function(input, output, session) {
             output[[s_id]] <- renderTable({ results[[s]][[c]]$summary })
             
             output[[d_id]] <- downloadHandler(
-              filename = function() paste0("summary_", s, "_", c, ".csv"),
+              filename = function(){paste0("summary_", s, "_", c, ".csv")},
               content = function(file) {
                 write.csv(results[[s]][[c]]$summary, file, row.names = FALSE)
               }
             )
             
             output[[dp_id]] <- downloadHandler(
-              filename = function() paste0("plot_", s, "_", c, ".png"),
+              filename = function(){paste0("plot_", s, "_", c, ".png")},
               content = function(file) {
                 ggsave(file, plot = results[[s]][[c]]$plot, device = "png", width = 8, height = 6, dpi = 300)
               }
@@ -211,7 +208,7 @@ server <- function(input, output, session) {
             observeEvent(input[[toggle_button_id]], {
               shinyjs::toggle(toggle_id)
             })
-          })
+          }) #closes local 
           
           output_list[[length(output_list) + 1]] <- tagList(
             tags$h4(paste("Symptom:", symptom, "|", cycle_name)),
@@ -222,15 +219,15 @@ server <- function(input, output, session) {
             downloadButton(download_summary_id, "Download Summary"),
             tags$hr()
           )
-        }
-      }
+        } #closes cycle name in names 
+      } #closes symptom in names
       
       do.call(tagList, output_list)
-    })
-  })
+    }) # closes render UI
+  }) # closes input$run_individual_plot observer
   
   
-  observeEvent(processed_data(), {
+  observeEvent(processed_data(), { #unmatched parentheses error
     req(processed_data())
     req(input$id_col)
     
