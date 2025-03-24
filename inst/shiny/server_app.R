@@ -220,7 +220,7 @@ server <- function(input, output, session) {
     
     tmpdir = tempdir()
     
-    pdfpath <- file.path(tmp.dir, paste0("CPASS_SUBJECT_", id_number, ".pdf"))
+    pdfpath <- file.path(tmpdir, paste0("CPASS_SUBJECT_", id_number, ".pdf"))
     
     cpass::plot_subject_data_and_dx(
       data = input1 %>% filter(subject == id_number),
