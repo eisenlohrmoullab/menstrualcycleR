@@ -213,23 +213,23 @@ server <- function(input, output, session) {
         names_to = "symptom",
         values_to = "drsp_score"
       ) %>%
-      mutate(item = recode(as.character(symptom), !!!symptom_map, .default = NA_real_)) %>%
-      filter(!is.na(cycle), !is.na(item))
+      dplyr::mutate(item = dplyr::recode(as.character(symptom), !!!symptom_map, .default = NA_real_)) %>%
+      dplyr::filter(!is.na(cycle), !is.na(item))
     
     input1 <- cpass::as_cpass_data(df1_long, sep_event = "menses")
     
-    pdf_dir <- file.path(tempdir(), paste0("cpass_output_", id_number))
-    dir.create(pdf_dir, showWarnings = FALSE, recursive = TRUE)
+    # Main diagnostic plot
+    plots <- list()
+    plots[["Diagnosis"]] <- cpass::plot_subject_dx(input1 %>% dplyr::filter(subject == id_number))
     
-    cpass::plot_subject_data_and_dx(
-      data = input1 %>% filter(subject == id_number),
-      save_as_pdf = T, 
-      pdf_path = pdf_dir
-    )
-    pdfpath <- file.path(pdf_dir, paste0("CPASS_SUBJECT_", id_number, ".pdf"))
-    return(pdfpath)
+    # Add cycle-specific observation plots
+    unique_cycles <- input1 %>% dplyr::filter(subject == id_number) %>% dplyr::pull(cycle) %>% unique() %>% na.omit()
+    for (cyc in unique_cycles) {
+      plots[[paste0("Cycle_", cyc)]] <- cpass::plot_subject_obs(input1 %>% dplyr::filter(subject == id_number, cycle == cyc))
+    }
+    
+    return(plots)
   }
-  
   # ---- CPASS UI Rendering for Symptom Map ----
   observeEvent(processed_data(), {
     req(processed_data())
