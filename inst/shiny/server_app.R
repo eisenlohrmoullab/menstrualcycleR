@@ -218,16 +218,15 @@ server <- function(input, output, session) {
     
     input1 <- cpass::as_cpass_data(df1_long, sep_event = "menses")
     
-    tmpdir = tempdir()
-    
-    pdfpath <- file.path(tmpdir, paste0("CPASS_SUBJECT_", id_number, ".pdf"))
+    pdf_dir <- file.path(tempdir(), paste0("cpass_output_", id_number))
+    dir.create(pdf_dir, showWarnings = FALSE, recursive = TRUE)
     
     cpass::plot_subject_data_and_dx(
       data = input1 %>% filter(subject == id_number),
       save_as_pdf = T, 
-      pdf_path = pdfpath
+      pdf_path = pdf_dir
     )
-    
+    pdfpath <- file.path(pdf_dir, paste0("CPASS_SUBJECT_", id_number, ".pdf"))
     return(pdfpath)
   }
   
