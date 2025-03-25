@@ -183,8 +183,18 @@ server <- function(input, output, session) {
   
   cycle_plot_data <- reactiveVal(NULL)
   
+  plot_inputs <- reactive({
+    list(
+      symptom = input$symptom_col_plot,
+      centering = input$plot_centering,
+      include_impute = input$plot_impute,
+      y_scale = input$plot_y_scale,
+      rollingavg = input$rollingavg
+    )
+  })
+  
   observeEvent(input$update_plot, {
-    req(processed_data(), input$symptom_col_plot, input$plot_centering, input$plot_impute, input$rollingavg)
+    req(processed_data(),plot_inputs())
     
     plot_result <- menstrualcycleR::cycle_plot(
       data = processed_data(),
