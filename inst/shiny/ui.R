@@ -122,10 +122,10 @@ ui <- fluidPage(
         tabPanel("Download Data", downloadButton("download_results", "Download Processed Data"))
       )
     )
-  )
+  ),
   tags$script(HTML('
-  $(function () {
-    $(\'[data-toggle="tooltip"]\').tooltip();
-  });
-'))
+    $(function () {
+      $(\'[data-toggle="tooltip"]\').tooltip();
+    });
+  '))
 )
