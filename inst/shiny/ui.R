@@ -23,20 +23,31 @@ ui <- fluidPage(
           `data-toggle` = "tooltip"
         )
       ),
-      selectInput("date_col", "Select Date Column:", choices = NULL),
-      selectInput("menses_col", "Select Menses Column:", choices = NULL),
+      selectInput("date_col", NULL, choices = NULL),
+      # menses column with tooltip
+      tags$div(
+        style = "display: flex; align-items: center;",
+        tags$label("Select Menses Column:"),
+        tags$i(
+          class = "fas fa-info-circle",
+          title = "This should be a binary column (0/1) where 1 = the first day of menses. This column needs to reflect the day of menses onset, and NOT each day of menstrual bleeding",
+          style = "margin-left: 5px; cursor: pointer;",
+          `data-toggle` = "tooltip"
+        )
+      ), 
+      selectInput("menses_col", NULL, choices = NULL),
       # Ovulation column with tooltip
       tags$div(
         style = "display: flex; align-items: center;",
         tags$label("Select Ovulation Column:"),
         tags$i(
           class = "fas fa-info-circle",
-          title = "This should be a binary column where 1 = ovulation occurred that day.",
+          title = "This should be a binary column (0/1) where 1 = ovulation occurred that day. If You are using urinary LH-surge testing, the estimated day of ovulation is the day following the positive LH-test, and this needs to be reflected in the uploaded dataset.",
           style = "margin-left: 5px; cursor: pointer;",
           `data-toggle` = "tooltip"
         )
-      ),
-      selectInput("ovtoday_col", "Select Ovulation Column:", choices = NULL),
+      ), 
+      selectInput("ovtoday_col", NULL, choices = NULL),
       numericInput("lower_bound", "Lower Cycle Length Bound:", value = 21, min = 10, max = 50),
       numericInput("upper_bound", "Upper Cycle Length Bound:", value = 35, min = 10, max = 50),
       hr(),
