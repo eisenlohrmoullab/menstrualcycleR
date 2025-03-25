@@ -248,7 +248,7 @@ server <- function(input, output, session) {
       symptoms = input$selected_symptoms,
       centering = input$centering_mode,
       y_scale = input$y_scale_mode,
-      include_impute = input$include_impute_toggle,
+      include_impute = isTRUE(input$include_impute_toggle),
       rollingavg = as.numeric(input$rollingavg_input)
     )
     
