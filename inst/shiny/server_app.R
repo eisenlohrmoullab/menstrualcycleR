@@ -4,6 +4,7 @@ library(dplyr)
 library(rlang)
 library(ggplot2)
 library(shinyjs)
+library(HiddenSemiMarkov)
 
 suppressMessages({
   if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")
