@@ -11,8 +11,31 @@ ui <- fluidPage(
       actionButton("load_data", "Load Data", class = "btn-primary"),
       hr(),
       selectInput("id_col", "Select ID Column:", choices = NULL),
+      
+      #Date column with tooltip
+      tags$div(
+        style = "display: flex; align-items: center;",
+        tags$label("Select Date Column:"),
+        tags$i(
+          class = "fas fa-info-circle",
+          title = "This should be the date each symptom or entry was recorded. This needs to be in y-m-d format.",
+          style = "margin-left: 5px; cursor: pointer;",
+          `data-toggle` = "tooltip"
+        )
+      ),
       selectInput("date_col", "Select Date Column:", choices = NULL),
       selectInput("menses_col", "Select Menses Column:", choices = NULL),
+      # Ovulation column with tooltip
+      tags$div(
+        style = "display: flex; align-items: center;",
+        tags$label("Select Ovulation Column:"),
+        tags$i(
+          class = "fas fa-info-circle",
+          title = "This should be a binary column where 1 = ovulation occurred that day.",
+          style = "margin-left: 5px; cursor: pointer;",
+          `data-toggle` = "tooltip"
+        )
+      ),
       selectInput("ovtoday_col", "Select Ovulation Column:", choices = NULL),
       numericInput("lower_bound", "Lower Cycle Length Bound:", value = 21, min = 10, max = 50),
       numericInput("upper_bound", "Upper Cycle Length Bound:", value = 35, min = 10, max = 50),
@@ -100,4 +123,9 @@ ui <- fluidPage(
       )
     )
   )
+  tags$script(HTML('
+  $(function () {
+    $(\'[data-toggle="tooltip"]\').tooltip();
+  });
+'))
 )
