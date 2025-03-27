@@ -4,14 +4,6 @@ library(dplyr)
 library(rlang)
 library(ggplot2)
 library(shinyjs)
-
-
-suppressMessages({
-  if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")
-  if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
-  if (!requireNamespace("cpass", quietly = TRUE)) devtools::install_github("lasy/cpass", dependencies = TRUE)
-})
-
 library(cpass)
 
 
