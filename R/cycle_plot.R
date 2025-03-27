@@ -65,7 +65,8 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
             {{var.d}}, 
             rollingavg, 
             mean, 
-            align = "center"  # Use NA instead of "extend" to avoid interpolation
+            align = "center",
+            fill = NA# Use NA instead of "extend" to avoid interpolation
           )
         }
       ) %>%
