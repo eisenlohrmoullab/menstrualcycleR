@@ -10,7 +10,8 @@ cycle_plot(
   centering = "menses",
   include_impute = TRUE,
   y_scale = "person-centered_roll",
-  rollingavg = 5
+  rollingavg = 5,
+  align_val = "center"
 )
 }
 \arguments{
@@ -26,6 +27,8 @@ Scaled cycle day variables are added to your dataframe after applying the calcul
 \item{y_scale}{A string specifying the y-axis scale. Options are "person-centered", "person-centered_roll", or "means". Default is "person-centered_roll".}
 
 \item{rollingavg}{A numeric indicating how many days of a rolling average to use, the default is 5}
+
+\item{alignval}{From the zoo package, using rollapply: alignment of rolling avg. Can be "center", "left", "right"}
 }
 \value{
 A list containing the following elements:
