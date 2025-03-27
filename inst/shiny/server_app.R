@@ -356,7 +356,7 @@ server <- function(input, output, session) {
   #   
   #   return(plots)
   # }
-  # # ---- CPASS UI Rendering for Symptom Map ----
+  # ---- CPASS UI Rendering for Symptom Map ----
   # observeEvent(processed_data(), {
   #   req(processed_data())
   #   
@@ -400,8 +400,8 @@ server <- function(input, output, session) {
   #     )
   #   })
   # })
-  # 
-  # # ---- Run CPASS Analysis ----
+  
+  # ---- Run CPASS Analysis ----
   # observeEvent(input$run_cpass, {
   #   req(processed_data(), input$cpass_id_select)
   #   
@@ -462,13 +462,13 @@ server <- function(input, output, session) {
   #           style = "margin-bottom: 50px;"
   #         )
   #       })
-        
-        do.call(tagList, plot_uis)
-      })
-      
-      
-    })
-  })
+  #       
+  #       do.call(tagList, plot_uis)
+  #     })
+  #     
+  #     
+  #   })
+  # }) #end
   
   output$download_results <- downloadHandler(
     filename = function() { paste("processed_cycle_data_", Sys.Date(), ".csv", sep = "") },
