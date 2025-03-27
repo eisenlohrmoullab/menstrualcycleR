@@ -11,6 +11,7 @@
 #' @param include_impute A boolean indicating whether to use imputed cycle time values based on NC cycle length norms. Default is TRUE.
 #' @param y_scale A string specifying the y-axis scale. Options are "person-centered", "person-centered_roll", or "means". Default is "person-centered_roll".
 #' @param rollingavg A numeric indicating how many days of a rolling average to use, the default is 5
+#' @param alignval From the zoo package, using rollapply: alignment of rolling avg. Can be "center", "left", "right"
 #'
 #' @return A list containing the following elements:
 #' 	1. A dataframe: The input dataframe augmented with person-centered mean (.m) and deviation (.d) values for the symptom variable.
@@ -33,7 +34,7 @@
 #' @export
 #' 
 
-cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRUE, y_scale = "person-centered_roll", rollingavg = 5) {
+cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRUE, y_scale = "person-centered_roll", rollingavg = 5, align_val = "center") {
   
   `%>%` <- magrittr::`%>%`
   `:=` <- rlang::`:=`
@@ -65,7 +66,7 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
             {{var.d}}, 
             rollingavg, 
             mean, 
-            align = "center",
+            align = align_val,
             fill = NA# Use NA instead of "extend" to avoid interpolation
           )
         }
