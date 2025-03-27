@@ -4,13 +4,11 @@ library(dplyr)
 library(rlang)
 library(ggplot2)
 library(shinyjs)
-library(HiddenSemiMarkov)
+
 
 suppressMessages({
   if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")
   if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
-  if (!requireNamespace("geomnet", quietly = TRUE)) remotes::install_github("sctyner/geomnet")
-  if (!requireNamespace("HiddenSemiMarkov", quietly = TRUE)) devtools::install_github("lasy/HiddenSemiMarkov")
   if (!requireNamespace("cpass", quietly = TRUE)) devtools::install_github("lasy/cpass", dependencies = TRUE)
 })
 
