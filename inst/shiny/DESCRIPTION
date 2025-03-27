@@ -4,6 +4,15 @@ Title: Shiny App for menstrualcycleR
 Version: 0.1.0
 Author: Anisha Nagpal
 Description: A Shiny app for visualizing and analyzing menstrual cycle data.
+Depends:
+  R (>= 4.1.0)
+Imports:
+  shiny,
+  dplyr,
+  ggplot2,
+  rlang,
+  tidyr,
+  menstrualcycleR
 Remotes:
     eisenlohrmoullab/menstrualcycleR
     lasy/cpass
