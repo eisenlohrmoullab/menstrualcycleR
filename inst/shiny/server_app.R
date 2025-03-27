@@ -302,166 +302,163 @@ server <- function(input, output, session) {
   })
   
   
-  ## CPASS Section 
+  ## CPASS Section
   # ---- CPASS Helper Function ----
-  # cpass_process <- function(dataframe, symptom_map, id_number) {
-  #   dataframe <- dataframe %>%
-  #     dplyr::mutate(subject = id, cycle = cyclenum)
-  #   
-  #   cycleCount <- function(x) {
-  #     inds <- which(x == 1)
-  #     if (!length(inds)) return(0)
-  #     num <- lapply(inds, function(i) {
-  #       num <- seq_along(x) - i
-  #       num[num >= 0] <- num[num >= 0] + 1
-  #       num[num < -15 | num > 10] <- NA
-  #       num
-  #     })
-  #     do.call(coalesce, num)
-  #   }
-  #   
-  #   dataframe <- dataframe %>%
-  #     dplyr::group_by(id) %>%
-  #     dplyr::mutate(day = cycleCount(menses)) %>%
-  #     dplyr::ungroup()
-  #   
-  #   df1_long <- dataframe %>%
-  #     tidyr::pivot_longer(
-  #       cols = all_of(names(symptom_map)),
-  #       names_to = "symptom",
-  #       values_to = "drsp_score"
-  #     ) %>%
-  #     dplyr::mutate(item = as.numeric(symptom_map[symptom])) %>%
-  #     dplyr::filter(!is.na(cycle), !is.na(item))
-  #   
-  #   input1 <- cpass::as_cpass_data(df1_long, sep_event = "menses")
-  #   
-  #   # Main diagnostic plot
-  #   plots <- list()
-  #   plots[["Diagnosis"]] <- cpass::plot_subject_dx(input1 %>% dplyr::filter(subject == id_number))
-  #   
-  #   # Add cycle-specific observation plots
-  #   unique_cycles <- input1 %>% dplyr::filter(subject == id_number) %>% dplyr::pull(cycle) %>% unique() %>% na.omit()
-  #   for (cyc in unique_cycles) {
-  #     plots[[paste0("Cycle_", cyc)]] <- cpass::plot_subject_obs(input1 %>% dplyr::filter(subject == id_number, cycle == cyc))
-  #   }
-  #   
-  #   return(plots)
-  # }
+  cpass_process <- function(dataframe, symptom_map, id_number) {
+    dataframe <- dataframe %>%
+      dplyr::mutate(subject = id, cycle = cyclenum)
+    
+    cycleCount <- function(x) {
+      inds <- which(x == 1)
+      if (!length(inds)) return(0)
+      num <- lapply(inds, function(i) {
+        num <- seq_along(x) - i
+        num[num >= 0] <- num[num >= 0] + 1
+        num[num < -15 | num > 10] <- NA
+        num
+      })
+      do.call(coalesce, num)
+    }
+    
+    dataframe <- dataframe %>%
+      dplyr::group_by(id) %>%
+      dplyr::mutate(day = cycleCount(menses)) %>%
+      dplyr::ungroup()
+    
+    df1_long <- dataframe %>%
+      tidyr::pivot_longer(
+        cols = all_of(names(symptom_map)),
+        names_to = "symptom",
+        values_to = "drsp_score"
+      ) %>%
+      dplyr::mutate(item = as.numeric(symptom_map[symptom])) %>%
+      dplyr::filter(!is.na(cycle), !is.na(item))
+    
+    input1 <- cpass::as_cpass_data(df1_long, sep_event = "menses")
+    
+    # Main diagnostic plot
+    plots <- list()
+    plots[["Diagnosis"]] <- cpass::plot_subject_dx(input1 %>% dplyr::filter(subject == id_number))
+    
+    # Add cycle-specific observation plots
+    unique_cycles <- input1 %>% dplyr::filter(subject == id_number) %>% dplyr::pull(cycle) %>% unique() %>% na.omit()
+    for (cyc in unique_cycles) {
+      plots[[paste0("Cycle_", cyc)]] <- cpass::plot_subject_obs(input1 %>% dplyr::filter(subject == id_number, cycle == cyc))
+    }
+    
+    return(plots)
+  }
+  
   # ---- CPASS UI Rendering for Symptom Map ----
-  # observeEvent(processed_data(), {
-  #   req(processed_data())
-  #   
-  #   updateSelectInput(session, "cpass_id_select", choices = unique(processed_data()$id))
-  #   
-  #   symptom_candidates <- setdiff(
-  #     names(processed_data()),
-  #     c(
-  #       input$id_col,
-  #       input$date_col,
-  #       input$menses_col,
-  #       input$ovtoday_col,
-  #       "cyclenum",
-  #       "scaled_cycleday",
-  #       "scaled_cycleday_impute",
-  #       "scaled_cycleday_ov",
-  #       "scaled_cycleday_imp_ov",
-  #       "id",
-  #       "daterated",
-  #       "m2mcount",
-  #       "mcyclength",
-  #       "cycle_incomplete",
-  #       "ovtoday_impute"
-  #     )
-  #   )
-  #   
-  #   output$cpass_mapping_table <- renderUI({
-  #     tagList(
-  #       lapply(symptom_candidates, function(symptom) {
-  #         fluidRow(
-  #           column(6, tags$label(symptom)),
-  #           column(6, selectInput(
-  #             inputId = paste0("map_", symptom),
-  #             label = NULL,
-  #             choices = c("", cpass_items),
-  #             selected = NULL,
-  #             width = "100%"
-  #           ))
-  #         )
-  #       })
-  #     )
-  #   })
-  # })
+  observeEvent(processed_data(), {
+    req(processed_data())
+    
+    updateSelectInput(session, "cpass_id_select", choices = unique(processed_data()$id))
+    
+    symptom_candidates <- setdiff(
+      names(processed_data()),
+      c(
+        input$id_col,
+        input$date_col,
+        input$menses_col,
+        input$ovtoday_col,
+        "cyclenum",
+        "scaled_cycleday",
+        "scaled_cycleday_impute",
+        "scaled_cycleday_ov",
+        "scaled_cycleday_imp_ov",
+        "id",
+        "daterated",
+        "m2mcount",
+        "mcyclength",
+        "cycle_incomplete",
+        "ovtoday_impute"
+      )
+    )
+    
+    output$cpass_mapping_table <- renderUI({
+      tagList(
+        lapply(symptom_candidates, function(symptom) {
+          fluidRow(
+            column(6, tags$label(symptom)),
+            column(6, selectInput(
+              inputId = paste0("map_", symptom),
+              label = NULL,
+              choices = c("", cpass_items),
+              selected = NULL,
+              width = "100%"
+            ))
+          )
+        })
+      )
+    })
+  })
   
   # ---- Run CPASS Analysis ----
-  # observeEvent(input$run_cpass, {
-  #   req(processed_data(), input$cpass_id_select)
-  #   
-  #   isolate({
-  #     # Build symptom_map from dropdown selections
-  #     symptom_inputs <- names(input)[grepl("^map_", names(input))]
-  #     symptom_map <- setNames(
-  #       lapply(symptom_inputs, function(x) as.numeric(input[[x]])),
-  #       gsub("^map_", "", symptom_inputs)
-  #     )
-  #     symptom_map <- symptom_map[!is.na(unlist(symptom_map))]
-  #     
-  #     # Run CPASS and store plots
-  #     plots <- tryCatch({
-  #       cpass_process(
-  #         dataframe = processed_data(),
-  #         symptom_map = unlist(symptom_map),
-  #         id_number = as.numeric(input$cpass_id_select)
-  #       )
-  #     }, error = function(e) {
-  #       showNotification(paste("CPASS Error:", e$message), type = "error")
-  #       return(NULL)
-  #     })
-  #     
-  #     # Display CPASS plots dynamically with download buttons 
-  #     output$cpass_plot_ui <- renderUI({
-  #       req(plots)
-  #       
-  #       plot_uis <- lapply(names(plots), function(name) {
-  #         plot_id <- paste0("cpass_plot_", name)
-  #         download_id <- paste0("download_plot_", name)
-  #         
-  #         local({
-  #           n <- name
-  #           pid <- plot_id
-  #           did <- download_id
-  #           
-  #           # Render plot (no need to specify height here)
-  #           output[[pid]] <- renderPlot({
-  #             plots[[n]]
-  #           })
-  #           
-  #           # Download handler
-  #           output[[did]] <- downloadHandler(
-  #             filename = function() paste0("cpass_plot_", n, "_", Sys.Date(), ".jpeg"),
-  #             content = function(file) {
-  #               ggsave(file, plot = plots[[n]], width = 6, height = 9, dpi = 300)
-  #             }
-  #           )
-  #         })
-  #         
-  #         # Wrap each plot and controls in a panel with dynamic height
-  #         wellPanel(
-  #           tags$h4(paste("CPASS Plot:", name), style = "margin-bottom: 15px;"),
-  #           plotOutput(plot_id, height = "800px"),  # taller plot
-  #           br(),
-  #           downloadButton(download_id, "Download Plot"),
-  #           style = "margin-bottom: 50px;"
-  #         )
-  #       })
-  #       
-  #       do.call(tagList, plot_uis)
-  #     })
-  #     
-  #     
-  #   })
-  # }) #end
+  observeEvent(input$run_cpass, {
+    req(processed_data(), input$cpass_id_select)
+    
+    isolate({
+      # Build symptom_map from dropdown selections
+      symptom_inputs <- names(input)[grepl("^map_", names(input))]
+      symptom_map <- setNames(
+        lapply(symptom_inputs, function(x) as.numeric(input[[x]])),
+        gsub("^map_", "", symptom_inputs)
+      )
+      symptom_map <- symptom_map[!is.na(unlist(symptom_map))]
+      
+      # Run CPASS and store plots
+      plots <- tryCatch({
+        cpass_process(
+          dataframe = processed_data(),
+          symptom_map = unlist(symptom_map),
+          id_number = as.numeric(input$cpass_id_select)
+        )
+      }, error = function(e) {
+        showNotification(paste("CPASS Error:", e$message), type = "error")
+        return(NULL)
+      })
+      
+      # Display CPASS plots dynamically with download buttons
+      output$cpass_plot_ui <- renderUI({
+        req(plots)
+        
+        plot_uis <- lapply(names(plots), function(name) {
+          plot_id <- paste0("cpass_plot_", name)
+          download_id <- paste0("download_plot_", name)
+          
+          local({
+            n <- name
+            pid <- plot_id
+            did <- download_id
+            
+            output[[pid]] <- renderPlot({
+              plots[[n]]
+            })
+            
+            output[[did]] <- downloadHandler(
+              filename = function() paste0("cpass_plot_", n, "_", Sys.Date(), ".jpeg"),
+              content = function(file) {
+                ggsave(file, plot = plots[[n]], width = 6, height = 9, dpi = 300)
+              }
+            )
+          })
+          
+          wellPanel(
+            tags$h4(paste("CPASS Plot:", name), style = "margin-bottom: 15px;"),
+            plotOutput(plot_id, height = "800px"),
+            br(),
+            downloadButton(download_id, "Download Plot"),
+            style = "margin-bottom: 50px;"
+          )
+        })
+        
+        do.call(tagList, plot_uis)
+      })
+    })
+  })
   
+
   output$download_results <- downloadHandler(
     filename = function() { paste("processed_cycle_data_", Sys.Date(), ".csv", sep = "") },
     content = function(file) { write.csv(processed_data(), file, row.names = FALSE) }
