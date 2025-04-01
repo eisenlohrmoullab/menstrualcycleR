@@ -1,5 +1,4 @@
 #' Calculate Menses-to-Menses Cycle Lengths
-#' (test)
 #'
 #' This function calculates the lengths of menses-to-menses cycles for individuals in a longitudinal dataset. 
 #' The input dataset must be in long format, where each row represents a unique date for a specific individual.
