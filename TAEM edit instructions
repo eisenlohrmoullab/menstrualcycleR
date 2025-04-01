@@ -1,0 +1,7 @@
+Tory instructions for updates: 
+
+load menstrualcycleR project
+open R folder
+open function
+make edits to file, then run "devtools::document()"
+then commit + push (github desktop OK)
