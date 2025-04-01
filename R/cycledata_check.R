@@ -2,7 +2,7 @@
 #'
 #' This function provides detailed information about the availability of non-missing symptom data, stratified by 
 #' cycle phases (luteal and follicular) and overall availability. It also generates visualizations to aid in data 
-#' quality assessment.
+#' quality assessment. 
 #'
 #' @keywords menstrual cycle, data quality, symptoms, cycle phase
 #'
