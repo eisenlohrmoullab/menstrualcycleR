@@ -2,7 +2,8 @@
 % Please edit documentation in R/calculate_mcyclength.r
 \name{calculate_mcyclength}
 \alias{calculate_mcyclength}
-\title{Calculate Menses-to-Menses Cycle Lengths}
+\title{Calculate Menses-to-Menses Cycle Lengths
+(test)}
 \usage{
 calculate_mcyclength(data, id, daterated, menses, ovtoday)
 }
