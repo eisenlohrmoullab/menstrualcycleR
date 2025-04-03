@@ -15,8 +15,6 @@ Imports:
   menstrualcycleR
 Remotes:
     eisenlohrmoullab/menstrualcycleR
-    lasy/cpass
 Depends:
     menstrualcycleR
-    cpass
 
