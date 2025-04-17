@@ -12,6 +12,7 @@
 #' @param y_scale A string specifying the y-axis scale. Options are "person-centered", "person-centered_roll", or "means". Default is "person-centered_roll".
 #' @param rollingavg A numeric indicating how many days of a rolling average to use, the default is 5
 #' @param alignval From the zoo package, using rollapply: alignment of rolling avg. Can be "center", "left", "right"
+#' @param se A boolean indicating whether to include a standard error ribbon. Default is False 
 #'
 #' @return A list containing the following elements:
 #' 	1. A dataframe: The input dataframe augmented with person-centered mean (.m) and deviation (.d) values for the symptom variable.
