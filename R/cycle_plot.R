@@ -34,7 +34,7 @@
 #' @export
 #' 
 
-cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRUE, y_scale = "person-centered_roll", rollingavg = 5, align_val = "center") {
+cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRUE, y_scale = "person-centered_roll", rollingavg = 5, align_val = "center", se = F) {
   
   `%>%` <- magrittr::`%>%`
   `:=` <- rlang::`:=`
@@ -105,15 +105,22 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
   if (y_scale == "person-centered") {
     dat_summary <- data %>%
       dplyr::group_by(cycleday_5perc) %>%
-      dplyr::summarise(mean_dev = mean(!!dplyr::sym(paste0(symptom, ".d")), na.rm = TRUE))
+      dplyr::summarise(mean_dev = mean(!!dplyr::sym(paste0(symptom, ".d")), na.rm = TRUE),
+      se = if (se) sd(!!dplyr::sym(paste0(symptom, ".d")), na.rm = TRUE) / sqrt(sum(!is.na(!!dplyr::sym(paste0(symptom, ".d"))))) else NA_real_,
+                       .groups = "drop"
+      )
   } else if (y_scale == "person-centered_roll") {
     dat_summary <- data %>%
       dplyr::group_by(cycleday_5perc) %>%
-      dplyr::summarise(mean_dev_roll = mean(!!dplyr::sym(paste0(symptom, ".d.roll")), na.rm = TRUE)) 
+      dplyr::summarise(mean_dev_roll = mean(!!dplyr::sym(paste0(symptom, ".d.roll")), na.rm = TRUE), 
+      se = if (se) sd(!!dplyr::sym(paste0(symptom, ".d.roll")), na.rm = TRUE) / sqrt(sum(!is.na(!!dplyr::sym(paste0(symptom, ".d.roll"))))) else NA_real_,
+                       .groups = "drop") 
   } else if (y_scale == "means") {
     dat_summary <- data %>%
       dplyr::group_by(cycleday_5perc) %>%
-      dplyr::summarise(mean_sx = mean(!!dplyr::sym(paste0(symptom, ".m")), na.rm = TRUE))
+      dplyr::summarise(mean_sx = mean(!!dplyr::sym(paste0(symptom, ".m")), na.rm = TRUE),
+      se = if (se) sd(!!dplyr::sym(paste0(symptom, ".m")), na.rm = TRUE) / sqrt(sum(!is.na(!!dplyr::sym(paste0(symptom, ".m"))))) else NA_real_,
+                       .groups = "drop")
   }
   
   # X-axis breaks and labels
@@ -144,6 +151,19 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
       y = paste("Mean", y_scale)
     ) +
     ggplot2::theme_minimal()
+  
+  
+  if (se) {
+    plot <- plot +
+      ggplot2::geom_ribbon(
+        ggplot2::aes(
+          ymin = if (y_scale == "person-centered") mean_dev - se else if (y_scale == "person-centered_roll") mean_dev_roll - se else mean_sx - se,
+          ymax = if (y_scale == "person-centered") mean_dev + se else if (y_scale == "person-centered_roll") mean_dev_roll + se else mean_sx + se
+        ),
+        fill = "lightgrey", alpha = 0.3
+      )
+  }
+  
   
   return(list(data = data, summary = dat_summary, plot = plot))
 }
