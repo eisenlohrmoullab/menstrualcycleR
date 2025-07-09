@@ -12,8 +12,10 @@ Imports:
   ggplot2,
   rlang,
   tidyr,
+  cpass,
   menstrualcycleR
 Remotes:
     eisenlohrmoullab/menstrualcycleR
+    lasy/cpass
 
 
