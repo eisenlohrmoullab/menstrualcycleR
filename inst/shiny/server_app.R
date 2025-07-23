@@ -305,6 +305,8 @@ server <- function(input, output, session) {
   
   # CPASS Section
   # ---- CPASS Helper Function ----
+  #defining cpass_data as a reactive val
+  cpass_data <- reactiveVal()
   add_cpass_count <- function(data, days_before = 8, days_after = 10) {
     # Step 1: Identify each menses start (first day per episode)
     menses_rows <- data %>%
