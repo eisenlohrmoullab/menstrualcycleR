@@ -66,9 +66,10 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
           zoo::rollapply(
             {{var.d}}, 
             rollingavg, 
-            mean, 
+            function(x) mean(x, na.rm = TRUE), 
             align = align_val,
-            fill = NA# Use NA instead of "extend" to avoid interpolation
+            fill = NA, # Use NA instead of "extend" to avoid interpolation
+            partial = T
           )
         }
       ) %>%
