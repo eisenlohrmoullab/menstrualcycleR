@@ -354,7 +354,7 @@ server <- function(input, output, session) {
       num <- lapply(inds, function(i) {
         num <- seq_along(x) - i
         num[num >= 0] <- num[num >= 0] + 1
-        num[num < -15 | num > 10] <- NA
+        num[num < -7 | num > 10] <- NA
         num
       })
       do.call(coalesce, num)
