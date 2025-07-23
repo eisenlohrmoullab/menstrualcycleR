@@ -12,6 +12,7 @@ Imports:
   ggplot2,
   rlang,
   tidyr,
+  purrr
   cpass,
   menstrualcycleR
 Remotes:

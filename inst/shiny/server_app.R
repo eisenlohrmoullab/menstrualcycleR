@@ -5,6 +5,7 @@ library(rlang)
 library(ggplot2)
 library(shinyjs)
 library(cpass)
+library(purrr)
 
 
 
