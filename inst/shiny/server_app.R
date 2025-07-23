@@ -304,9 +304,48 @@ server <- function(input, output, session) {
   
   # CPASS Section
   # ---- CPASS Helper Function ----
+  add_cpass_count <- function(data, days_before = 8, days_after = 10) {
+    # Step 1: Identify each menses start (first day per episode)
+    menses_rows <- data %>%
+      dplyr::arrange(id, daterated) %>%
+      dplyr::group_by(id) %>%
+      dplyr::mutate(menses_index = cumsum(menses == 1)) %>%
+      dplyr::ungroup() %>%
+      dplyr::filter(menses == 1) %>%
+      dplyr::group_by(id, menses_index) %>%
+      dplyr::slice(1) %>%
+      dplyr::ungroup() %>%
+      dplyr::select(id, menses_index, menses_date = daterated)
+    
+    # Step 2: For each menses window, label +/- days with its index
+    cpass_labeled <- purrr::map_dfr(seq_len(nrow(menses_rows)), function(i) {
+      m_row <- menses_rows[i, ]
+      data %>%
+        dplyr::filter(
+          id == m_row$id,
+          daterated >= m_row$menses_date - days_before,
+          daterated <= m_row$menses_date + days_after
+        ) %>%
+        dplyr::mutate(cpass_count = m_row$menses_index)
+    })
+    
+    # Step 3: Join back to full data
+    result <- data %>%
+      dplyr::left_join(
+        cpass_labeled %>% dplyr::select(id, daterated, cpass_count),
+        by = c("id", "daterated")
+      )
+    
+    return(result)
+  }
+  
+  
+  
+  
+
   cpass_process <- function(dataframe, symptom_map, id_number) {
     dataframe <- dataframe %>%
-      dplyr::mutate(subject = id, cycle = cyclenum)
+      dplyr::mutate(subject = id, cycle = cpass_count)
 
     cycleCount <- function(x) {
       inds <- which(x == 1)
@@ -363,6 +402,7 @@ server <- function(input, output, session) {
         input$menses_col,
         input$ovtoday_col,
         "cyclenum",
+        "cpass_count",
         "scaled_cycleday",
         "scaled_cycleday_impute",
         "scaled_cycleday_ov",
@@ -408,6 +448,7 @@ server <- function(input, output, session) {
       symptom_map <- symptom_map[!is.na(unlist(symptom_map))]
 
       # Run CPASS and store plots
+      processed_data() = add_cpass_count(processed_data())
       plots <- tryCatch({
         cpass_process(
           dataframe = processed_data(),
