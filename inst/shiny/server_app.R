@@ -448,11 +448,14 @@ server <- function(input, output, session) {
       )
       symptom_map <- symptom_map[!is.na(unlist(symptom_map))]
 
+      
+      # Add cpass_count column
+      updated_data <- add_cpass_count(processed_data())
+      cpass_data(updated_data)
       # Run CPASS and store plots
-      processed_data() = add_cpass_count(processed_data())
       plots <- tryCatch({
         cpass_process(
-          dataframe = processed_data(),
+          dataframe = cpass_data(),
           symptom_map = unlist(symptom_map),
           id_number = as.numeric(input$cpass_id_select)
         )
