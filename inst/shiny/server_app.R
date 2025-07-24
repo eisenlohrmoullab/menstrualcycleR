@@ -50,7 +50,7 @@ server <- function(input, output, session) {
     processed <- data %>%
       menstrualcycleR::pacts_scaling(
         id = !!id_col,
-        daterated = !!date_col,
+        date = !!date_col,
         menses = !!menses_col,
         ovtoday = !!ovtoday_col,
         lower_cyclength_bound = as.numeric(input$lower_bound),
