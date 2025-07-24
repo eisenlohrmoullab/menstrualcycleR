@@ -516,8 +516,8 @@ process_follicular_phase_impute <- function(data, id, date, menses) {
       if (!is.na(foldaycount_impute) &&
           i >= 3 &&
           !is.na(data$ovtoday_impute[i]) &&
+          !is.na(data$ovtoday_impute[i - 1]) &&
           data$ovtoday_impute[i - 1] == 1) {
-        # Stop counting one row after ovtoday == 1
         foldaycount_impute <- NA
       } else if (data[[menses_col]][i] == 1) {
         # Start counting when menses == 1
