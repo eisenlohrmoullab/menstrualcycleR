@@ -19,7 +19,7 @@ pacts_scaling(
 
 \item{id}{A unique identifier for individuals in the dataset.}
 
-\item{date}{A date column indicating when the data was recorded.}
+\item{date}{A date column indicating the day in which outcomes were reported on/observed.Keep in mind that prior to using this function, you may want to adjust dates for late-night entries (e.g. reclassify post-midnight surveys to the previous day).}
 
 \item{menses}{A binary column (\code{0}/\code{1}) indicating the first day of menses onset, where \code{1} represents menses onset.}
 
