@@ -264,16 +264,14 @@ process_follicular_phase_base <- function(data, id, date, menses) {
   
   data = data %>%
     dplyr::mutate(
-      cyclic_fol = dplyr::case_when(
-        mcyclength >= lower_cyclength_bound &
-          mcyclength <= upper_cyclength_bound ~ folperc,
+      cyclic_fol = folperc,
         TRUE ~ NA
       )
-    ) 
+    
   
   # Calculate ovulation-centered follicular phase part of cyclic time 
   data = data %>% 
-    dplyr::mutate(cyclic_fol_ov = dplyr::case_when(!is.na(cyclic_fol) ~ -1*(1 - cyclic_fol), 
+    dplyr::mutate(cyclic_fol_ov = dplyr::case_when(!is.na(cyclic_fol) & is.na(percfol_ov) ~ -1*(1 - cyclic_fol), 
                                      TRUE ~ cyclic_fol))
   
   return(data)
@@ -445,9 +443,7 @@ process_luteal_phase_impute <- function(data, id, date, menses) {
   data = data %>%
     dplyr::mutate(
       cyclic_lut1_imp = dplyr::case_when(
-        mcyclength >= lower_cyclength_bound &
-          mcyclength <= upper_cyclength_bound ~ lutdaycount1_impute / (lutmax_impute +
-                                                                         1),
+        !is.na(perclut_impute) ~ lutdaycount1_impute / (lutmax_impute + 1),
         TRUE ~ NA
       )
     )
