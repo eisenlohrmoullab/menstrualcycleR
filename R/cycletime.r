@@ -100,6 +100,24 @@ calculate_cycletime <- function(data, id, daterated, menses, ovtoday, lower_cycl
   data <- process_follicular_phase_impute(data, id, daterated, menses)
   data <- create_scaled_cycleday(id, data)
   
+  data <- data %>%
+    dplyr::mutate(
+      scaled_cycleday = dplyr::case_when(ovtoday == 1 &
+                                           is.na(scaled_cycleday) ~ 1, TRUE ~ scaled_cycleday),
+      scaled_cycleday_impute = dplyr::case_when(
+        ovtoday_impute == 1 & is.na(scaled_cycleday_impute) ~ 1,
+        TRUE ~ scaled_cycleday_impute
+      ),
+      scaled_cycleday_ov = dplyr::case_when(
+        menses == 1 & is.na(scaled_cycleday_ov) ~ -1,
+        TRUE ~ scaled_cycleday_ov
+      ),
+      scaled_cycleday_imp_ov = dplyr::case_when(
+        menses == 1 & is.na(scaled_cycleday_imp_ov) ~ -1,
+        TRUE ~ scaled_cycleday_imp_ov
+      )
+    ) 
+  
   #Select and return the relevant columns
   data <- data %>%
     dplyr::select(
@@ -109,7 +127,12 @@ calculate_cycletime <- function(data, id, daterated, menses, ovtoday, lower_cycl
         scaled_cycleday,
         scaled_cycleday_ov,
         scaled_cycleday_impute,
-        scaled_cycleday_imp_ov
+        scaled_cycleday_imp_ov, 
+        cyclic_time,
+        cyclic_time_impute, 
+        cyclic_time_ov, 
+        cyclic_time_imp_ov, 
+        luteal_length
       )
     )
 
