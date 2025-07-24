@@ -48,13 +48,7 @@ server <- function(input, output, session) {
     }
     
     processed <- data %>%
-      menstrualcycleR::calculate_mcyclength(
-        id = !!id_col,
-        daterated = !!date_col,
-        menses = !!menses_col,
-        ovtoday = !!ovtoday_col
-      ) %>%
-      menstrualcycleR::calculate_cycletime(
+      menstrualcycleR::pacts_scaling(
         id = !!id_col,
         daterated = !!date_col,
         menses = !!menses_col,
