@@ -17,10 +17,18 @@
 #' @export
 #'
 #' @examples
-#' data("cycledata")
-#' data = calculate_mcyclength(data, id = id, daterated , menses = menses, ovtoday = ovtoday)
-#' data = calculate_cycletime(data, id = id, daterated , menses = menses, ovtoday = ovtoday)
-# results <- cycle_plot_individual(data, id = 1, symptom = "symptom", centering = "menses", y_scale = "person-centered")
+#' data(cycledata)
+#'
+#' data_with_scaling <- pacts_scaling(
+#'   data, 
+#'   id = id, 
+#'   date = date, 
+#'   menses = menses, 
+#'   ovtoday = ovtoday, 
+#'   lower_cyclength_bound = 21, 
+#'   upper_cyclength_bound = 35
+#' )
+# plot_info_id_1 <- cycle_plot_individual(data_with_scaling, id = 1, symptom = "symptom", centering = "menses", y_scale = "person-centered")
 #' 
 #' 
 
