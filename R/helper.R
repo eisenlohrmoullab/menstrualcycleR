@@ -84,6 +84,35 @@ process_luteal_phase_base <- function(data, id, daterated, menses) {
       lutperc1 = lutperc - 1
     )
   
+  # Calculate cyclic time luteal phase part 
+  data$cyclic_lut1 = data$lutdaycount1/(data$lutmax+1)
+  
+  data = data %>%
+    dplyr::mutate(
+      cyclic_lut = dplyr::case_when(
+        mcyclength >= lower_cyclength_bound &
+          mcyclength <= upper_cyclength_bound ~ (-1 * (1 - dat$cyclic_lut1)),
+        TRUE ~ NA
+      )
+    )
+  
+  # Calculate ovulation-centered luteal phase part of cyclic time 
+  data = data %>% 
+    dplyr::mutate(cyclic_lut_ov = dplyr::case_when(!is.na(cyclic_lut) ~ 1 + cyclic_lut, 
+                                     TRUE ~ cyclic_lut))
+  
+  # Luteal phase length variable 
+  data = data %>%
+    dplyr::mutate(
+      luteal_length = case_when(
+        mcyclength >= lower_cyclength_bound &
+          mcyclength <= upper_cyclength_bound ~ lutmax,
+        TRUE ~ NA
+      )
+    )
+  
+  data = data %>%
+    dplyr::mutate(luteal_length = dplyr::case_when(is.na(lutdaycount1) ~ NA, TRUE ~ luteal_length))
   
   # data <- data %>%
   #   dplyr::arrange(!!id, !!daterated) %>%  # Ensure correct order
@@ -230,6 +259,23 @@ process_follicular_phase_base <- function(data, id, daterated, menses) {
       ),
       percfol_ov = percfol - 1
     )
+  
+  # Calculate follicular phase part of cyclic time
+  
+  data = data %>%
+    dplyr::mutate(
+      cyclic_fol = dplyr::case_when(
+        mcyclength >= lower_cyclength_bound &
+          mcyclength <= upper_cyclength_bound ~ folperc,
+        TRUE ~ NA
+      )
+    ) 
+  
+  # Calculate ovulation-centered follicular phase part of cyclic time 
+  data = data %>% 
+    dplyr::mutate(cyclic_fol_ov = dplyr::case_when(!is.na(cyclic_fol) ~ -1*(1 - cyclic_fol), 
+                                     TRUE ~ cyclic_fol))
+  
   return(data)
 }
 
@@ -388,8 +434,22 @@ process_luteal_phase_impute <- function(data, id, daterated, menses) {
       )
     ))
   
-  #lutperc is scaled from 0 to 1, so substracting 1 so that it is scaled from -1 to 0 for menses-centered scaled_cycleday 
+  # lutperc is scaled from 0 to 1, so substracting 1 so that it is scaled from -1 to 0 for menses-centered scaled_cycleday 
   data$perclut_impute = data$lutperc_impute -1 
+  
+  # Calculating cyclic_lut_imp (luteal component using ovtoday_impute)
+  
+  data = data %>%
+    dplyr::mutate(
+      cyclic_lut1_imp = dplyr::case_when(
+        mcyclength >= lower_cyclength_bound &
+          mcyclength <= upper_cyclength_bound ~ lutdaycount1_impute / (lutmax_impute +
+                                                                         1),
+        TRUE ~ NA
+      )
+    )
+  
+  data$cyclic_lut_imp = -1*(1 - data$cyclic_lut1_imp)
   
   # Calculate `lutdaycount_imp_ov`
   data <- data %>%
@@ -414,7 +474,10 @@ process_luteal_phase_impute <- function(data, id, daterated, menses) {
       )
     ))
   
-
+  # Calculating ovulation-centered cyclic_lut_imp_ov (luteal component using ovtoday_impute)
+  data = data %>% 
+    dplyr::mutate(cyclic_lut_imp_ov = dplyr::case_when(!is.na(cyclic_lut_imp) ~ 1 + cyclic_lut_imp, 
+                                         TRUE ~ cyclic_lut_imp))
   
   return(data)
 }
@@ -483,9 +546,17 @@ process_follicular_phase_impute <- function(data, id, daterated, menses) {
     }
   }
   
-  # Create `percfol_impute`, based on Bull 2019 norms
+  # Create `percfol_impute`
   data <- data %>%
     dplyr::mutate(percfol_impute = ifelse(mcyclength >= lower_cyclength_bound & mcyclength <= upper_cyclength_bound & cycle_incomplete != 1, foldaycount_impute / folmax_impute, NA))
+  
+  # Create cyclic_fol_imp, follicular part of cyclic time, using ovtoday_impute 
+  data$cyclic_fol_imp = data$percfol_impute
+  
+  # Create cyclic_fol_imp_ov, ovulation-centered follicular part of cyclic time, using ovtoday_impute 
+  data = data %>% 
+    dplyr::mutate(cyclic_fol_imp_ov = dplyr::case_when(!is.na(cyclic_fol_imp) ~ -1*(1 - cyclic_fol_imp), 
+                                         TRUE ~ cyclic_fol_imp))
   
   return(data)
 }
@@ -591,6 +662,32 @@ create_scaled_cycleday <- function(id, data) {
         percfol_ov_imp
       )
     )
+  
+  # Create cyclic_time
+  data = data %>% 
+    dplyr::mutate(cyclic_time = dplyr::case_when(is.na(cyclic_lut) ~ cyclic_fol, 
+                                   TRUE ~ cyclic_lut))
+  
+  # Create cyclic_time_impute
+  data = data %>%
+    dplyr::mutate(
+      cyclic_time_imp1 = dplyr::case_when(is.na(cyclic_lut_imp) ~ cyclic_fol_imp, TRUE ~ cyclic_lut_imp),
+      cyclic_time_impute = dplyr::case_when(is.na(cyclic_time) ~ cyclic_time_imp1, TRUE ~ cyclic_time)
+    )
+  
+  # Create ovulation-centered cyclic_time_ov
+  data = data %>% 
+    dplyr::mutate(cyclic_time_ov = dplyr::case_when(is.na(cyclic_lut_ov) ~ cyclic_fol_ov, 
+                                      TRUE ~ cyclic_lut_ov))
+  
+  # Created ovulation-centered cyclic_time_imp_ov
+  data = data %>% 
+    dplyr::mutate(cyclic_time_imp_ov1 = dplyr::case_when(is.na(cyclic_lut_imp_ov) ~ cyclic_fol_imp_ov, 
+                                           TRUE ~ cyclic_lut_imp_ov))
+  
+  data = data %>% 
+    dplyr::mutate(cyclic_time_imp_ov = dplyr::case_when(is.na(cyclic_time_ov) ~ cyclic_time_imp_ov1, 
+                                          TRUE ~ cyclic_time_ov))
   
   return(data)
 }
