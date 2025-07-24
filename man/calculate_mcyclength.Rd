@@ -4,14 +4,14 @@
 \alias{calculate_mcyclength}
 \title{Calculate Menses-to-Menses Cycle Lengths}
 \usage{
-calculate_mcyclength(data, id, daterated, menses, ovtoday)
+calculate_mcyclength(data, id, date, menses, ovtoday)
 }
 \arguments{
 \item{data}{A data frame containing the required input variables.}
 
 \item{id}{A unique identifier for individuals in the dataset.}
 
-\item{daterated}{A date column indicating when the data was recorded.}
+\item{date}{A date column indicating when the data was recorded.}
 
 \item{menses}{A binary column (\code{0}/\code{1}) indicating the first day of menses onset, where \code{1} represents menses onset.}
 
@@ -33,7 +33,7 @@ The input dataset must be in long format, where each row represents a unique dat
 \details{
 \itemize{
 \item The \code{menses} column should indicate the first day of menses onset for each individual, coded as \code{1} (menses) or \code{0} (no menses).
-\item The \code{daterated} column should be a date variable recording when the data was collected.
+\item The \code{date} column should be a date variable recording when the data was collected.
 \item The \code{ovtoday} column should indicate estimated ovulation days, also coded as \code{1} (ovulation day) or \code{0} (non-ovulation day).
 }
 }
@@ -44,7 +44,7 @@ data(cycledata)
 # Calculate menses-to-menses cycle lengths
 result <- calculate_mcyclength(data = data, 
                                 id = id, 
-                                daterated = daterated, 
+                                date = date, 
                                 menses = menses, 
                                 ovtoday = ovtoday)
 
