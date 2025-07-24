@@ -32,26 +32,19 @@
 #' # Load the example dataset
 #' data(cycledata)
 #'
-#' # First, calculate menses-to-menses cycle lengths
-#' data <- calculate_mcyclength(
+#' data_with_scaling <- pacts_scaling(
 #'   data, 
 #'   id = id, 
 #'   daterated = daterated, 
 #'   menses = menses, 
-#'   ovtoday = ovtoday
+#'   ovtoday = ovtoday, 
+#'   lower_cyclength_bound = 21, 
+#'   upper_cyclength_bound = 35
 #' )
 #'
-#' # Then, create cycle time variables
-#' data <- calculate_cycletime(
-#'   data, 
-#'   id = id, 
-#'   daterated = daterated, 
-#'   menses = menses, 
-#'   ovtoday = ovtoday
-#' )
 #'
 #' # View the result
-#' print(data)
+#' print(data_with_scaling)
 #' 
 
 pacts_scaling <- function(data, id, daterated, menses, ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35) {
