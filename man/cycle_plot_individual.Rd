@@ -41,9 +41,17 @@ This function creates cycle-specific plots and summary statistics for a specifie
 storing both in a named list for easy access.
 }
 \examples{
-data("cycledata")
-data = calculate_mcyclength(data, id = id, daterated , menses = menses, ovtoday = ovtoday)
-data = calculate_cycletime(data, id = id, daterated , menses = menses, ovtoday = ovtoday)
+data(cycledata)
+
+data_with_scaling <- pacts_scaling(
+  data, 
+  id = id, 
+  date = date, 
+  menses = menses, 
+  ovtoday = ovtoday, 
+  lower_cyclength_bound = 21, 
+  upper_cyclength_bound = 35
+)
 
 
 }

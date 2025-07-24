@@ -47,14 +47,23 @@ and provides flexibility in choosing the y-axis scale for the plot.
 \examples{
 # Example usage:
 data(cycledata)
-data = calculate_mcyclength(data, id, daterated, menses, ovtoday)
-data = calculate_cycletime(data, id, daterated, menses, ovtoday)
-result <- cycle_plot(
-  data,
+
+data_with_scaling <- pacts_scaling(
+  data, 
+  id = id, 
+  date = date, 
+  menses = menses, 
+  ovtoday = ovtoday, 
+  lower_cyclength_bound = 21, 
+  upper_cyclength_bound = 35
+)
+
+cycle_plot_data <- cycle_plot(
+  data_with_scaling,
   "symptom",
   centering = "menses",
   include_impute = TRUE,
   y_scale = "person-centered"
 )
-result$plot
+cycle_plot_data$plot
 }
