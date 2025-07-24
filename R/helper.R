@@ -91,7 +91,7 @@ process_luteal_phase_base <- function(data, id, daterated, menses) {
     dplyr::mutate(
       cyclic_lut = dplyr::case_when(
         mcyclength >= lower_cyclength_bound &
-          mcyclength <= upper_cyclength_bound ~ (-1 * (1 - data$cyclic_lut1)),
+          mcyclength <= upper_cyclength_bound ~ (-1 * (1 - cyclic_lut1)),
         TRUE ~ NA
       )
     )
