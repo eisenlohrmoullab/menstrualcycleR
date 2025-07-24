@@ -32,34 +32,26 @@
 #' # Load example dataset
 #' data(cycledata)
 #'
-#' # Calculate menses-to-menses cycle lengths
-#' data <- calculate_mcyclength(
+#' data_with_scaling <- pacts_scaling(
 #'   data, 
 #'   id = id, 
-#'   daterated = daterated, 
+#'   date = date, 
 #'   menses = menses, 
-#'   ovtoday = ovtoday
-#' )
-#'
-#' # Add cycle time variables
-#' data <- calculate_cycletime(
-#'   data, 
-#'   id = id, 
-#'   daterated = daterated, 
-#'   menses = menses, 
-#'   ovtoday = ovtoday
+#'   ovtoday = ovtoday, 
+#'   lower_cyclength_bound = 21, 
+#'   upper_cyclength_bound = 35
 #' )
 #'
 #' # Analyze symptom data availability
-#' result <- cycledata_check(
-#'   data, 
+#' data_available_info <- cycledata_check(
+#'   data_with_scaling, 
 #'   symptom_columns = c("symptom")
 #' )
 #'
 #' # View results
-#' print(result$by_id)
-#' print(result$overall)
-#' print(result$data_symptom_plots$symptom)
+#' print(data_available_info$by_id)
+#' print(data_available_info$overall)
+#' print(data_available_info$data_symptom_plots$symptom)
 
 
 cycledata_check <- function(data, symptom_columns) {
