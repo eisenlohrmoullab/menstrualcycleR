@@ -2,7 +2,7 @@ utils::globalVariables(c("ovtoday_impute", "scaled_cycleday", "scaled_cycleday_o
 
 .onAttach <- function(libname, pkgname) {
   packageStartupMessage(
-    "Thank you for using the menstrualcycleR package!\n",
+    "Welcome to the menstrualcycleR package!\n",
     "If you use this package, please cite:\n",
     "Nagpal, A., Schmalenberger, K. M., Barone, J., Mulligan, E. M., Stumper, A., Knol, L., … Eisenlohr-Moul, T. A., PhD. (2025, May 6). ",
     "Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the `menstrualcycleR` package. ",
