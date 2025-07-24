@@ -9,7 +9,9 @@ Authors@R:
 Description: The menstrualcycleR package provides tools for Phase-Aligned Cycle Time Scaling (PACTS),
     enabling precise and dynamic analysis of menstrual cycle data by standardizing events across
     cycles onto a continuous timeline while accounting for variability in ovulation timing and
-    cycle lengths.
+    cycle lengths. 
+    
+URL: https://osf.io/preprints/osf/hd5xw_v1?view_only=
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
