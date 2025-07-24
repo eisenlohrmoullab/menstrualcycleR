@@ -35,7 +35,7 @@
 #' data_with_scaling <- pacts_scaling(
 #'   data, 
 #'   id = id, 
-#'   daterated = daterated, 
+#'   date = date, 
 #'   menses = menses, 
 #'   ovtoday = ovtoday, 
 #'   lower_cyclength_bound = 21, 
