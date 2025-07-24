@@ -8,7 +8,7 @@
 #'
 #' @param data A data frame containing the required input variables.
 #' @param id A unique identifier for individuals in the dataset.
-#' @param date A date column indicating when the data was recorded.
+#' @param date A date column indicating the day in which outcomes were reported on/observed.Keep in mind that prior to using this function, you may want to adjust dates for late-night entries (e.g. reclassify post-midnight surveys to the previous day).
 #' @param menses A binary column (`0`/`1`) indicating the first day of menses onset, where `1` represents menses onset.
 #' @param ovtoday A binary column (`0`/`1`) indicating the estimated day of ovulation, where `1` represents ovulation.
 #' @param lower_cyclength_bound A numeric that indicates the lower bound of cycle lengths that the function will scale, the default is 21 
