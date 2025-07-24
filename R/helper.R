@@ -378,11 +378,14 @@ process_luteal_phase_impute <- function(data, id, date, menses) {
         lutdaycount1_impute[i] <- lutdaycount1_impute[i - 1] + 1
       }
       
-      if (!is.na(lutdaycount1_impute[i]) &&
-          !is.na(data[[menses_col]][i]) &&
-          data[[menses_col]][i] == 1) {
-        lutdaycount1_impute[i] <- NA
-      } else if (data$ovtoday_impute[i] == 1) {
+      if (is.na(lutdaycount1_impute[i])) {
+        if (!is.na(data[[menses_col]][i]) && data[[menses_col]][i] == 1) {
+          lutdaycount1_impute[i] <- NA
+        }
+      }
+      else if (!is.na(data$ovtoday_impute[i]) &&
+               data$ovtoday_impute[i] == 1)
+      {
         lutdaycount1_impute[i] <- 0
       }
       
