@@ -264,8 +264,7 @@ process_follicular_phase_base <- function(data, id, date, menses) {
   
   data = data %>%
     dplyr::mutate(
-      cyclic_fol = folperc,
-        TRUE ~ NA
+      cyclic_fol = folperc
       )
     
   
