@@ -4,14 +4,14 @@
 \alias{process_luteal_phase_base}
 \title{Process Data (Internal)}
 \usage{
-process_luteal_phase_base(data, id, daterated, menses)
+process_luteal_phase_base(data, id, date, menses)
 }
 \arguments{
 \item{data}{A data frame containing cycle data.}
 
 \item{id}{A column specifying individual ids.}
 
-\item{daterated}{A column specifying the dates.}
+\item{date}{A column specifying the dates.}
 
 \item{menses}{A column indicating menses (0/1).}
 }
