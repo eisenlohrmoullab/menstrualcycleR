@@ -48,6 +48,19 @@
 #' 
 
 pacts_scaling <- function(data, id, date, menses, ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35) {
+  id <- rlang::enquo(id)
+  date <- rlang::enquo(date)
+  menses <- rlang::enquo(menses)
+  ovtoday <- rlang::enquo(ovtoday)
+  
+  data = data %>%
+   dplyr:: mutate(
+      id = !!id,
+      date = !!date,
+      menses = !!menses,
+      ovtoday = !!ovtoday
+    )
+  
   data = calculate_mcyclength(data, id, date, menses, ovtoday)
   data = calculate_cycletime(data, id, date, menses, ovtoday, lower_cyclength_bound, upper_cyclength_bound)
   return(data)
