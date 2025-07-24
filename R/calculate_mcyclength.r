@@ -4,14 +4,14 @@
 #' The input dataset must be in long format, where each row represents a unique date for a specific individual.
 #' 
 #' - The `menses` column should indicate the first day of menses onset for each individual, coded as `1` (menses) or `0` (no menses).
-#' - The `daterated` column should be a date variable recording when the data was collected.
+#' - The `date` column should be a date variable recording when the data was collected.
 #' - The `ovtoday` column should indicate estimated ovulation days, also coded as `1` (ovulation day) or `0` (non-ovulation day).
 #'
 #' @keywords menstrual cycle, menses, cycle analysis
 #'
 #' @param data A data frame containing the required input variables.
 #' @param id A unique identifier for individuals in the dataset.
-#' @param daterated A date column indicating when the data was recorded.
+#' @param date A date column indicating when the data was recorded.
 #' @param menses A binary column (`0`/`1`) indicating the first day of menses onset, where `1` represents menses onset.
 #' @param ovtoday A binary column (`0`/`1`) indicating the estimated day of ovulation, where `1` represents ovulation day.
 #'
@@ -29,7 +29,7 @@
 #' # Calculate menses-to-menses cycle lengths
 #' result <- calculate_mcyclength(data = data, 
 #'                                 id = id, 
-#'                                 daterated = daterated, 
+#'                                 date = date, 
 #'                                 menses = menses, 
 #'                                 ovtoday = ovtoday)
 #' 
@@ -37,21 +37,21 @@
 #' print(result)
 
 
-calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
+calculate_mcyclength <- function(data, id, date, menses, ovtoday) {
   `%>%` <- magrittr::`%>%`
   `:=` <- rlang::`:=`
   
   
-  # Ensure variable and daterated are evaluated correctly
+  # Ensure variable and date are evaluated correctly
   # Capture column names
   menses <- rlang::enquo(menses)
-  daterated <- rlang::enquo(daterated)
+  date <- rlang::enquo(date)
   id <- rlang::enquo(id)
   ovtoday <- rlang::enquo(ovtoday)
   
   # Print column names to debug
   print(glue::glue("id: {rlang::quo_name(id)}"))
-  print(glue::glue("daterated: {rlang::quo_name(daterated)}"))
+  print(glue::glue("date: {rlang::quo_name(date)}"))
   print(glue::glue("menses: {rlang::quo_name(menses)}"))
   print(glue::glue("ovtoday: {rlang::quo_name(ovtoday)}"))
 
@@ -59,25 +59,25 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   # Initialize columns
   data <- data %>%
     dplyr::mutate(id = !!id, 
-                  daterated = !!daterated, 
+                  date = !!date, 
                   menses = !!menses, 
                   ovtoday = !!ovtoday)
   
   
-  # Step 1: Ensure daterated is in Date format
+  # Step 1: Ensure date is in Date format
   data <- data %>%
-    dplyr::mutate(!!rlang::quo_name(daterated) := lubridate::ymd(!!daterated))
+    dplyr::mutate(!!rlang::quo_name(date) := lubridate::ymd(!!date))
   
   # Step 2: Remove rows with missing dates
-  data <- data[complete.cases(data[[rlang::quo_name(daterated)]]), ]
+  data <- data[complete.cases(data[[rlang::quo_name(date)]]), ]
   
   # Step 3: Fill missing dates within each group
   data <- data %>%
     dplyr::group_by(!!id) %>%
     tidyr::complete(
-      !!daterated := seq.Date(
-        min(!!daterated, na.rm = TRUE),
-        max(!!daterated, na.rm = TRUE),
+      !!date := seq.Date(
+        min(!!date, na.rm = TRUE),
+        max(!!date, na.rm = TRUE),
         by = "day"
       )
     ) %>%
@@ -99,13 +99,13 @@ calculate_mcyclength <- function(data, id, daterated, menses, ovtoday) {
   # Step 4: Ensure data is grouped and sorted properly
   data <- data %>%
     dplyr::group_by(!!id) %>%
-    dplyr::arrange(!!daterated, .by_group = TRUE)
+    dplyr::arrange(!!date, .by_group = TRUE)
   
   
   # Initialize columns
   data <- data %>%
     dplyr::group_by(!!id) %>%
-    dplyr::arrange(!!daterated, .by_group = TRUE) %>%
+    dplyr::arrange(!!date, .by_group = TRUE) %>%
     dplyr::mutate(
       m2mcount = NA_integer_,
       mcyclength = NA_integer_,
