@@ -81,7 +81,11 @@ server <- function(input, output, session) {
         "date",
         "cyclenum",
         "mcyclength",
-        "cycle_incomplete"
+        "cycle_incomplete", 
+        "cyclic_time_impute", 
+        "cyclic_time_impute", 
+        "cyclic_time_imp_ov", 
+        "luteal_length"
       )
     )
     updateCheckboxGroupInput(session, "cyclecheck_symptoms", choices = symptom_choices)
@@ -219,7 +223,11 @@ server <- function(input, output, session) {
         "ovtoday",
         "ovtoday_impute",
         "cycle_incomplete", 
-        "date"
+        "date", 
+        "cyclic_time_impute", 
+        "cyclic_time_impute", 
+        "cyclic_time_imp_ov", 
+        "luteal_length"
       )
     )
     updateCheckboxGroupInput(session, "selected_symptoms", choices = symptom_choices)
@@ -409,7 +417,11 @@ server <- function(input, output, session) {
         "m2mcount",
         "mcyclength",
         "cycle_incomplete",
-        "ovtoday_impute"
+        "ovtoday_impute", 
+        "cyclic_time_impute", 
+        "cyclic_time_impute", 
+        "cyclic_time_imp_ov", 
+        "luteal_length"
       )
     )
 
