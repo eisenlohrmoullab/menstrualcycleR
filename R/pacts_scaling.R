@@ -47,8 +47,8 @@
 #' print(data_with_scaling)
 #' 
 
-pacts_scaling <- function(data, id, daterated, menses, ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35) {
-  data = calculate_mcyclength(data, id, daterated, menses, ovtoday)
-  data = calculate_cycletime(data, id, daterated, menses, ovtoday)
+pacts_scaling <- function(data, id, date, menses, ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35) {
+  data = calculate_mcyclength(data, id, date, menses, ovtoday)
+  data = calculate_cycletime(data, id, date, menses, ovtoday, lower_cyclength_bound, upper_cyclength_bound)
   return(data)
 }
