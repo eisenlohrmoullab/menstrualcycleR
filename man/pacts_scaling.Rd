@@ -2,7 +2,7 @@
 % Please edit documentation in R/pacts_scaling.R
 \name{pacts_scaling}
 \alias{pacts_scaling}
-\title{Create Cycle Time Variables}
+\title{Adds Cycle Time Variables to Longitudinal Menstrual Cycle Data}
 \usage{
 pacts_scaling(
   data,
@@ -23,7 +23,16 @@ pacts_scaling(
 
 \item{menses}{A binary column (\code{0}/\code{1}) indicating the first day of menses onset, where \code{1} represents menses onset.}
 
-\item{ovtoday}{A binary column (\code{0}/\code{1}) indicating the estimated day of ovulation, where \code{1} represents ovulation.}
+\item{ovtoday}{A binary column (\code{0} or \code{1}) indicating the estimated day of ovulation, where \code{1} marks the day of ovulation. This column is required, even if ovulation was not directly assessed—if unavailable, include a column of \code{NA} or \code{0}s.
+Ovulation can be estimated using methods such as:
+\itemize{
+\item \strong{Luteinizing hormone (LH) tests}: Ovulation is typically estimated as the day after a positive LH test (LH +1), using a threshold of 40 mIU/ml for urinary LH.
+\item \strong{Basal body temperature (BBT)}: Ovulation is estimated as the day after the BBT nadir (BBT +1).
+}
+
+This function requires the \code{ovtoday} column to be coded accordingly (e.g., \code{1} on LH +1 or BBT +1).
+If ovulation was not assessed for a given menses-to-menses cycle (i.e., no \code{1} in the \code{ovtoday} column), the function will estimate ovulation as 15 days before the next menses onset, based on the typical luteal phase length. These imputed ovulation days will be indicated in a new binary column, \code{ovtoday_impute}, in the output.
+For more information regarding the validity of estimating ovulation via day -15 in the absence of biomarkers, see: Schmalenberger et al. (2021) and Nagpal et al. (2025).}
 
 \item{lower_cyclength_bound}{A numeric that indicates the lower bound of cycle lengths that the function will scale, the default is 21}
 
@@ -36,14 +45,28 @@ The input data frame with the following additional variables:
 \item \strong{\code{scaled_cycleday_impute}}: Similar to \code{scaled_cycleday}, but includes scaling based on imputed ovulation (\code{ovtoday_impute}) for cycles without confirmed ovulation (\code{ovtoday}). This variable spans from \code{-1} (the first day of the luteal phase) to \code{+1} (the estimated day of ovulation, either \code{ovtoday} or \code{ovtoday_impute}).
 \item \strong{\code{scaled_cycleday_ov}}: Centered on confirmed ovulation (\code{ovtoday == 1} corresponds to \code{scaled_cycleday_ov == 0}) and spans from \code{-1} (the first day of the follicular phase) to \code{+1} (the last day of the luteal phase).
 \item \strong{\code{scaled_cycleday_imp_ov}}: Similar to \code{scaled_cycleday_ov}, but includes scaling based on imputed ovulation (\code{ovtoday_impute}) for cycles without confirmed ovulation. This variable is centered on ovulation (\code{ovtoday == 1} or \code{ovtoday_impute == 1} corresponds to \code{scaled_cycleday == 0}) and spans from \code{-1} to \code{+1}.
-\item \strong{\code{ovtoday_impute}}: If ovulation is not indicated in the column inputted for the parameter \code{ovtoday} in a menses-to-menses cycle, \code{ovtoday_impute} will be calculated, which estimates ovulation as day -15 of the cycle.
+\item \strong{\code{ovtoday_impute}}: If ovulation is not indicated in the column inputted for the parameter \code{ovtoday} in a menses-to-menses cycle, \code{ovtoday_impute} will be calculated, which estimates ovulation as day -15 of the cycle. For information regarding the validity of day -15 as estimated day of ovulation see: Schmalenberger et al. (2021) and Nagpal et al. (2025).
 }
 }
 \description{
-This function calculates and adds cycle time variables to a longitudinal dataset.
+This function computes and adds menstrual cycle time variables to a long-format dataset, where each row represents a unique date for a specific individual.
 }
 \details{
-The dataset must be in long format, where each row represents a unique date for a specific individual.
+The dataset must include a column indicating the estimated day of ovulation. Ovulation can be assessed using several common methods in menstrual cycle research:
+\itemize{
+\item \strong{Luteinizing hormone (LH) urinary tests}: Ovulation is estimated as the day after a positive LH surge (i.e., LH +1), typically using a threshold of 40 mIU/ml.
+\item \strong{Basal body temperature (BBT)}: Ovulation is estimated as the day after the lowest point in BBT prior to the rise (i.e., BBT +1).
+}
+
+Before using this function, ovulation must be coded accordingly, with a value of \code{1} on the estimated day of ovulation in the \code{ovtoday} column and \code{0} or \code{NA} elsewhere.
+
+If ovulation was not assessed in your study, you must still include a placeholder \code{ovtoday} column (filled with \code{0} or \code{NA}). For cycles without a marked ovulation day (\code{ovtoday == 1}), the function will impute the ovulation day by counting backward 15 days from the onset of the next menses, based on the relatively stable length of the luteal phase. These imputed days will be marked with \code{1} in a new column named \code{ovtoday_impute} in the output.
+
+For additional guidance on assessing ovulation or using backward-count methods to estimate ovulation, see:
+\itemize{
+\item Schmalenberger, K. M., Tauseef, H. A., Barone, J. C., Owens, S. A., Lieberman, L., Jarczok, M. N., et al. (2021). How to study the menstrual cycle: Practical tools and recommendations. \emph{Psychoneuroendocrinology, 123}, 104895. https://doi.org/10.1016/j.psyneuen.2020.104895
+\item Nagpal, A., Schmalenberger, K. M., Barone, J., Mulligan, E. M., Stumper, A., Knol, L., et al. (2025). Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the \code{menstrualcycleR} package. https://doi.org/10.31219/osf.io/hd5xw_v1
+}
 }
 \examples{
 # Load the example dataset
