@@ -77,7 +77,7 @@ ui <- fluidPage(
                    )
                  )
         ),
-        tabPanel("Ovulation Analysis",
+        tabPanel("Ovulation Summary",
                  tableOutput("ovulation_summary"),
                  tableOutput("ovulation_summary_id")),
         
