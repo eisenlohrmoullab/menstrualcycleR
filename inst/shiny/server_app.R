@@ -78,7 +78,7 @@ server <- function(input, output, session) {
         "ovtoday",
         "m2mcount",
         "ovtoday_impute",
-        "daterated",
+        "date",
         "cyclenum",
         "mcyclength",
         "cycle_incomplete"
@@ -219,7 +219,7 @@ server <- function(input, output, session) {
         "ovtoday",
         "ovtoday_impute",
         "cycle_incomplete", 
-        "daterated"
+        "date"
       )
     )
     updateCheckboxGroupInput(session, "selected_symptoms", choices = symptom_choices)
@@ -304,7 +304,7 @@ server <- function(input, output, session) {
   add_cpass_count <- function(data, days_before = 8, days_after = 10) {
     # Step 1: Identify each menses start (first day per episode)
     menses_rows <- data %>%
-      dplyr::arrange(id, daterated) %>%
+      dplyr::arrange(id, date) %>%
       dplyr::group_by(id) %>%
       dplyr::mutate(menses_index = cumsum(menses == 1)) %>%
       dplyr::ungroup() %>%
@@ -312,7 +312,7 @@ server <- function(input, output, session) {
       dplyr::group_by(id, menses_index) %>%
       dplyr::slice(1) %>%
       dplyr::ungroup() %>%
-      dplyr::select(id, menses_index, menses_date = daterated)
+      dplyr::select(id, menses_index, menses_date = date)
     
     # Step 2: For each menses window, label +/- days with its index
     cpass_labeled <- purrr::map_dfr(seq_len(nrow(menses_rows)), function(i) {
@@ -320,8 +320,8 @@ server <- function(input, output, session) {
       data %>%
         dplyr::filter(
           id == m_row$id,
-          daterated >= m_row$menses_date - days_before,
-          daterated <= m_row$menses_date + days_after
+          date >= m_row$menses_date - days_before,
+          date <= m_row$menses_date + days_after
         ) %>%
         dplyr::mutate(cpass_count = m_row$menses_index)
     })
@@ -329,8 +329,8 @@ server <- function(input, output, session) {
     # Step 3: Join back to full data
     result <- data %>%
       dplyr::left_join(
-        cpass_labeled %>% dplyr::select(id, daterated, cpass_count),
-        by = c("id", "daterated")
+        cpass_labeled %>% dplyr::select(id, date, cpass_count),
+        by = c("id", "date")
       )
     
     return(result)
@@ -405,7 +405,7 @@ server <- function(input, output, session) {
         "scaled_cycleday_ov",
         "scaled_cycleday_imp_ov",
         "id",
-        "daterated",
+        "date",
         "m2mcount",
         "mcyclength",
         "cycle_incomplete",
