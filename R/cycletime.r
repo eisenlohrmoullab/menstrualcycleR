@@ -9,7 +9,7 @@
 #'
 #' @param data A data frame containing the required input variables.
 #' @param id A unique identifier for individuals in the dataset.
-#' @param daterated A date column indicating when the data was recorded.
+#' @param date A date column indicating when the data was recorded.
 #' @param menses A binary column (`0`/`1`) indicating the first day of menses onset, where `1` represents menses onset.
 #' @param ovtoday A binary column (`0`/`1`) indicating the estimated day of ovulation, where `1` represents ovulation.
 #' @param lower_cyclength_bound A numeric that indicates the lower bound of cycle lengths that the function will scale, the default is 21 
@@ -35,7 +35,7 @@
 #' data <- calculate_mcyclength(
 #'   data, 
 #'   id = id, 
-#'   daterated = daterated, 
+#'   date = date, 
 #'   menses = menses, 
 #'   ovtoday = ovtoday
 #' )
@@ -44,7 +44,7 @@
 #' data <- calculate_cycletime(
 #'   data, 
 #'   id = id, 
-#'   daterated = daterated, 
+#'   date = date, 
 #'   menses = menses, 
 #'   ovtoday = ovtoday
 #' )
@@ -54,7 +54,7 @@
 
 
 
-calculate_cycletime <- function(data, id, daterated, menses, ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35) {
+calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35) {
   `%>%` <- magrittr::`%>%`
   # Check if input data is a data frame
   if (!is.data.frame(data)) {
@@ -66,7 +66,7 @@ calculate_cycletime <- function(data, id, daterated, menses, ovtoday, lower_cycl
   
   # Quote the column names for tidy evaluation
   id <- rlang::enquo(id)
-  daterated <- rlang::enquo(daterated)
+  date <- rlang::enquo(date)
   menses <- rlang::enquo(menses)
   ovtoday <- rlang::enquo(ovtoday)
   # Create ovtoday 
@@ -77,7 +77,7 @@ calculate_cycletime <- function(data, id, daterated, menses, ovtoday, lower_cycl
     dplyr::mutate(menses = !!menses)
   
   data <- data %>% 
-    dplyr::mutate(daterated = !!daterated)
+    dplyr::mutate(date = !!date)
   
   data <- data %>% 
     dplyr::mutate(id = !!id)
@@ -90,14 +90,14 @@ calculate_cycletime <- function(data, id, daterated, menses, ovtoday, lower_cycl
   # Group and arrange data by ID and date
   data <- data %>%
     dplyr::group_by(!!id) %>%
-    dplyr::arrange(!!daterated, .by_group = TRUE)
+    dplyr::arrange(!!date, .by_group = TRUE)
   
   # Apply the processing functions in sequence
-  data <- process_luteal_phase_base(data, id, daterated, menses)
-  data <- process_follicular_phase_base(data, id, daterated, menses)
-  data <- calculate_ovtoday_impute(data, id, daterated, menses)
-  data <- process_luteal_phase_impute(data, id, daterated, menses)
-  data <- process_follicular_phase_impute(data, id, daterated, menses)
+  data <- process_luteal_phase_base(data, id, date, menses)
+  data <- process_follicular_phase_base(data, id, date, menses)
+  data <- calculate_ovtoday_impute(data, id, date, menses)
+  data <- process_luteal_phase_impute(data, id, date, menses)
+  data <- process_follicular_phase_impute(data, id, date, menses)
   data <- create_scaled_cycleday(id, data)
   
   data <- data %>%
