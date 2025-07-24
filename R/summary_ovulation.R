@@ -1,4 +1,12 @@
-#' A function to provide information regarding ovulation confirmation/imputation
+#' Summarize Ovulation Confirmation and Imputation
+#'
+#' This function summarizes how ovulation was identified in the dataset—either through direct confirmation using a biomarker or via imputation based on cycle timing.
+#' Specifically, it counts how often ovulation was directly confirmed (i.e., a value of `1` in the `ovtoday` column, indicating use of biomarkers such as LH surge tests or basal body temperature) versus how often ovulation was estimated using the backward-count method (15 days before the next menses onset).
+#' 
+#' The output includes both overall counts and per-individual (`id`) summaries.
+#'
+#' This information is important to examine in your dataset and should be transparently reported in publications. It helps readers understand the degree to which ovulation timing was determined using objective biomarkers (e.g., LH tests or BBT) versus estimated based on assumptions about luteal phase length.
+#' Biomarker-based confirmation is preferred whenever possible, as it provides more precise and biologically valid identification of ovulation, thereby improving the accuracy of cycle phase alignment and reducing potential sources of error.
 #'
 #'
 #' @keywords menstrual cycle
