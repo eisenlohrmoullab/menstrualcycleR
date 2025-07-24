@@ -4,7 +4,7 @@
 #'
 #' @param data A data frame containing cycle data.
 #' @param id A column specifying individual ids.
-#' @param daterated A column specifying the dates.
+#' @param date A column specifying the dates.
 #' @param menses A column indicating menses (0/1).
 #'
 #' @return A data frame with processed data.
@@ -12,18 +12,18 @@
 #' 
 #' 
 
-process_luteal_phase_base <- function(data, id, daterated, menses) {
+process_luteal_phase_base <- function(data, id, date, menses) {
   `%>%` <- magrittr::`%>%`
   
   # Quote column names for tidy evaluation
   id <- rlang::enquo(id)
-  daterated <- rlang::enquo(daterated)
+  date <- rlang::enquo(date)
   menses <- rlang::enquo(menses)
   
   # Group and arrange data
   data <- data %>%
     dplyr::group_by(!!id) %>%
-    dplyr::arrange(!!daterated, .by_group = TRUE) %>%
+    dplyr::arrange(!!date, .by_group = TRUE) %>%
     dplyr::mutate(lutmax = NA)
   
   # Helper function to calculate lutdaycount1
@@ -115,7 +115,7 @@ process_luteal_phase_base <- function(data, id, daterated, menses) {
     dplyr::mutate(luteal_length = dplyr::case_when(is.na(lutdaycount1) ~ NA, TRUE ~ luteal_length))
   
   # data <- data %>%
-  #   dplyr::arrange(!!id, !!daterated) %>%  # Ensure correct order
+  #   dplyr::arrange(!!id, !!date) %>%  # Ensure correct order
   #   dplyr::group_by(!!id, cyclenum) %>%
   #   dplyr::mutate(
   #     next_id = dplyr::lead(!!id),  # Capture the ID of the next row
@@ -151,7 +151,7 @@ process_luteal_phase_base <- function(data, id, daterated, menses) {
 }
 
 
-process_follicular_phase_base <- function(data, id, daterated, menses) {
+process_follicular_phase_base <- function(data, id, date, menses) {
   `%>%` <- magrittr::`%>%`
   
   # Early validation for required columns
@@ -169,13 +169,13 @@ process_follicular_phase_base <- function(data, id, daterated, menses) {
   
   # Quote column names for tidy evaluation
   id <- rlang::enquo(id)
-  daterated <- rlang::enquo(daterated)
+  date <- rlang::enquo(date)
   menses <- rlang::enquo(menses)
   
   # Processing logic remains unchanged
   data <- data %>%
     dplyr::group_by(!!id) %>%
-    dplyr::arrange(!!daterated, .by_group = TRUE) %>%
+    dplyr::arrange(!!date, .by_group = TRUE) %>%
     dplyr::mutate(folmax = NA, foldaycount = NA)
   
   # Function to calculate foldaycount
@@ -235,7 +235,7 @@ process_follicular_phase_base <- function(data, id, daterated, menses) {
   #   dplyr::mutate(folperc = ifelse(follength >= 8 & follength <= 25, foldaycount / folmax, NA))
   
   data <- data %>%
-    dplyr::arrange(!!id, cyclenum,!!daterated) %>%  # Ensure correct order
+    dplyr::arrange(!!id, cyclenum,!!date) %>%  # Ensure correct order
     dplyr::group_by(!!id, cyclenum) %>%
     dplyr::mutate(
       next_id = dplyr::lead(!!id),  # Capture the ID of the next row
@@ -281,12 +281,12 @@ process_follicular_phase_base <- function(data, id, daterated, menses) {
 
 
 
-calculate_ovtoday_impute <- function(data, id, daterated, menses) {
+calculate_ovtoday_impute <- function(data, id, date, menses) {
   `%>%` <- magrittr::`%>%`
   
   # Dynamically handle input column names
   id <- rlang::enquo(id)
-  daterated <- rlang::enquo(daterated)
+  date <- rlang::enquo(date)
   menses <- rlang::enquo(menses)
   
   # Step 1: Calculate `lutlength_impute` and `follength_impute`
@@ -300,10 +300,10 @@ calculate_ovtoday_impute <- function(data, id, daterated, menses) {
       ) 
     )
   
-  # Step 2: Group by `id` and sort by `daterated`
+  # Step 2: Group by `id` and sort by `date`
   data <- data %>%
     dplyr::group_by(!!id) %>%
-    dplyr::arrange(!!daterated, .by_group = TRUE)
+    dplyr::arrange(!!date, .by_group = TRUE)
   
   # Step 3: Calculate `follcount1_impute`
   data$follcount1_impute <- NA
@@ -335,11 +335,11 @@ calculate_ovtoday_impute <- function(data, id, daterated, menses) {
   # Step 6: If ovtoday and ovtoday_impute are within 5 days of each other, ovtoday_impute == 0
   data <- data %>%
     dplyr::group_by(!!id) %>%
-    dplyr::arrange(!!daterated, .by_group = TRUE) %>%
+    dplyr::arrange(!!date, .by_group = TRUE) %>%
     dplyr::mutate(
       ovtoday_impute = ifelse(
-        ovtoday_impute == 1 & sapply(!!daterated, function(date) {
-          any(abs(difftime(daterated[ovtoday == 1], date, units = "days")) <= 7)
+        ovtoday_impute == 1 & sapply(!!date, function(date) {
+          any(abs(difftime(date[ovtoday == 1], date, units = "days")) <= 7)
         }),
         0,
         ovtoday_impute
@@ -352,18 +352,18 @@ calculate_ovtoday_impute <- function(data, id, daterated, menses) {
 }
 
 
-process_luteal_phase_impute <- function(data, id, daterated, menses) {
+process_luteal_phase_impute <- function(data, id, date, menses) {
   `%>%` <- magrittr::`%>%`
   
   # Dynamically handle input column names
   id <- rlang::enquo(id)
-  daterated <- rlang::enquo(daterated)
+  date <- rlang::enquo(date)
   menses <- rlang::enquo(menses)
   
   # Group by ID and arrange by date
   data <- data %>%
     dplyr::group_by(!!id) %>%
-    dplyr::arrange(!!daterated, .by_group = TRUE) %>%
+    dplyr::arrange(!!date, .by_group = TRUE) %>%
     dplyr::mutate(lutmax_impute = NA)
   
   # Helper function to calculate `lutdaycount1_impute`
@@ -483,18 +483,18 @@ process_luteal_phase_impute <- function(data, id, daterated, menses) {
 }
 
 
-process_follicular_phase_impute <- function(data, id, daterated, menses) {
+process_follicular_phase_impute <- function(data, id, date, menses) {
   `%>%` <- magrittr::`%>%`
   
   # Dynamically handle input column names
   id <- rlang::enquo(id)
-  daterated <- rlang::enquo(daterated)
+  date <- rlang::enquo(date)
   menses <- rlang::enquo(menses)
   
   # Group by ID and arrange by date
   data <- data %>%
     dplyr::group_by(!!id) %>%
-    dplyr::arrange(!!daterated, .by_group = TRUE) %>%
+    dplyr::arrange(!!date, .by_group = TRUE) %>%
     dplyr::mutate(folmax_impute = NA, foldaycount_impute = NA)
   
   # Helper function to calculate `foldaycount_impute`
