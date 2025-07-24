@@ -22,9 +22,18 @@
 #' @export
 #' @examples 
 #' data(cycledata)
-#' data = calculate_mcyclength(data, id, daterated, menses, ovtoday)
-#' data = calculate_cycletime(data, id, daterated, menses, ovtoday)
-#' summary_ovulation(data)
+#'
+#' data_with_scaling <- pacts_scaling(
+#'   data, 
+#'   id = id, 
+#'   date = date, 
+#'   menses = menses, 
+#'   ovtoday = ovtoday, 
+#'   lower_cyclength_bound = 21, 
+#'   upper_cyclength_bound = 35
+#' )
+#' 
+#' summary_ovulation(data_with_scaling)
 #' 
 
 summary_ovulation <- function(data){
