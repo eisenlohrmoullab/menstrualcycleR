@@ -1,19 +1,27 @@
 ---
-title: "menstrualcycleR-overview"
+title: "Getting Started with menstrualcycleR"
+author: "Anisha Nagpal, Tory Eisenlohr-Moul"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{menstrualcycleR-overview}
+  %\VignetteIndexEntry{Getting Started with menstrualcycleR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-```
-
-```{r setup}
 library(menstrualcycleR)
 ```
+
+Overview
+The menstrualcycleR package provides tools to process, visualize, and analyze daily menstrual cycle data. 
+
+Key features include:
+
+Preprocessing and alignment of daily data
+
+Individual cycle plotting
+
