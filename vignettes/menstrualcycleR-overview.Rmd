@@ -349,12 +349,12 @@ names(cycle_df_scaled)
   A binary indicator identifying **imputed ovulation days** (value = 1), estimated as 15 days before the next menses onset.
   
   
-  ### Checking Data availability 
+### Checking Data availability 
   
 To examine how much non-missing data is available, apply  `cycledata_check()`, inputting our resultant dataset from above (`df_with_scaling`) and choosing which outcomes you would like to look at. Here we are examining only 1 outcome: `symptom`. 
   
 ```{r cycledata_check}
-checkdata = cycledata_check(df_with_scaling, symptom_columns = c("symptom"))
+checkdata = cycledata_check(cycle_df_scaled, symptom_columns = c("symptom"))
 ```
   
 This function will output a warning if any IDs have less than 10 observations in a menses-to-menses cycle for the outcome selected. As you can see, IDs 9, 14, and 25 have less than 10 observations. 
