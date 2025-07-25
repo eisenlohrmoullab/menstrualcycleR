@@ -21,6 +21,7 @@
 #' - **`cyclenum`**: The number of complete menses-to-menses cycles for each individual (`id`).
 #' - **`cycle_incomplete`**: A binary variable (`0`/`1`), where `1` indicates that the row is not part of a complete cycle.
 #'
+#' @noRd
 #' 
 #' @examples 
 #' # Load the example dataset
