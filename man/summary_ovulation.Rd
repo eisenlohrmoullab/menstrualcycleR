@@ -8,33 +8,49 @@ summary_ovulation(data)
 }
 \arguments{
 \item{data}{A dataframe containing the input data. Must include columns for scaled cycle day variables and symptoms/dependent variables of interest.
-Scaled cycle day variables are added to your dataframe after applying the calculate_mcyclength() and calculate_cycletime() functions. (See examples below)}
+Scaled cycle day variables are added to your dataframe after applying the \code{pacts_scaling()} function. (See examples below)}
 }
 \value{
-A list containing two data frames: \code{ovstatus_total} and \code{ovstatus_id}.
+A list with two data frames:
 \itemize{
-\item \strong{\code{ovstatus_total}}: Among complete cycles, this data frame summarizes:
+\item \code{ovstatus_total}: A dataset-level summary showing:
 \enumerate{
-\item The number of cycles with confirmed ovulation.
-\item The number of cycles with ovulation imputed based on Natural Cycles norms.
+\item The number of cycles with confirmed ovulation (\code{ovtoday == 1}).
+\item The number of cycles with imputed ovulation (\code{ovtoday_impute == 1}).
 }
-\item \strong{\code{ovstatus_id}}: For each unique ID, this data frame provides details for complete cycles:
+
+\item \code{ovstatus_id}: A participant-level summary showing, for each unique ID:
 \enumerate{
-\item The number of cycles outside the 21–35 day range.
 \item The number of cycles with confirmed ovulation.
-\item The number of cycles with imputed ovulation based on Natural Cycles norms.
+\item The number of cycles with imputed ovulation.
 }
 }
 }
 \description{
-This function summarizes how ovulation was identified in the dataset—either through direct confirmation using a biomarker or via imputation based on cycle timing.
-Specifically, it counts how often ovulation was directly confirmed (i.e., a value of \code{1} in the \code{ovtoday} column, indicating use of biomarkers such as LH surge tests or basal body temperature) versus how often ovulation was estimated using the backward-count method (15 days before the next menses onset).
+This function provides a summary of how ovulation was identified across the dataset—either through direct confirmation using biomarkers or via imputation based on menstrual cycle timing.
 }
 \details{
-The output includes both overall counts and per-individual (\code{id}) summaries.
+Specifically, it counts the number of cycles in which ovulation was:
+\itemize{
+\item \strong{Confirmed} using objective biomarkers (i.e., a \code{1} in the \code{ovtoday} column), such as urinary LH surge tests or basal body temperature (BBT).
+\item \strong{Imputed} using the backward-count method, which estimates ovulation as 15 days before the subsequent menses onset (\code{ovtoday_impute == 1}), based on the typical length of the luteal phase.
+}
 
-This information is important to examine in your dataset and should be transparently reported in publications. It helps readers understand the degree to which ovulation timing was determined using objective biomarkers (e.g., LH tests or BBT) versus estimated based on assumptions about luteal phase length.
-Biomarker-based confirmation is preferred whenever possible, as it provides more precise and biologically valid identification of ovulation, thereby improving the accuracy of cycle phase alignment and reducing potential sources of error.
+The output includes both:
+\itemize{
+\item Overall summary counts across the entire dataset.
+\item Per-individual summaries to support participant-level quality checks and reporting.
+}
+
+This summary is essential for understanding data quality and should be transparently reported in publications. It helps clarify how often ovulation timing was determined using biologically grounded methods versus estimated through assumptions. Whenever possible, biomarker-based confirmation (e.g., LH or BBT) is preferred, as it provides more precise and physiologically valid estimates of ovulation timing. This enhances the accuracy of cycle phase alignment and reduces potential sources of error in time-sensitive analyses.
+
+When biomarkers are unavailable, imputation via the -15 day backward-count method offers a more biologically valid estimate than assuming ovulation occurs at the cycle midpoint. This method accounts for the relative stability of the luteal phase length and is recommended over midpoint-based estimates (see Nagpal et al., 2025).
+
+For further guidance on ovulation identification and the rationale for the -15 day imputation method, see:
+\itemize{
+\item Nagpal et al. (2025). \emph{Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the \code{menstrualcycleR} package}. https://doi.org/10.31219/osf.io/hd5xw_v1
+\item Schmalenberger et al. (2021). \emph{How to study the menstrual cycle: Practical tools and recommendations}. \emph{Psychoneuroendocrinology, 123}, 104895. https://doi.org/10.1016/j.psyneuen.2020.104895
+}
 }
 \examples{
 data(cycledata)
@@ -49,8 +65,14 @@ data_with_scaling <- pacts_scaling(
   upper_cyclength_bound = 35
 )
 
-summary_ovulation(data_with_scaling)
+ov_summary = summary_ovulation(data_with_scaling)
+print(ov_summary)
+ov_summary$ovstatus_total
+ov_summary$ovstatus_id
 
 }
-\keyword{cycle}
+\keyword{biomarkers,}
+\keyword{cycle,}
+\keyword{imputation}
 \keyword{menstrual}
+\keyword{ovulation,}
