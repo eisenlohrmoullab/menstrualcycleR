@@ -81,7 +81,25 @@ library(gam.hp)
 
 # Demo dataset 
 
-To explore the `menstrualcycleR` package, we will use a demo dataset with the data (daily ratings) from 
+To explore the `menstrualcycleR` package, we will use a demo dataset with simulated daily ratings from 25 participants with menses onset and ovulation information. 
+
+```{r demo dataset}
+cycle_df = cycledata
+dim(d)
+head(d)
+```
+
+
+# Overview of package functions 
+
+The `menstrualcycleR` package contains 3 types of functions: 
+
+1. A cycle scaling function `pacts_scaling()`
+
+```{r}
+
+```
+
 
 
 
