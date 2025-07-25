@@ -51,6 +51,8 @@
 #'
 #' # View the result
 #' print(data)
+#' 
+#' @noRd
 
 
 
