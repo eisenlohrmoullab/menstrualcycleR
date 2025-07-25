@@ -1,53 +1,40 @@
-#' Adds Cycle Time Variables to Longitudinal Menstrual Cycle Data
+#' Phase-Aligned Cycle Time Scaling (PACTS)
 #'
-#' This function computes and adds menstrual cycle time variables to a long-format dataset, where each row represents a unique date for a specific individual.
+#' This function uses the Phase-Aligned Cycle Time Scaling (PACTS) method, as described in Nagpal et al. (2025), to compute continuous, biologically meaningful cycle time variables in a long-format dataset, where each row represents a unique observation date for a specific naturally-cycling individual.
 #'
-#' The dataset must include a column indicating the estimated day of ovulation. Ovulation can be assessed using several common methods in menstrual cycle research:
-#' - **Luteinizing hormone (LH) urinary tests**: Ovulation is estimated as the day after a positive LH surge (i.e., LH +1), typically using a threshold of 40 mIU/ml.
-#' - **Basal body temperature (BBT)**: Ovulation is estimated as the day after the lowest point in BBT prior to the rise (i.e., BBT +1).
+#' The PACTS method aligns observations across cycles by centering time either on menses onset or ovulation. This allows researchers to model menstrual cycle dynamics as continuous functions of time, improving sensitivity and interpretability. The function requires identification of menses onset (`menses`) and the estimated day of ovulation (`ovtoday`), which may be determined via biomarker (preferred) or imputed based on typical luteal phase length when unavailable.
 #'
-#' Before using this function, ovulation must be coded accordingly, with a value of `1` on the estimated day of ovulation in the `ovtoday` column and `0` or `NA` elsewhere.
+#' When ovulation is not directly assessed, the function imputes ovulation as 15 days prior to the next menses onset (i.e., the last day of the follicular phase), based on the population-average luteal phase length. Imputed ovulation days are recorded in a new binary column, `ovtoday_impute`.
 #'
-#' If ovulation was not assessed in your study, you must still include a placeholder `ovtoday` column (filled with `0` or `NA`). For cycles without a marked ovulation day (`ovtoday == 1`), the function will impute the ovulation day by counting backward 15 days from the onset of the next menses, based on the relatively stable length of the luteal phase. These imputed days will be marked with `1` in a new column named `ovtoday_impute` in the output.
+#' Reporting how often ovulation was confirmed using biomarkers versus imputed is important for transparency and scientific rigor. Whenever possible, researchers should use objective biomarkers such as LH tests or basal body temperature (BBT) to identify ovulation, as these methods provide greater precision. This function supports both confirmed and imputed ovulation, allowing analyses to flexibly account for variable data availability across participants and cycles.
 #'
-#' For additional guidance on assessing ovulation or using backward-count methods to estimate ovulation, see:
-#'
-#' - Schmalenberger, K. M., Tauseef, H. A., Barone, J. C., Owens, S. A., Lieberman, L., Jarczok, M. N., et al. (2021). How to study the menstrual cycle: Practical tools and recommendations. *Psychoneuroendocrinology, 123*, 104895. https://doi.org/10.1016/j.psyneuen.2020.104895  
-#'
-#' - Nagpal, A., Schmalenberger, K. M., Barone, J., Mulligan, E. M., Stumper, A., Knol, L., et al. (2025). Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the `menstrualcycleR` package. https://doi.org/10.31219/osf.io/hd5xw_v1
-#' 
-#' @keywords menstrual cycle, cycle time, ovulation
+#' For further guidance on ovulation identification and justification of the -15 day imputation approach, see:
+#' - Nagpal et al. (2025). *Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the `menstrualcycleR` package*. https://doi.org/10.31219/osf.io/hd5xw_v1  
+#' - Schmalenberger et al. (2021). *How to study the menstrual cycle: Practical tools and recommendations*. *Psychoneuroendocrinology, 123*, 104895. https://doi.org/10.1016/j.psyneuen.2020.104895
 #'
 #' @param data A data frame containing the required input variables.
-#' @param id A unique identifier for individuals in the dataset.
-#' @param date A date column indicating the day in which outcomes were reported on/observed.Keep in mind that prior to using this function, you may want to adjust dates for late-night entries (e.g. reclassify post-midnight surveys to the previous day).
-#' @param menses A binary column (`0`/`1`) indicating the first day of menses onset, where `1` represents menses onset.
-#' @param ovtoday A binary column (`0` or `1`) indicating the estimated day of ovulation, where `1` marks the day of ovulation. This column is required, even if ovulation was not directly assessed—if unavailable, include a column of `NA` or `0`s. 
-#' Ovulation can be estimated using methods such as:
-#' - **Luteinizing hormone (LH) tests**: Ovulation is typically estimated as the day after a positive LH test (LH +1), using a threshold of 40 mIU/ml for urinary LH.
-#' - **Basal body temperature (BBT)**: Ovulation is estimated as the day after the BBT nadir (BBT +1).
-#' 
-#' This function requires the `ovtoday` column to be coded accordingly (e.g., `1` on LH +1 or BBT +1). 
-
-#' If ovulation was not assessed for a given menses-to-menses cycle (i.e., no `1` in the `ovtoday` column), the function will estimate ovulation as 15 days before the next menses onset, based on the typical luteal phase length. These imputed ovulation days will be indicated in a new binary column, `ovtoday_impute`, in the output.
-
-#' For more information regarding the validity of estimating ovulation via day -15 in the absence of biomarkers, see: Schmalenberger et al. (2021) and Nagpal et al. (2025).
-
-#' @param lower_cyclength_bound A numeric that indicates the lower bound of cycle lengths that the function will scale, the default is 21 
-#' @param upper_cyclength_bound A numeric that indicates the upper bound of cycle lengths that the function will scale, the default is 35
+#' @param id A unique identifier for each naturally-cycling individual in the dataset.
+#' @param date A date column corresponding to the day of observation. Ensure all id-date combinations are unique. You may wish to reclassify post-midnight survey entries to the previous day to maintain alignment with sleep or daily tracking data.
+#' @param menses A binary column (`0`/`1`) indicating the *first* day of menses onset, where `1` marks onset. All subsequent bleeding days should be set to `0`. Periovulatory spotting should also be excluded.
+#' @param ovtoday A binary column (`0`/`1`) indicating the day of estimated ovulation. Required even if biomarkers were not collected—use a column of all `0`s or `NA`s in that case. Accepted ovulation determination methods include:
+#' \itemize{
+#'   \item \strong{Urinary LH surge tests}: Code `ovtoday == 1` on the day *after* the first positive test (LH +1). Specify the brand and threshold (e.g., 40 mIU/ml).
+#'   \item \strong{Basal body temperature (BBT)}: Code `ovtoday == 1` on the day after the BBT nadir (BBT +1). Specify measurement method.
+#'   \item \strong{Daily hormone assays}: See Nagpal et al. (2025) for guidance.
+#' }
+#' @param lower_cyclength_bound Numeric lower bound of cycle lengths to include in scaling. Default is 21.
+#' @param upper_cyclength_bound Numeric upper bound of cycle lengths to include in scaling. Default is 35.
 #'
-#' @return The input data frame with the following additional variables:
-#' 
-#' - **`scaled_cycleday`**: Centered on menses (`menses == 1` corresponds to `scaled_cycleday == 0`) and spans from `-1` (the first day of the luteal phase) to `+1` (the estimated day of ovulation).
-#' 
-#' - **`scaled_cycleday_impute`**: Similar to `scaled_cycleday`, but includes scaling based on imputed ovulation (`ovtoday_impute`) for cycles without confirmed ovulation (`ovtoday`). This variable spans from `-1` (the first day of the luteal phase) to `+1` (the estimated day of ovulation, either `ovtoday` or `ovtoday_impute`).
-#' 
-#' - **`scaled_cycleday_ov`**: Centered on confirmed ovulation (`ovtoday == 1` corresponds to `scaled_cycleday_ov == 0`) and spans from `-1` (the first day of the follicular phase) to `+1` (the last day of the luteal phase).
-#' 
-#' - **`scaled_cycleday_imp_ov`**: Similar to `scaled_cycleday_ov`, but includes scaling based on imputed ovulation (`ovtoday_impute`) for cycles without confirmed ovulation. This variable is centered on ovulation (`ovtoday == 1` or `ovtoday_impute == 1` corresponds to `scaled_cycleday == 0`) and spans from `-1` to `+1`.
-#' 
-#' - **`ovtoday_impute`**: If ovulation is not indicated in the column inputted for the parameter `ovtoday` in a menses-to-menses cycle, `ovtoday_impute` will be calculated, which estimates ovulation as day -15 of the cycle. For information regarding the validity of day -15 as estimated day of ovulation see: Schmalenberger et al. (2021) and Nagpal et al. (2025).
+#' @return The original data frame with the following additional columns:
+#' \itemize{
+#'   \item \code{scaled_cycleday}: A continuous cycle time variable centered on menses onset (`menses == 1` → 0), ranging from -1 (start of luteal phase) to +1 (ovulation). Only includes cycles with biomarker-confirmed ovulation.
+#'   \item \code{scaled_cycleday_impute}: Same as above, but includes cycles where ovulation was imputed using day -15. Offers broader coverage across the dataset, at the cost of lower precision.
+#'   \item \code{scaled_cycleday_ov}: A cycle time variable centered on ovulation day (`ovtoday == 1` → 0), ranging from -1 (start of follicular phase) to +1 (end of luteal phase). Only includes cycles with confirmed ovulation.
+#'   \item \code{scaled_cycleday_imp_ov}: Same as above, but uses imputed ovulation (`ovtoday_impute == 1`) for cycles lacking biomarker confirmation. Centered on either confirmed or imputed ovulation.
+#'   \item \code{ovtoday_impute}: A binary column indicating imputed ovulation days (value `1`) for cycles without confirmed ovulation, estimated as 15 days before menses onset.
+#' }
 #'
+#' @keywords menstrual cycle, ovulation, cycle phase, scaling, time-varying covariate
 #' @export
 #'
 #' @examples 
