@@ -85,8 +85,6 @@ To explore the `menstrualcycleR` package, we will use a demo dataset with simula
 
 ```{r demo dataset}
 cycle_df = cycledata
-dim(d)
-head(d)
 ```
 
 
