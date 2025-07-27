@@ -100,7 +100,7 @@ calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength
   data <- calculate_ovtoday_impute(data, id, date, menses)
   data <- process_luteal_phase_impute(data, id, date, menses)
   data <- process_follicular_phase_impute(data, id, date, menses)
-  data <- create_scaled_cycleday(id, data)
+  data <- create_scaled_cycleday(data, id, date, menses)
   
   data <- data %>%
     dplyr::mutate(
