@@ -71,7 +71,7 @@ calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength
   date <- rlang::enquo(date)
   menses <- rlang::enquo(menses)
   ovtoday <- rlang::enquo(ovtoday)
-  # Create ovtoday 
+  
   data <- data %>% 
     dplyr::mutate(ovtoday = !!ovtoday)
   
@@ -110,29 +110,23 @@ calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength
         ovtoday_impute == 1 & is.na(scaled_cycleday_impute) ~ 1,
         TRUE ~ scaled_cycleday_impute
       ),
-        scaled_cycleday = dplyr::case_when(menses == 1 &
-                                             is.na(scaled_cycleday) ~ 0, TRUE ~ scaled_cycleday),
-        scaled_cycleday_impute = dplyr::case_when(
-          menses == 1 & is.na(scaled_cycleday_impute) ~ 0,
-          TRUE ~ scaled_cycleday_impute
-        ),
+      scaled_cycleday = dplyr::case_when(menses == 1 &
+                                           is.na(scaled_cycleday) ~ 0, TRUE ~ scaled_cycleday),
+      
       scaled_cycleday_ov = dplyr::case_when(
         menses == 1 & is.na(scaled_cycleday_ov) ~ -1,
         TRUE ~ scaled_cycleday_ov
       ),
-      scaled_cycleday_imp_ov = dplyr::case_when(
-        menses == 1 & is.na(scaled_cycleday_imp_ov) ~ -1,
-        TRUE ~ scaled_cycleday_imp_ov
-      ),
+      
       scaled_cycleday_ov = dplyr::case_when(
         ovtoday == 1 & is.na(scaled_cycleday_ov) ~ 0,
         TRUE ~ scaled_cycleday_ov
       ),
       scaled_cycleday_imp_ov = dplyr::case_when(
-        ovtoday|ovtoday_impute == 1 & is.na(scaled_cycleday_imp_ov) ~ 0,
+        ovtoday | ovtoday_impute == 1 & is.na(scaled_cycleday_imp_ov) ~ 0,
         TRUE ~ scaled_cycleday_imp_ov
       )
-    ) 
+    )
   
   #Select and return the relevant columns
   data <- data %>%
@@ -143,16 +137,15 @@ calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength
         scaled_cycleday,
         scaled_cycleday_ov,
         scaled_cycleday_impute,
-        scaled_cycleday_imp_ov, 
+        scaled_cycleday_imp_ov,
         cyclic_time,
-        cyclic_time_impute, 
-        cyclic_time_ov, 
-        cyclic_time_imp_ov, 
+        cyclic_time_impute,
+        cyclic_time_ov,
+        cyclic_time_imp_ov,
         luteal_length
       )
     )
-
+  
   return(data)
 }
-
 
