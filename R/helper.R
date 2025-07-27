@@ -90,8 +90,8 @@ process_luteal_phase_base <- function(data, id, date, menses) {
   data = data %>%
     dplyr::mutate(
       cyclic_lut = dplyr::case_when(
-        mcyclength >= lower_cyclength_bound &
-          mcyclength <= upper_cyclength_bound ~ (-1 * (1 - cyclic_lut1)),
+        lutmax <= 18 &
+          lutmax >= 7 ~ (-1 * (1 - cyclic_lut1)),
         TRUE ~ NA
       )
     )
@@ -99,36 +99,22 @@ process_luteal_phase_base <- function(data, id, date, menses) {
   # Calculate ovulation-centered luteal phase part of cyclic time 
   data = data %>% 
     dplyr::mutate(cyclic_lut_ov = dplyr::case_when(!is.na(cyclic_lut) ~ 1 + cyclic_lut, 
-                                     TRUE ~ cyclic_lut))
+                                                   TRUE ~ NA))
   
   # Luteal phase length variable 
   data = data %>%
     dplyr::mutate(
       luteal_length = case_when(
-        mcyclength >= lower_cyclength_bound &
-          mcyclength <= upper_cyclength_bound ~ lutmax,
+        lutmax <= 18 &
+          lutmax >= 7 ~ lutmax,
         TRUE ~ NA
       )
     )
   
+  #NOTE: we only scale luteal phases if the length is <= 18 days and >= 7 days. This judgement is based on norms from Bull et al., 2019 in    21 to 35 day cycles. Scaling is NOT based on mcyclength (menses-to-menses cycle length), because then of someone only had a luteal phase    in study, bookended by ovulation and menses, it would not get scaled. Or if they had 1 luteal phase and then a full menses-to-menses cycle   the luteal phase would not get scaled. 
+  
   data = data %>%
     dplyr::mutate(luteal_length = dplyr::case_when(is.na(lutdaycount1) ~ NA, TRUE ~ luteal_length))
-  
-  # data <- data %>%
-  #   dplyr::arrange(!!id, !!date) %>%  # Ensure correct order
-  #   dplyr::group_by(!!id, cyclenum) %>%
-  #   dplyr::mutate(
-  #     next_id = dplyr::lead(!!id),  # Capture the ID of the next row
-  #     valid_group = any(lutdaycount1 == lutmax & !!id == next_id),  # Check if the condition is met for the group
-  #     lutperc = ifelse(
-  #       lutmax <= 18 & lutmax >=7 & valid_group,
-  #       lutdaycount / lutmax,
-  #       NA
-  #     ),
-  #     lutperc1 = lutperc - 1
-  #   ) %>%
-  #   dplyr::ungroup() %>%
-  #   dplyr::select(-next_id, -valid_group)
   
   # Calculate lutdaycount_ov and lutperc_ov
   data <- data %>%
@@ -231,8 +217,7 @@ process_follicular_phase_base <- function(data, id, date, menses) {
     dplyr::mutate(follength = folmax + 1)
   
   # Calculate folperc (only when follicular length is between 8 and 25)
-  # data <- data %>%
-  #   dplyr::mutate(folperc = ifelse(follength >= 8 & follength <= 25, foldaycount / folmax, NA))
+  #NOTE: we only scale follicular phases if the length is <= 25 days and >= 8 days. This judgement is based on norms from Bull et al., 2019 in 21 to 35 day cycles. Scaling is NOT based on mcyclength (menses-to-menses cycle length), because then if someone only had a follicular phase in study, bookended by menses and ovulation, it would not get scaled. Or if they had a full menses-to-menses cycle and then a follicualr phase (bookend by menses and ovulation), the follicular phase would not get scaled. 
   
   data <- data %>%
     dplyr::arrange(!!id, cyclenum,!!date) %>%  # Ensure correct order
@@ -265,17 +250,16 @@ process_follicular_phase_base <- function(data, id, date, menses) {
   data = data %>%
     dplyr::mutate(
       cyclic_fol = folperc
-      )
-    
+    )
+  
   
   # Calculate ovulation-centered follicular phase part of cyclic time 
   data = data %>% 
-    dplyr::mutate(cyclic_fol_ov = dplyr::case_when(!is.na(cyclic_fol) & is.na(percfol_ov) ~ -1*(1 - cyclic_fol), 
-                                     TRUE ~ cyclic_fol))
+    dplyr::mutate(cyclic_fol_ov = dplyr::case_when(!is.na(cyclic_fol) & !is.na(percfol_ov) ~ -1*(1 - cyclic_fol), 
+                                                   TRUE ~ NA))
   
   return(data)
 }
-
 
 
 calculate_ovtoday_impute <- function(data, id, date, menses) {
@@ -289,12 +273,18 @@ calculate_ovtoday_impute <- function(data, id, date, menses) {
   # Step 1: Calculate `lutlength_impute` and `follength_impute`
   data <- data %>%
     dplyr::mutate(
-      lutlength_impute = 14,  # Assign fixed value 14 to lutlength_impute
+      lutlength_impute = 14,
+      # Assign fixed value 14 to lutlength_impute
       follength_impute = dplyr::if_else(
-        cycle_incomplete != 1 & (mcyclength >= lower_cyclength_bound & mcyclength <= upper_cyclength_bound),
+        cycle_incomplete != 1 &
+          (
+            mcyclength >= lower_cyclength_bound &
+              mcyclength <= upper_cyclength_bound
+          ),
+        #we do not want to impute ovulation if the cycle is not menses-to-menses bounded in the study and within the lower and upper cycle length bounds (default and recommended and vlaidated at 21-35 days)
         mcyclength - 14,
-        NA_real_  
-      ) 
+        NA_real_
+      )
     )
   
   # Step 2: Group by `id` and sort by `date`
@@ -305,7 +295,8 @@ calculate_ovtoday_impute <- function(data, id, date, menses) {
   # Step 3: Calculate `follcount1_impute`
   data$follcount1_impute <- NA
   for (i in 1:nrow(data)) {
-    if (data[[rlang::as_name(menses)]][i] == 1 & !is.na(data$follength_impute[i])) {
+    if (data[[rlang::as_name(menses)]][i] == 1 &
+        !is.na(data$follength_impute[i])) {
       follcount1_impute <- seq_len(round(data$follength_impute[i]))
       end_index <- i + length(follcount1_impute) - 1
       if (end_index <= nrow(data)) {
@@ -320,34 +311,34 @@ calculate_ovtoday_impute <- function(data, id, date, menses) {
   data <- data %>%
     dplyr::mutate(
       ovtoday_impute = dplyr::case_when(
-        round(follength_impute) == follcount1_impute ~ 1,
-        TRUE ~ NA
+        !is.na(follength_impute) & !is.na(follcount1_impute) & follength_impute == follcount1_impute ~ 1L,
+        TRUE ~ 0L
       )
     )
+  
   
   # Step 5: Replace NA values in `ovtoday_impute` with 0
   data$ovtoday_impute <- ifelse(is.na(data$ovtoday_impute), 0, data$ovtoday_impute)
   
   
-  # Step 6: If ovtoday and ovtoday_impute are within 5 days of each other, ovtoday_impute == 0
+  # # # Step 6: If ovtoday and ovtoday_impute are within 7 days of each other OR if ovtoday and ovtoday_impute are the same cycle,   ovtoday_impute == 0;
   data <- data %>%
     dplyr::group_by(!!id) %>%
     dplyr::arrange(!!date, .by_group = TRUE) %>%
     dplyr::mutate(
-      ovtoday_impute = ifelse(
-        ovtoday_impute == 1 & sapply(!!date, function(date) {
-          any(abs(difftime(date[ovtoday == 1], date, units = "days")) <= 7)
-        }),
-        0,
+      ovtoday_impute = dplyr::if_else(
+        ovtoday_impute == 1 & (
+          purrr::map_lgl(date, ~ any(abs(difftime(date[ovtoday == 1], .x, units = "days")) <= 7)) |
+            cyclenum %in% cyclenum[ovtoday == 1]
+        ),
+        0L,
         ovtoday_impute
       )
     ) %>%
     dplyr::ungroup()
   
-  
   return(data)
 }
-
 
 process_luteal_phase_impute <- function(data, id, date, menses) {
   `%>%` <- magrittr::`%>%`
@@ -363,82 +354,128 @@ process_luteal_phase_impute <- function(data, id, date, menses) {
     dplyr::arrange(!!date, .by_group = TRUE) %>%
     dplyr::mutate(lutmax_impute = NA)
   
-  # Helper function to calculate `lutdaycount1_impute`
-  calculate_lutdaycount_impute <- function(data, id_col, menses_col) {
-    last_id <- NULL
-    lutdaycount1_impute <- rep(NA, nrow(data))
+  # Helper function to calculate `lutdaycount_impute` and `lutdaycount1_impute`
+  calculate_lutdaycount_impute <- function(data, id_col, date_col, ovulation_col, menses_col) {
+    id_col <- rlang::as_name(rlang::enquo(id_col))
+    date_col <- rlang::as_name(rlang::enquo(date_col))
+    ovulation_col <- rlang::as_name(rlang::enquo(ovulation_col))
+    menses_col <- rlang::as_name(rlang::enquo(menses_col))
     
-    for (i in 1:nrow(data)) {
-      if (is.null(last_id) || last_id != data[[id_col]][i]) {
-        lutdaycount1_impute[i] <- ifelse(data$ovtoday_impute[i] == 1, 0, NA)
-      } else if (!is.na(lutdaycount1_impute[i - 1])) {
-        lutdaycount1_impute[i] <- lutdaycount1_impute[i - 1] + 1
-      }
-      
-      if (is.na(lutdaycount1_impute[i])) {
-        if (!is.na(data[[menses_col]][i]) && data[[menses_col]][i] == 1) {
-          lutdaycount1_impute[i] <- NA
+    data <- data %>%
+      dplyr::arrange(.data[[id_col]], .data[[date_col]]) %>%
+      dplyr::group_by(.data[[id_col]]) %>%
+      dplyr::mutate(lutdaycount_impute = NA_integer_) %>%
+      dplyr::group_modify(~ {
+        df <- .x
+        ov_idx <- which(df[[ovulation_col]] == 1)
+        
+        for (i in ov_idx) {
+          # Start on the next day after ovtoday_impute == 1
+          j <- i + 1
+          count <- 0
+          while (j <= nrow(df)) {
+            df$lutdaycount_impute[j] <- count
+            
+            # Stop *after* assigning if menses == 1
+            if (!is.na(df[[menses_col]][j]) && df[[menses_col]][j] == 1) {
+              break
+            }
+            
+            count <- count + 1
+            j <- j + 1
+          }
         }
-      }
-      else if (!is.na(data$ovtoday_impute[i]) &&
-               data$ovtoday_impute[i] == 1)
-      {
-        lutdaycount1_impute[i] <- 0
-      }
-      
-      last_id <- data[[id_col]][i]
-    }
+        return(df)
+      }) %>%
+      dplyr::ungroup()
     
-    data$lutdaycount1_impute <- lutdaycount1_impute
     return(data)
   }
   
-  # Apply helper function
-  data <- calculate_lutdaycount_impute(
-    data,
-    id_col = rlang::quo_name(id),
-    menses_col = rlang::quo_name(menses)
-  )
-  
-  # Calculate `lutdaycount_impute`
-  data <- data %>%
-    dplyr::group_by(!!id) %>%
-    dplyr::mutate(
-      lutdaycount_impute = dplyr::lag(lutdaycount1_impute),
-      lutdaycount_impute = dplyr::case_when(
-        is.na(lutdaycount_impute) | !!id != dplyr::lag(!!id) ~ NA,
-        TRUE ~ lutdaycount_impute
-      )
-    )
-  
-  # Calculate `lutmax_impute`
-  for (i in 1:(nrow(data) - 1)) {
-    if (is.na(data$lutdaycount_impute[i + 1] &&
-              !is.na(data$lutdaycount_impute[i]))) {
-      data$lutmax_impute[(i - (data$lutdaycount_impute[i])):i] <- as.numeric(data$lutdaycount_impute[i])
-    }
+  calculate_lutdaycount1_impute <- function(data, id_col, date_col, ovulation_col, menses_col) {
+    id_col <- rlang::as_name(rlang::enquo(id_col))
+    date_col <- rlang::as_name(rlang::enquo(date_col))
+    ovulation_col <- rlang::as_name(rlang::enquo(ovulation_col))
+    menses_col <- rlang::as_name(rlang::enquo(menses_col))
+    
+    data <- data %>%
+      dplyr::arrange(.data[[id_col]], .data[[date_col]]) %>%
+      dplyr::group_by(.data[[id_col]]) %>%
+      dplyr::mutate(lutdaycount1_impute = NA_integer_) %>%
+      dplyr::group_modify(~ {
+        df <- .x
+        ov_idx <- which(df[[ovulation_col]] == 1)
+        
+        for (i in ov_idx) {
+          # Start from the ovulation day itself
+          j <- i
+          count <- 0
+          
+          while (j <= nrow(df) &&
+                 (is.na(df[[menses_col]][j]) || df[[menses_col]][j] != 1)) {
+            df$lutdaycount1_impute[j] <- count
+            
+            # Stop the day before menses == 1
+            if (!is.na(df[[menses_col]][j + 1]) && df[[menses_col]][j + 1] == 1) {
+              break
+            }
+            
+            count <- count + 1
+            j <- j + 1
+          }
+        }
+        
+        return(df)
+      }) %>%
+      dplyr::ungroup()
+    
+    return(data)
   }
   
-  # Lag `lutlength_impute` to align with `lutdaycount`
-  data$lutlength1_impute <- dplyr::lag(data$lutlength_impute)
+  
+  # Apply helper functions
+  data <- calculate_lutdaycount_impute(
+    data,
+    id_col = !!id,
+    date_col = !!date,
+    ovulation_col = ovtoday_impute,
+    menses_col =!!menses
+  )
+  
+  data <- calculate_lutdaycount1_impute(
+    data,
+    id_col = !!id,
+    date_col = !!date,
+    ovulation_col = ovtoday_impute,
+    menses_col =!!menses
+  )
+  
+  
+  # Calculate `lutmax_impute`
+  # for (i in 1:(nrow(data) - 1)) {
+  #   if (is.na(data$lutdaycount_impute[i + 1] &&
+  #             !is.na(data$lutdaycount_impute[i]))) {
+  #     data$lutmax_impute[(i - (data$lutdaycount_impute[i])):i] <- as.numeric(data$lutdaycount_impute[i])
+  #   }
+  # }
+  data = data %>%
+    dplyr::mutate(lutmax_impute = case_when(!is.na(lutdaycount_impute) ~ 14, TRUE ~ NA))
+  
   
   data <- data %>%
-    dplyr::mutate(lutperc_impute = dplyr::if_else(
-      is.na(lutlength1_impute),
-      NA,
-      dplyr::if_else(
-        is.na(lutlength1_impute) &
-          !is.na(lutmax_impute) & cycle_incomplete != 1 & mcyclength >= lower_cyclength_bound & mcyclength <= upper_cyclength_bound,
-        lutdaycount_impute / lutmax_impute,
-        lutdaycount_impute / round(lutlength1_impute)
-      )
-    ))
+    dplyr::mutate(lutperc_impute = 
+                    dplyr::if_else(
+                      !is.na(lutmax_impute) & cycle_incomplete != 1 & mcyclength >= lower_cyclength_bound & mcyclength <= upper_cyclength_bound,
+                      lutdaycount_impute / lutmax_impute,
+                      NA
+                    )
+    )
   
   # lutperc is scaled from 0 to 1, so substracting 1 so that it is scaled from -1 to 0 for menses-centered scaled_cycleday 
-  data$perclut_impute = data$lutperc_impute -1 
-  
-  # Calculating cyclic_lut_imp (luteal component using ovtoday_impute)
-  
+  data$perclut_impute = data$lutperc_impute -1
+  # 
+  # # Calculating cyclic_lut_imp (luteal component using ovtoday_impute)
+  # 
   data = data %>%
     dplyr::mutate(
       cyclic_lut1_imp = dplyr::case_when(
@@ -446,10 +483,10 @@ process_luteal_phase_impute <- function(data, id, date, menses) {
         TRUE ~ NA
       )
     )
-  
+  # 
   data$cyclic_lut_imp = -1*(1 - data$cyclic_lut1_imp)
-  
-  # Calculate `lutdaycount_imp_ov`
+  # 
+  # # Calculate `lutdaycount_imp_ov`
   data <- data %>%
     dplyr::group_by(!!id) %>%
     dplyr::mutate(
@@ -457,29 +494,32 @@ process_luteal_phase_impute <- function(data, id, date, menses) {
       lutdaycount_imp_ov = dplyr::case_when(
         is.na(lutdaycount_imp_ov) | !!id != dplyr::lead(!!id) ~ NA_real_,
         TRUE ~ lutdaycount_imp_ov
+      ), 
+      lutmax_imp_ov =  dplyr::case_when(
+        !is.na(lutdaycount_imp_ov) ~ 14,
+        TRUE ~ NA
+      ))
+  # 
+  # # Calculate `lutperc_imp_ov`
+  data <- data %>%
+    dplyr::mutate(
+      lutperc_imp_ov = dplyr::case_when(
+        !is.na(lutmax_imp_ov) &
+          cycle_incomplete != 1 &
+          mcyclength >= lower_cyclength_bound &
+          mcyclength <= upper_cyclength_bound ~
+          lutdaycount_imp_ov / lutmax_imp_ov,
+        TRUE ~ NA_real_
       )
     )
-  
-  # Calculate `lutperc_imp_ov`
-  data <- data %>%
-    dplyr::mutate(lutperc_imp_ov = dplyr::if_else(
-      is.na(lutlength1_impute) ,
-      NA,
-      dplyr::if_else(
-        is.na(lutlength1_impute) & !is.na(lutmax) & cycle_incomplete != 1 & mcyclength >= lower_cyclength_bound & mcyclength <= upper_cyclength_bound,
-        lutdaycount_imp_ov / lutmax_impute,
-        lutdaycount_imp_ov / round(lutlength1_impute)
-      )
-    ))
-  
-  # Calculating ovulation-centered cyclic_lut_imp_ov (luteal component using ovtoday_impute)
-  data = data %>% 
-    dplyr::mutate(cyclic_lut_imp_ov = dplyr::case_when(!is.na(cyclic_lut_imp) ~ 1 + cyclic_lut_imp, 
-                                         TRUE ~ cyclic_lut_imp))
+  # 
+  # # Calculating ovulation-centered cyclic_lut_imp_ov (luteal component using ovtoday_impute)
+  data = data %>%
+    dplyr::mutate(cyclic_lut_imp_ov = dplyr::case_when(!is.na(cyclic_lut_imp) ~ 1 + cyclic_lut_imp,
+                                                       TRUE ~ cyclic_lut_ov))
   
   return(data)
 }
-
 
 process_follicular_phase_impute <- function(data, id, date, menses) {
   `%>%` <- magrittr::`%>%`
@@ -554,17 +594,18 @@ process_follicular_phase_impute <- function(data, id, date, menses) {
   # Create cyclic_fol_imp_ov, ovulation-centered follicular part of cyclic time, using ovtoday_impute 
   data = data %>% 
     dplyr::mutate(cyclic_fol_imp_ov = dplyr::case_when(!is.na(cyclic_fol_imp) ~ -1*(1 - cyclic_fol_imp), 
-                                         TRUE ~ cyclic_fol_imp))
+                                                       TRUE ~ cyclic_fol_ov))
   
   return(data)
 }
 
-
-create_scaled_cycleday <- function(id, data) {
+create_scaled_cycleday <- function(data, id, date, menses) {
   `%>%` <- magrittr::`%>%`
   
   # Dynamically handle input column name
   id <- rlang::enquo(id)
+  date <- rlang::enquo(date)
+  menses <- rlang::enquo(menses)
   
   # Create `percentlut` and `percentfol`
   data <- data %>%
@@ -664,7 +705,7 @@ create_scaled_cycleday <- function(id, data) {
   # Create cyclic_time
   data = data %>% 
     dplyr::mutate(cyclic_time = dplyr::case_when(is.na(cyclic_lut) ~ cyclic_fol, 
-                                   TRUE ~ cyclic_lut))
+                                                 TRUE ~ cyclic_lut))
   
   # Create cyclic_time_impute
   data = data %>%
@@ -676,18 +717,61 @@ create_scaled_cycleday <- function(id, data) {
   # Create ovulation-centered cyclic_time_ov
   data = data %>% 
     dplyr::mutate(cyclic_time_ov = dplyr::case_when(is.na(cyclic_lut_ov) ~ cyclic_fol_ov, 
-                                      TRUE ~ cyclic_lut_ov))
+                                                    TRUE ~ cyclic_lut_ov))
   
   # Created ovulation-centered cyclic_time_imp_ov
   data = data %>% 
     dplyr::mutate(cyclic_time_imp_ov1 = dplyr::case_when(is.na(cyclic_lut_imp_ov) ~ cyclic_fol_imp_ov, 
-                                           TRUE ~ cyclic_lut_imp_ov))
+                                                         TRUE ~ cyclic_lut_imp_ov))
   
   data = data %>% 
     dplyr::mutate(cyclic_time_imp_ov = dplyr::case_when(is.na(cyclic_time_ov) ~ cyclic_time_imp_ov1, 
-                                          TRUE ~ cyclic_time_ov))
+                                                        TRUE ~ cyclic_time_ov))
+  
+  data <- data %>%
+    dplyr::arrange(!!date, .by_group = TRUE) %>%
+    dplyr::group_by(!!id) %>%
+    dplyr::mutate(
+      scaled_cycleday_impute = dplyr::case_when(
+        !!menses == 1 & !is.na(dplyr::lag(scaled_cycleday_impute)) ~ 0,
+        TRUE ~ scaled_cycleday_impute
+      ),
+      cyclic_time_impute = dplyr::case_when(
+        !!menses == 1 & !is.na(dplyr::lag(cyclic_time_impute)) ~ 0,
+        TRUE ~ cyclic_time_impute
+      ),
+      cyclic_time_imp_ov = dplyr::case_when(
+        !!menses == 1 & !is.na(dplyr::lag(cyclic_time_imp_ov)) ~ 1,
+        TRUE ~ cyclic_time_imp_ov
+      ),
+      scaled_cycleday_imp_ov = dplyr::case_when(
+        !!menses == 1 & !is.na(dplyr::lag(scaled_cycleday_imp_ov)) ~ -1,
+        TRUE ~ scaled_cycleday_imp_ov
+      )
+    )
+  
+  data <- data %>%
+    dplyr::arrange(!!date) %>% # Ensure proper ordering
+    dplyr::group_by(!!id) %>%
+    dplyr::mutate(
+      scaled_cycleday = dplyr::case_when(
+        !!menses == 1 & !is.na(dplyr::lag(scaled_cycleday)) ~ 0,
+        TRUE ~ scaled_cycleday
+      ),
+      cyclic_time = dplyr::case_when(
+        !!menses == 1 & !is.na(dplyr::lag(cyclic_time)) ~ 0,
+        TRUE ~ cyclic_time
+      ),
+      cyclic_time_ov = dplyr::case_when(
+        !!menses == 1 & !is.na(dplyr::lag(cyclic_time_ov)) ~ 1,
+        TRUE ~ cyclic_time_imp_ov
+      ),
+      scaled_cycleday_ov = dplyr::case_when(
+        !!menses == 1 & !is.na(dplyr::lag(scaled_cycleday_ov)) ~ -1,
+        TRUE ~ scaled_cycleday_imp_ov
+      )
+    )
   
   return(data)
 }
-
 
