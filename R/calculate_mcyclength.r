@@ -55,22 +55,18 @@ calculate_mcyclength <- function(data, id, date, menses, ovtoday) {
   print(glue::glue("date: {rlang::quo_name(date)}"))
   print(glue::glue("menses: {rlang::quo_name(menses)}"))
   print(glue::glue("ovtoday: {rlang::quo_name(ovtoday)}"))
-
-  
-  # Initialize columns
-  data <- data %>%
-    dplyr::mutate(id = !!id, 
-                  date = !!date, 
-                  menses = !!menses, 
-                  ovtoday = !!ovtoday)
   
   
   # Step 1: Ensure date is in Date format
-  data <- data %>%
-    dplyr::mutate(!!rlang::quo_name(date) := lubridate::ymd(!!date))
+  # Coerce date column to Date if needed
+  if (!inherits(dplyr::pull(data, !!date), "Date")) {
+    data <- data %>%
+      dplyr::mutate(!!date := lubridate::ymd(!!date))
+  }
   
   # Step 2: Remove rows with missing dates
-  data <- data[complete.cases(data[[rlang::quo_name(date)]]), ]
+  data <- data %>%
+    dplyr::filter(!is.na(!!date))
   
   # Step 3: Fill missing dates within each group
   data <- data %>%
@@ -97,13 +93,20 @@ calculate_mcyclength <- function(data, id, date, menses, ovtoday) {
     dplyr::mutate(ovtoday = ifelse(is.na(!!ovtoday), 0, !!ovtoday))
   
   
-  # Step 4: Ensure data is grouped and sorted properly
+  # Initialize columns
+  data <- data %>%
+    dplyr::mutate(id = !!id,
+                  date = !!date,
+                  menses = !!menses,
+                  ovtoday = !!ovtoday)
+  
+  # # Step 4: Ensure data is grouped and sorted properly
   data <- data %>%
     dplyr::group_by(!!id) %>%
     dplyr::arrange(!!date, .by_group = TRUE)
-  
-  
-  # Initialize columns
+  # 
+  # 
+  # # Initialize columns
   data <- data %>%
     dplyr::group_by(!!id) %>%
     dplyr::arrange(!!date, .by_group = TRUE) %>%
@@ -113,8 +116,13 @@ calculate_mcyclength <- function(data, id, date, menses, ovtoday) {
       cycle_incomplete = 0
     )
   
-
-  # Loop to calculate m2mcount
+  # # Loop to calculate m2mcount
+  menses_col <- rlang::as_name(menses)
+  id_col <- rlang::as_name(id)
+  
+  # Initialize m2mcount column
+  data$m2mcount <- NA_integer_
+  
   for (i in seq_len(nrow(data))) {
     if (!is.na(data[[rlang::quo_name(menses)]][i]) && data[[rlang::quo_name(menses)]][i] == 1) {
       data$m2mcount[i] <- 1
@@ -131,22 +139,25 @@ calculate_mcyclength <- function(data, id, date, menses, ovtoday) {
         j <- j + 1
       }
     }
-  }
+  } 
+  
+  
   
   # Identify incomplete cycles
+  # cycle is incomplete = 1 if m2mcount is NA, the next row for m2mcount is NA (data stops) AND the next row is a different ID
   data <- data %>%
-    dplyr::mutate(cycle_incomplete = ifelse(!is.na(m2mcount) & 
-                                       (is.na(dplyr::lead(m2mcount)) & !!id != dplyr::lead(!!id)), 1, 0))
-  
-  # Set cycle_incomplete = 1 if m2mcount restarts when id changes
+    dplyr::mutate(cycle_incomplete = ifelse(!is.na(m2mcount) &
+                                              (is.na(dplyr::lead(m2mcount)) & !!id != dplyr::lead(!!id)), 1, 0))
+  # 
+  # # Set cycle_incomplete = 1 if m2mcount restarts when id changes
   data <- data %>%
     dplyr::group_by(!!id) %>%
     dplyr::mutate(cycle_incomplete = ifelse(
       !!id != dplyr::lag(!!id, default = dplyr::first(id)) & m2mcount == 1, 1, cycle_incomplete
     )) %>%
     dplyr::ungroup()
-  
-  # Propagate cycle_incomplete within each group of m2mcount and calculate mcyclength
+  # 
+  # # Propagate cycle_incomplete within each group of m2mcount and calculate mcyclength
   data <- data %>%
     dplyr::group_by(!!id) %>%
     dplyr::mutate(
@@ -171,18 +182,18 @@ calculate_mcyclength <- function(data, id, date, menses, ovtoday) {
     ) %>%
     dplyr::ungroup() %>%
     dplyr::select(-cycle_group)
-  
-  
+  # 
+  # 
   data$cycle_incomplete <- ifelse(is.na(data$cycle_incomplete), 1, data$cycle_incomplete)
   data$cycle_incomplete <- ifelse(is.na(data$m2mcount), NA, data$cycle_incomplete)
-  
-  # Calculate cyclenum: number of menses-to-menses cycles within a person
+  # 
+  # # Calculate cyclenum: number of menses-to-menses cycles within a person
   data <- data %>%
     dplyr::group_by(!!id) %>%
     dplyr::mutate(cyclenum = cumsum(!is.na(m2mcount) & m2mcount == 1 & cycle_incomplete == 0)) %>%
     dplyr::ungroup()
-  
-  # Handle cyclenum for incomplete cycles
+  # 
+  # # Handle cyclenum for incomplete cycles
   data <- data %>%
     dplyr::group_by(!!id) %>%
     dplyr::mutate(cyclenum = ifelse(
@@ -191,7 +202,7 @@ calculate_mcyclength <- function(data, id, date, menses, ovtoday) {
       cumsum(!is.na(m2mcount) & m2mcount == 1 & cycle_incomplete == 0)
     )) %>%
     dplyr::ungroup()
-  #If mcyclength = -inf, turn to NA 
+  # #If mcyclength = -inf, turn to NA 
   data <- data %>%
     dplyr::mutate(
       mcyclength = dplyr::case_when(
@@ -200,6 +211,6 @@ calculate_mcyclength <- function(data, id, date, menses, ovtoday) {
       )
     )
   
-
+  
   return(data)
 }
