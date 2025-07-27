@@ -8,8 +8,6 @@
 #'
 #' @param data A data frame containing the input data. 
 #'   - Must include columns for scaled cycle day variables and the symptom or dependent variables of interest. 
-#'   - Scaled cycle day variables are added to your data frame after applying the `calculate_mcyclength()` and 
-#'     `calculate_cycletime()` functions. (See examples below.)
 #' @param symptom_columns A character vector of column names representing the dependent variables of interest. 
 #'   For example, `c("symptom1", "symptom2", "symptom3")`, where each name corresponds to a column in your data set.
 #'
