@@ -154,7 +154,6 @@ The dataset should include the following columns:
 
 ### References
 
-- Peters et al. (2024). *Perimenstrual dysphoria and cycle-centered modeling*. Under review.  
 - Nagpal et al. (2025). *Studying the Menstrual Cycle as a Continuous Variable: Implementing PACTS with the `menstrualcycleR` Package*. https://doi.org/10.31219/osf.io/hd5xw_v1  
 - Schmalenberger et al. (2021). *How to study the menstrual cycle: Practical tools and recommendations*. *Psychoneuroendocrinology*, 123, 104895. https://doi.org/10.1016/j.psyneuen.2020.104895
 
