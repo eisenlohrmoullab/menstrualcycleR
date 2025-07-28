@@ -463,13 +463,13 @@ This function will help you evaluate how many cycles had a confirmed ovulation v
 
 We can examine this across the entire sample: 
 
-```{r}
+```{r ovulation_summary_total}
 ov_summary$ovstatus_total
 ```
 
 And also by each id in the dataset: 
 
-```{r}
+```{r ovulation_summary_id}
 ov_summary$ovstatus_id
 ```
 
@@ -571,7 +571,7 @@ cycle_plot_df_menses$data
 cycle_plot_df_menses$summary
 ```
 
-```{r cycle_plot_menses_raw_plot fig.width=8, fig.height=6}
+```{r cycle_plot_menses_raw_plot, fig.width=8, fig.height=6}
 cycle_plot_df_menses$plot
 ```
 
@@ -593,7 +593,7 @@ cycle_plot_df_ov <- cycle_plot(
 
 ```
 
-```{r cycle_plot_ov_roll_plot fig.width=8, fig.height=6}
+```{r cycle_plot_ov_roll_plot_access, fig.width=8, fig.height=6}
 cycle_plot_df_ov$plot
 ```
 
@@ -656,7 +656,7 @@ cycle_plot_individual(
 
 This is what the raw data of symptom looks like across the first (and only cycle) for ID = 2: 
 
-```{r cycle_plot_menses_id_2_raw_plot fig.width=8, fig.height=6}
+```{r cycle_plot_menses_id_2_raw_plot, fig.width=8, fig.height=6}
 cycle_plot_menses_id_2 <- cycle_plot_individual(
   cycle_df_scaled,
   id = 2, 
@@ -672,7 +672,7 @@ cycle_plot_menses_id_2$symptom$Cycle_1$plot
 
 As you can see, it is difficult to examine any trends. Smoothing using `y_scale = "roll"` or `y_scale = "rollingavg"` will help us understand what the trajectory looks like for participant ID = 2. 
 
-```{r cycle_plot_menses_id_2_roll_plot fig.width=8, fig.height=6}
+```{r cycle_plot_menses_id_2_roll_plot, fig.width=8, fig.height=6}
 cycle_plot_menses_id_2 <- cycle_plot_individual(
   cycle_df_scaled,
   id = 2, 
@@ -705,13 +705,13 @@ cycle_plot_menses_id_2$symptom$Cycle_1$summary
 
 #### Cycle_1 plot for ID = 2
 
-```{r cycle_plot_menses_id_2_plot}
+```{r cycle_plot_menses_id_2_plot_access, fig.width=8, fig.height=6}
 cycle_plot_menses_id_2$symptom$Cycle_1$plot
 ```
 
 Cycles can also be examined ovulation-centered. 
 
-```{r cycle_plot_ov_id_2_summary fig.width=8, fig.height=6}
+```{r cycle_plot_ov_id_2_summary, fig.width=8, fig.height=6}
 cycle_plot_ov_id_2 <- cycle_plot_individual(
   cycle_df_scaled,
   id = 2, 
