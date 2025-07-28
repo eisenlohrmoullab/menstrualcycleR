@@ -575,6 +575,7 @@ cycle_plot_df_menses$summary
 cycle_plot_df_menses$plot
 ```
 
+This plot is a ggplot object and can be edited using the package `ggplot2` and saved using the function `ggsave()`. 
 
 #### Symptom, Ovulation-centered
 
@@ -724,4 +725,10 @@ cycle_plot_ov_id_2 <- cycle_plot_individual(
 
 cycle_plot_ov_id_2$symptom$Cycle_1$plot
 ```
+
+All of these plots are ggplot objects and can be edited using the package `ggplot2` and saved using the function `ggsave()`. 
+
+## Getting started with modeling outcomes across the menstrual cycle
+
+
 
