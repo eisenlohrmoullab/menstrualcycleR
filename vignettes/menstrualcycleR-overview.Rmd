@@ -327,7 +327,57 @@ cycle_df_scaled = pacts_scaling(data = cycle_df, id = id, date = daterated, mens
 
 For full documentation, type `?pacts_scaling()` in R console. The lower and upper cycle length bounds may be adjusted, but the default is 21-35 days as that was what was validated in Nagpal et al., (2025). Only cycles between 21 and 35 days will get scaled. 
 
-`cycle_df_scaled` will now have additional variables. These scaled cycle time variables align hormonal meaning between cycles and participants. 
+`cycle_df_scaled` will now have additional variables as well as observations.  In this dataset we went from initially having 614 observations in `cycle_df` and then having 739 observations in `cycle_df_scaled`. 
+When scaling the cycle using `pacts_scaling()`, each cycle is required to have a complete sequence of calendar days from menses onset to the next menses onset. If a participant missed reporting symptoms on any day within a cycle, the function inserts placeholder rows with `NA` values to ensure continuity. This process allows accurate computation of cycle-aligned time variables.
+
+
+#### Before and After: Filling Missing Dates Within a Cycle
+
+Below is an example showing how `pacts_scaling()` fills in rows for missing dates in a real participant's cycle.
+
+**Original data (`cycle_df`)**
+
+| id | menses | ovtoday | symptom | daterated   |
+|----|--------|---------|---------|-------------|
+| 1  | 1      | 0       | 5       | 2024-01-20  |
+| 1  | 0      | 0       | 4       | 2024-01-21  |
+| 1  | 0      | 0       | 1       | 2024-01-22  |
+| 1  | 0      | 0       | 2       | 2024-01-24  |
+| 1  | 0      | 0       | 3       | 2024-01-25  |
+| 1  | 0      | 0       | 5       | 2024-01-26  |
+
+- This participant **skipped reporting on 2024-01-23**.
+- The time series is incomplete for cycle scaling until the gap is filled.
+
+**After scaling (`cycle_df_scaled`)**
+
+| id | menses | ovtoday | symptom | daterated   |
+|----|--------|---------|---------|-------------|
+| 1  | 1      | 0       | 5       | 2024-01-20  |
+| 1  | 0      | 0       | 4       | 2024-01-21  |
+| 1  | 0      | 0       | 1       | 2024-01-22  |
+| 1  | 0      | 0       | NA      | 2024-01-23  |
+| 1  | 0      | 0       | 2       | 2024-01-24  |
+| 1  | 0      | 0       | 3       | 2024-01-25  |
+| 1  | 0      | 0       | 5       | 2024-01-26  |
+
+- The function inserts a placeholder row for 2024-01-23 with `NA` in the `symptom` column.
+- This ensures complete daily continuity from menses to the end of the cycle.
+
+---
+
+#### Summary of Row Counts
+
+| Dataset           | Observations | Description                                 |
+|-------------------|--------------|---------------------------------------------|
+| `cycle_df`        | 614          | Original data; only dates with reports      |
+| `cycle_df_scaled` | 739          | Additional rows added to fill date gaps     |
+
+By ensuring complete daily coverage, `pacts_scaling()` allows downstream modeling and visualization tools to interpret menstrual cycle time as a continuous, standardized variable across individuals and cycles.
+
+---
+
+#### Cycle time variables are added in cycle_df_scaled
 
 ```{r view-data}
 names(cycle_df_scaled)
@@ -372,6 +422,7 @@ A cycle time variable centered on **ovulation** (`ovtoday == 1 → 0`), ranging 
 - `cyclic_time_imp_ov`
 Same as above, but includes **imputed ovulation** (`ovtoday_impute == 1`) for cycles lacking confirmation. Centered on either confirmed or imputed ovulation.
 
+---
   
   
 ### Checking Data availability 
