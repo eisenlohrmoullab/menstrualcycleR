@@ -54,7 +54,7 @@ cycle_plot_individual <- function(data, id, symptoms, centering = "menses",
   data_filtered <- data_filtered %>% dplyr::filter(!is.na(cyclenum))
   
   # Ensure data is still a dataframe after filtering
-  if (nrow(data) == 0) {
+  if (nrow(data_filtered) == 0) {
     stop(paste("Error: No data found for ID", id))
   }
   
