@@ -10,8 +10,6 @@ cycledata_check(data, symptom_columns)
 \item{data}{A data frame containing the input data.
 \itemize{
 \item Must include columns for scaled cycle day variables and the symptom or dependent variables of interest.
-\item Scaled cycle day variables are added to your data frame after applying the \code{calculate_mcyclength()} and
-\code{calculate_cycletime()} functions. (See examples below.)
 }}
 
 \item{symptom_columns}{A character vector of column names representing the dependent variables of interest.

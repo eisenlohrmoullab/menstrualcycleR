@@ -294,16 +294,17 @@ The app includes tools for:
 - Visualization by person and symptom
 - PMDD, MRMD, and PME diagnosis using the **Carolina Premenstrual Assessment Scoring System (C-PASS)**
 
-> 📚 C-PASS is implemented via the [`cpass`](https://lasy.github.io/cpass/) R package:  
+> C-PASS is implemented via the [`cpass`](https://lasy.github.io/cpass/) R package. Please cite this package if you utilize the CPASS tool in the shiny app:  
 > Symul L, Eisenlohr-Moul T (2025). *cpass: PMDD and MRMD Diagnoses Following The Carolina Premenstrual Assessment Scoring System (C-PASS)*. R package version 0.1.0.
 
-For more on C-PASS as a diagnostic tool, see:  
-Eisenlohr-Moul, T. A., Girdler, S. S., Schmalenberger, K. M., Dawson, D. N., Surana, P., Johnson, J. L., & Rubinow, D. R. (2017).  
+> For more on C-PASS as a diagnostic tool, see:  
+> Eisenlohr-Moul, T. A., Girdler, S. S., Schmalenberger, K. M., Dawson, D. N., Surana, P., Johnson, J. L., & Rubinow, D. R. (2017).  
 *Toward the Reliable Diagnosis of DSM-5 Premenstrual Dysphoric Disorder: The Carolina Premenstrual Assessment Scoring System (C-PASS).*  
-American Journal of Psychiatry, 174(1), 51–59. https://doi.org/10.1176/appi.ajp.2016.15121510
+> American Journal of Psychiatry, 174(1), 51–59. https://doi.org/10.1176/appi.ajp.2016.15121510
+> **Please cite this paper if you utilize the CPASS tool in the shiny app.**
 
-The app is accessible online here:  
-👉 https://menstrualcycledata.shinyapps.io/shiny/
+> **The shiny app is also accessible online here:**  
+> 👉 https://menstrualcycledata.shinyapps.io/shiny/
 
 ---
 
@@ -347,10 +348,35 @@ names(cycle_df_scaled)
 - `ovtoday_impute`:  
   A binary indicator identifying **imputed ovulation days** (value = 1), estimated as 15 days before the next menses onset.
   
+- `mcyclength`: 
+  Indicates the length of a menses-to-menses cycle an observation belongs to. 
+  
+- `luteal_length`: 
+  Indicates the length of the luteal phase an observation belongs to, when ovulation was not imputed. 
+  
+- `cycle_inomplete`
+  A binary indicator identifying if the observation is part of an incomplete menses-to-menses cycle 
+  
+
+The following additional variables may be helpful for menstrual cycle analysis, but are not discussed in detail in Nagpal et al., (2025). 
+
+- `cyclic_time`
+ A continuous cycle time variable centered on **menses onset** (`menses == 1 → 0`), ranging from –1 to +1. Unlike `scaled_cycleday`, -1 and + 1 are parameterized to have the same hormonal meaning of **ovulation**.  Includes **only biomarker-confirmed** ovulation cycles.
+
+- `cyclic_time_impute`
+ Same as above, but also includes cycles with **imputed ovulation** (assigned to day –15 before next menses). Increases dataset coverage, but with lower precision.
+
+- `cyclic_time_ov`
+A cycle time variable centered on **ovulation** (`ovtoday == 1 → 0`), ranging from –1 to +1. Unlike `scaled_cycleday_ov`, -1 and + 1 are parameterized to have the same hormonal meaning of **menses_onset**.  Includes **only biomarker-confirmed** ovulation.
+
+- `cyclic_time_imp_ov`
+Same as above, but includes **imputed ovulation** (`ovtoday_impute == 1`) for cycles lacking confirmation. Centered on either confirmed or imputed ovulation.
+
+  
   
 ### Checking Data availability 
   
-To examine how much non-missing data is available, apply  `cycledata_check()`, inputting our resultant dataset from above (`df_with_scaling`) and choosing which outcomes you would like to look at. Here we are examining only 1 outcome: `symptom`. 
+To examine how much non-missing data is available, apply  `cycledata_check()`, inputting our resultant dataset from above (`df_with_scaling`) and choosing which outcomes you would like to look at. As of now, this function examines number of observations with a corresponding value for `scaled_cycleday_impute`. Here we are examining only 1 outcome: `symptom`. 
   
 ```{r cycledata_check}
 checkdata = cycledata_check(cycle_df_scaled, symptom_columns = c("symptom"))
