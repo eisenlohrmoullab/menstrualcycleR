@@ -77,7 +77,7 @@ When ovulation is not confirmed using biomarkers (e.g., LH surge, BBT), PACTS us
 
 This backward-counting method is preferable to mid-cycle assumptions, which often misclassify ovulation in cycles with short or long follicular phases. The use of biomarkers is still recommended whenever possible to ensure precise alignment.
 
-The function automatically flags imputed ovulation using a binary column (`ovtoday_impute`) so that users can report and model uncertainty.
+Functions in `menstrualcycleR` automatically flag imputed ovulation using a binary column (`ovtoday_impute`) so that users can report and model uncertainty.
 
 ---
 
@@ -427,15 +427,15 @@ Same as above, but includes **imputed ovulation** (`ovtoday_impute == 1`) for cy
   
 ### Checking Data availability 
   
-To examine how much non-missing data is available, apply  `cycledata_check()`, inputting our resultant dataset from above (`df_with_scaling`) and choosing which outcomes you would like to look at. As of now, this function examines number of observations with a corresponding value for `scaled_cycleday_impute`. Here we are examining only 1 outcome: `symptom`. 
+To examine how much non-missing data is available, apply  `cycledata_check()`, inputting our resultant dataset from above (`df_with_scaling`) and choosing which outcomes you would like to look at. As of now, this function examines number of observations with a corresponding value for `scaled_cycleday_impute`. Here we are examining only 1 outcome: `symptom`. However, if you would like to look at more outcomes at once, replace `c("symptom")` with the outcomes of interest: e.g.`c("symptom1", "symptom2", "symptom3")`
   
 ```{r cycledata_check}
 checkdata = cycledata_check(cycle_df_scaled, symptom_columns = c("symptom"))
 ```
   
-This function will output a warning if any IDs have less than 10 observations in a menses-to-menses cycle for the outcome selected. As you can see, IDs 9, 14, and 25 have less than 10 observations. 
+This function will output a warning if any IDs have less than 10 observations in a menses-to-menses cycle for the outcome selected. 
 
-We can examine how much non-missing data for `symptom` each ID has with a corresponding scaled cycle time measure both overall, and by phase (luteal and follicular). 
+We can examine how much non-missing data for `symptom` each ID has with a corresponding scaled cycle time measure (taking into account imputed ovulation) both overall, and by phase (luteal and follicular). 
 
 ```{r cycledata_check_by_id}
 checkdata$by_id
@@ -447,13 +447,234 @@ We can also examine this in aggregate, looking at the sample as a whole:
 checkdata$overall
 ```
 
-Overall, 492 observations were scaled because they existed in menses-to-menses cycles between 21 and 35 days. We can also visualize non-missing symptom data across the cycle: 
+Overall, all 614 observations were scaled because they existed in menses-to-menses cycles between 21 and 35 days and there were no observations that were not bookended by either menses-onset or imputed ovulation. We can also visualize non-missing symptom data across the cycle: 
+
+```{r cycledata_check_plot ,fig.width=8, fig.height=6}
+checkdata$data_symptom_plots
+```
+
+### Checking Ovulation Data Availability 
+
+```{r ovulation_summary}
+ov_summary = summary_ovulation(cycle_df_scaled)
+```
+
+This function will help you evaluate how many cycles had a confirmed ovulation value prior to using `menstrualcycleR` and how many cycles had an ovulation day imputed via 15-day backward count via the `pacts_scaling()` function. (see [Estimating Ovulation When Biomarkers Are Unavailable](#estimating-ovulation-when-biomarkers-are-unavailable) and [Ovulation Assessment or Imputation](#ovulation-assessment-or-imputation)).
+
+We can examine this across the entire sample: 
+
 ```{r}
+ov_summary$ovstatus_total
+```
+
+And also by each id in the dataset: 
+
+```{r}
+ov_summary$ovstatus_id
+```
+
+Researchers are strongly encouraged to report the proportion of confirmed versus imputed ovulation days for transparency and scientific rigor.
+
+### Visualizing outcomes across the cycle 
+
+#### `cycle_plot()`
+
+The `cycle_plot()` function generates a group-level visualization of symptom or outcome data across the standardized menstrual cycle. This function supports flexible centering (on menses or ovulation), person-centered or raw scaling, and optional smoothing via rolling averages. Rolling averages are supported by the package `zoo`. 
+
+
+Let's take a look at the parameters of `cycle_plot`:
+
+
+```{r eval = F}
+cycle_plot(
+  data,
+  symptom,
+  centering = "menses",
+  include_impute = TRUE,
+  y_scale = "person-centered_roll",
+  rollingavg = 5,
+  align_val = "center",
+  se = FALSE
+)
+```
+
+
+- `data`:  
+  A dataframe containing the cycle-aligned data. Must include the relevant scaled cycle time variables (`scaled_cycleday`, `scaled_cycleday_ov`, etc.) and the symptom column. This function will only work if your dataset has been run through `pacts_scaling()` first.
+
+- `symptom`:  
+  A string specifying the name of the symptom or outcome variable to visualize.
+
+- `centering`:  
+  Whether to center the x-axis on `"menses"` (default) or `"ovulation"`. This determines which scaled cycle day variable is used.
+
+- `include_impute`:  
+  Logical. If `TRUE`, uses both confirmed and imputed ovulation cycles. Set to `FALSE` to restrict the analysis to biomarker-confirmed cycles only.
+
+- `y_scale`:  
+  Specifies how to scale the y-axis:
+  - `"person-centered"`: Mean person-centered values
+  - `"person-centered_roll"`: Smoothed person-centered values (default) that applies a rolling average to data, using `zoo::rollapply`
+  - `"means"`: Raw mean values of participants 
+
+- `rollingavg`:  
+  Number of days used for rolling average smoothing (default = 5). Computed using `zoo::rollapply.`
+
+- `align_val`:  
+  Controls alignment of the rolling average window (`"center"`, `"left"`, or `"right"`). Passed to `zoo::rollapply`.
+
+- `se`:  
+  Logical. If `TRUE`, includes a standard error ribbon around the group mean.
+  
+
+> **Note:** If you use the `"person_centered_roll"` option for the `y_scale`, please cite the `zoo` package:  
+> Zeileis A, Grothendieck G (2005). “zoo: S3 Infrastructure for Regular and Irregular Time Series.”  
+> *Journal of Statistical Software*, *14*(6), 1–27.  
+> [https://doi.org/10.18637/jss.v014.i06](https://doi.org/10.18637/jss.v014.i06)
+
+
+---
+
+#### Symptom, Menses-centered
+
+```{r}
+cycle_plot_df_menses <- cycle_plot(
+  cycle_df_scaled,
+  "symptom",
+  centering = "menses",
+  include_impute = TRUE,
+  y_scale = "person-centered_roll", 
+  se = T
+)
 
 ```
 
 
+`cycle_plot()` returns a list with three components:
+
+1. **data**: The original data augmented with person-mean (`.m`) and deviation (`.d`) values for the symptom.
+
+A "person-mean" is the average of all of a single participant’s repeated scores or measurements over time. It represents a way to summarize what is "typical" for a given person, and is used for “between-person” or “trait-level” analyses. 
+
+•	By extension, “deviations from person-mean" represent the differences between a person’s score on a specific day (or other repeated measure interval) and their usual average (their person-mean). It tells us how much higher or lower they are compared to their normal, and is used in “within-person” or “state-level” analyses. 
+
+2. **summary**: A summary of the outcome variable at each 5% increment of the scaled cycle timeline.
+3. **plot**: A `ggplot2` object visualizing the trajectory of the symptom variable across the cycle.
 
 
+```{r}
+cycle_plot_df_menses$data
+```
+
+```{r}
+cycle_plot_df_menses$summary
+```
+
+```{r fig.width=8, fig.height=6}
+cycle_plot_df_menses$plot
+```
+
+
+#### Symptom, Ovulation-centered
+
+Here is the same data, centered on ovulation. 
+
+
+```{r}
+cycle_plot_df_ov <- cycle_plot(
+  cycle_df_scaled,
+  "symptom",
+  centering = "ovulation",
+  include_impute = TRUE,
+  y_scale = "person-centered_roll", 
+  se = T
+)
+
+```
+
+```{r fig.width=8, fig.height=6}
+cycle_plot_df_ov$plot
+```
+
+### Visualizing Individual Participants and Cycles with `cycle_plot_individual()`
+
+####  `cycle_plot_individual`
+
+The `cycle_plot_individual()` function generates **cycle-specific plots and summaries** for a given participant ID. This function is especially useful for quality control, or individualized data visualization. It produces one plot per cycle, centered on either menses or ovulation, and includes summary data for each. Rolling averages are supported by the package `zoo`. 
+
+
+Let's take a look at the parameters of `cycle_plot_individual`:
+
+```{r eval = F}
+cycle_plot_individual(
+  data,
+  id,
+  symptoms,
+  centering = "menses",
+  y_scale = "person-centered",
+  include_impute = TRUE,
+  rollingavg = 5
+)
+```
+
+
+- `data`:  
+  A dataframe containing scaled cycle data with at least `id`, `cyclenum`, and the relevant symptom variables. The dataframe must already include the appropriate scaled cycle time columns.
+
+- `id`:  
+  A numeric or character value specifying the participant ID to visualize.
+
+- `symptoms`:  
+  A character vector of one or more symptom variables to plot.
+
+- `centering`:  
+  Center the plot on `"menses"` (default) or `"ovulation"`. Determines which scaled time variable is used.
+
+- `y_scale`:  
+  Specifies the type of y-axis transformation:
+  - `"person-centered"`: Deviation from participant mean
+  - `"person-centered_roll"`: Smoothed person-centered values (default) that applies a rolling average to data, using `zoo::rollapply`
+  - `"raw"`: Uncentered raw values
+  - `"roll"`: Rolling average of raw values
+
+- `include_impute`:  
+  Logical. If `TRUE`, includes cycles with imputed ovulation.
+
+- `rollingavg`:  
+  Number of days to use in the rolling average window (default = 5). Applies only when using `"roll"` or `"person-centered_roll"` scales. Computed using `zoo::rollapply.`
+  
+  > **Note:** If you use the `"person_centered_roll"` option for the `y_scale`, please cite the `zoo` package:  
+> Zeileis A, Grothendieck G (2005). “zoo: S3 Infrastructure for Regular and Irregular Time Series.”  
+> *Journal of Statistical Software*, *14*(6), 1–27.  
+> [https://doi.org/10.18637/jss.v014.i06](https://doi.org/10.18637/jss.v014.i06)
+
+
+---
+
+#### Symptom, Menses-centered
+
+```{r}
+cycle_plot_df_menses <- cycle_plot(
+  cycle_df_scaled,
+  "symptom",
+  centering = "menses",
+  include_impute = TRUE,
+  y_scale = "person-centered_roll", 
+  se = T
+)
+
+```
+
+
+`cycle_plot_individual()` returns a list with three components:
+
+1. **data**: The original data augmented with person-mean (`.m`) and deviation (`.d`) values for the symptom.
+
+A "person-mean" is the average of all of a single participant’s repeated scores or measurements over time. It represents a way to summarize what is "typical" for a given person, and is used for “between-person” or “trait-level” analyses. 
+
+•	By extension, “deviations from person-mean" represent the differences between a person’s score on a specific day (or other repeated measure interval) and their usual average (their person-mean). It tells us how much higher or lower they are compared to their normal, and is used in “within-person” or “state-level” analyses. 
+
+2. **summary**: A summary of the outcome variable at each 5% increment of the scaled cycle timeline.
+3. **plot**: A `ggplot2` object visualizing the trajectory of the symptom variable across the cycle.
 
 
