@@ -87,6 +87,7 @@ cycledata_check <- function(data, symptom_columns) {
   
   # Overall table (not grouped by id)
   overall_summary <- data %>%
+    dplyr::ungroup() %>%
     dplyr::summarise(
       dplyr::across(
         dplyr::all_of(symptom_columns),
