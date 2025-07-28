@@ -526,8 +526,23 @@ cycle_plot(
 - `se`:  
   Logical. If `TRUE`, includes a standard error ribbon around the group mean.
   
+  
+#### Note on Rolling Averages
 
-> **Note:** If you use the `"person_centered_roll"` option for the `y_scale`, please cite the `zoo` package:  
+If `y_scale = "person-centered_roll"` is selected, rolling averages are calculated using the `zoo::rollapply()` function, which applies a moving average over the time series, with the settings as:
+
+```{r eval = F}
+zoo::rollapply(
+  variable,         # vector of values
+  rollingavg,       # size of the moving window (default = 5 days)
+  FUN = function(x) mean(x, na.rm = TRUE), # specifies a mean function to apply to each rolling window of values, ignoring missing values
+  align = "center", # align the output to the center of the window
+  fill = NA,        # fill edges with NA where full window is not available
+  partial = TRUE    # allow smaller windows at the beginning and end
+)
+```  
+
+>  If you use the `"person_centered_roll"` option for the `y_scale`, please cite the `zoo` package:  
 > Zeileis A, Grothendieck G (2005). “zoo: S3 Infrastructure for Regular and Irregular Time Series.”  
 > *Journal of Statistical Software*, *14*(6), 1–27.  
 > [https://doi.org/10.18637/jss.v014.i06](https://doi.org/10.18637/jss.v014.i06)
@@ -681,11 +696,26 @@ cycle_plot_menses_id_2 <- cycle_plot_individual(
   centering = "menses",
   y_scale = "roll",
   include_impute = TRUE,
-  rollingavg = 5
+  rollingavg = 3
 )
 
 cycle_plot_menses_id_2$symptom$Cycle_1$plot
 ```
+
+#### Note on Rolling Averages
+
+If `y_scale = "person-centered_roll"` is selected, rolling averages are calculated using the `zoo::rollapply()` function, which applies a moving average over the time series, with the settings as:
+
+```{r eval = F}
+zoo::rollapply(
+  variable,         # vector of values
+  rollingavg,       # size of the moving window (default = 5 days)
+  FUN = function(x) mean(x, na.rm = TRUE), # specifies a mean function to apply to each rolling window of values, ignoring missing values
+  align = "center", # align the output to the center of the window
+  fill = NA,        # fill edges with NA where full window is not available
+  partial = TRUE    # allow smaller windows at the beginning and end
+)
+```  
 
 
 `cycle_plot_individual()` returns a list with two components accessible for every menses-to-menses cycle that exists for an individual:
@@ -720,7 +750,7 @@ cycle_plot_ov_id_2 <- cycle_plot_individual(
   centering = "ovulation",
   y_scale = "roll",
   include_impute = TRUE,
-  rollingavg = 5
+  rollingavg = 3
 )
 
 cycle_plot_ov_id_2$symptom$Cycle_1$plot
@@ -728,7 +758,105 @@ cycle_plot_ov_id_2$symptom$Cycle_1$plot
 
 All of these plots are ggplot objects and can be edited using the package `ggplot2` and saved using the function `ggsave()`. 
 
-## Getting started with modeling outcomes across the menstrual cycle
+## Modeling Menstrual Cycle Dynamics with Generalized Additive Mixed Models (GAMMs)
+
+Okay — now that you've used `menstrualcycleR` to generate standardized menstrual cycle time variables and can beautifully visualize outcomes across the cycle (both at the sample and individual levels), you may be wondering:
+
+> **How do I know if my outcome significantly changes across the cycle?**
+
+To answer this, we turn to **generalized additive mixed models (GAMMs)** via the `mgcv` R package (Wood, 2006). GAMMs allow you to statistically evaluate whether there are meaningful, nonlinear changes in your outcome across time in the cycle, while accounting for repeated measures within individuals.
+
+GAMMs extend linear mixed-effects models by incorporating **smooth functions** of predictors, allowing researchers to flexibly estimate curved trajectories without assuming a specific polynomial shape. This makes them especially well-suited for capturing the **dynamic and cyclical** nature of menstrual cycle data.
+
+### Model Specifications 
+
+In our generalized additive mixed model (GAMM) framework, we adopt a flexible approach that accommodates nonlinear trends and individual-level variation across the menstrual cycle:
+
+- Models are estimated using **restricted maximum likelihood (REML)**, which provides stable and unbiased estimates of smoothness parameters, particularly in mixed-effects settings.
+
+- In the below example, we assume a **Gaussian distribution** with an **identity link function** for the outcome variable. However, GAMMs can accommodate a variety of outcome distributions.  
+  **Important:** You should always assess the distribution of residuals and consider alternative families when appropriate (e.g., Poisson for count data, binomial for binary outcomes).  
+  See [`family.mgcv`](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/family.mgcv.html) and  
+  Wood, S.N., Pya, N., & Saefken, B. (2016). *Smoothing parameter and model selection for general smooth models.* _Journal of the American Statistical Association, 111_, 1548–1575. [https://doi.org/10.1080/01621459.2016.1180986](https://doi.org/10.1080/01621459.2016.1180986)
+
+- Both **fixed effects** (population-level trends) and **random effects** (individual-level variation) are modeled as **smooth terms**, providing flexibility to capture nonlinearity without assuming a specific functional form.
+
+- Smooth terms are constructed using **thin plate regression splines**, the default and recommended basis in the `mgcv` package. These splines are automatically penalized to minimize overfitting and promote interpretability.
+
+- Time-varying predictors created by `menstrualcycleR`—such as `scaled_cycleday_impute`, `scaled_cycleday`, or `scaled_cycleday_imp_ov`—can be directly included as smooth terms in the model specification (e.g., `s(scaled_cycleday_impute)`).
+
+- Missing data are addressed using **listwise deletion**: only observations with complete data for the outcome and all predictors are retained in the model fitting process.
+")
+
+Compared to traditional modeling strategies (e.g., phase-based contrasts or linear time effects), GAMMs offer:
+
+- **Data-driven flexibility** to model smooth trends.
+- Avoidance of arbitrary knot placement or boundary instability.
+- The ability to model **subject-specific trajectories** through random smooths.
+- Easy alignment with biologically meaningful time variables (e.g., centered on **menses** or **ovulation**).
+
+This modeling framework allows researchers to explore subtle changes and patterns across the menstrual cycle with greater precision and interpretability.
+
+We will now demonstrate how to use GAMMs on the sample dataset provided by `menstrualcycleR`.
+
+### Running a GAMM
+
+- To use the most observations available to use, we will use the variable `scaled_cycleday_impute` as the predictor. 
+
+#### Data Preparation 
+
+Here, we log-transform our outcome variable `symptom`, because oftentimes many biological and behavioral outcomes (e.g. hormone levels, reaction times, symptom scores) are right-skewed. Log-transforming these outcomes often results in a distribution that is more symmetric and approximately normal. However, you should always check model residuals to assess heteroscedascity and distribution of residuals. 
+
+
+```{r}
+cycle_df_scaled$symptom_log = log(cycle_df_scaled$symptom + 1) #log-transforming our outcome variable symptom
+```
+
+We now create a dataframe called `datSX` that includes only complete cases for the variables `scaled_cycleday_impute` and `symptom_log`. 
+
+GAMMs in the `mgcv` package use **listwise deletion**, meaning the model will only include rows with **no missing values** across any variables in the formula. By pre-filtering the dataset using `complete.cases()`, we can determine exactly how many observations will be included in the model. This ensures transparency and avoids confusion when interpreting model results.
+
+
+```{r}
+selected_vars <- c("scaled_cycleday_impute", "symptom_log" )
+datSX <- cycle_df_scaled[complete.cases(cycle_df_scaled[selected_vars]), ]
+```
+
+Let's run the GAMM!
+
+```{r}
+datSX$id = as.factor(datSX$id) # ALWAYS factor id before putting it in a gam formula
+
+gamm1 <- mgcv::gam(
+  symptom_log ~ 
+    s(scaled_cycleday_impute) + 
+    s(id, bs = 're') + 
+    s(scaled_cycleday, id, bs = 're'),
+  data = datSX, 
+  method = 'REML'
+)
+```
+
+This model includes:
+
+- **`symptom_log`**  
+  The outcome variable (log-transformed symptom). 
+  
+- **`s(scaled_cycleday_impute)`**  
+  A smooth term modeling the **fixed effect** of cycle time (scaled, centered on menses) across the sample. This captures **nonlinear, average trends** in the symptom over the cycle.
+
+- **`s(id, bs = 're')`**  
+  A **random intercept** for each participant. This accounts for **individual differences in average symptom level**.
+
+- **`s(scaled_cycleday, id, bs = 're')`**  
+  A **random slope**: models how each participant's cycle trajectory may deviate from the population-level pattern. This allows **person-specific nonlinear trends** across the cycle.
+
+- **`data = datSX`**  
+  The dataset used for model fitting. It should contain only complete cases for all model variables.
+
+- **`method = 'REML'`**  
+  Fits the model using Restricted Maximum Likelihood, which improves estimation of smoothness and variance components, especially in the presence of random effects.
+")
 
 
 
