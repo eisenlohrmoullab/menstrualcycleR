@@ -103,7 +103,7 @@ cycle_plot_individual <- function(data, id, symptoms, centering = "menses",
         !!paste0(symptom, ".roll") := if (sum(!is.na(!!sym(symptom))) < 2) {
           NA_real_
         } else {
-          zoo::rollapply(!!sym(symptom), rollingavg, mean, align = "center", fill = NA)
+          zoo::rollapply(!!sym(symptom), rollingavg, FUN = function(x) mean(x, na.rm = TRUE), align = "center", fill = NA, partial = T)
         }
       ) %>%
       dplyr::ungroup()
