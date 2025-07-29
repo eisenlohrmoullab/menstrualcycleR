@@ -1,0 +1,10 @@
+name: menstrualcycler
+title:
+username: menstrualcycledata
+account: menstrualcycledata
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 15138965
+bundleId: 10695801
+url: https://menstrualcycledata.shinyapps.io/menstrualcycler/
+version: 1

@@ -421,14 +421,13 @@
       ],
       "VignetteBuilder": "knitr",
       "Config/testthat/edition": "3",
+      "Author": "Laura Symul [aut, cre, ccp], Tory Eisenlohr-Moul [aut, ccp]",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteRepo": "cpass",
       "RemoteUsername": "lasy",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "043bef943ca450bd32145cb7add9078b60c8227a",
-      "NeedsCompilation": "no",
-      "Author": "Laura Symul [aut, cre, ccp], Tory Eisenlohr-Moul [aut, ccp]"
+      "RemoteRepo": "cpass",
+      "RemoteRef": "master",
+      "RemoteSha": "043bef943ca450bd32145cb7add9078b60c8227a"
     },
     "cpp11": {
       "Package": "cpp11",
