@@ -2,7 +2,7 @@
 #'
 #' This dataset contains daily symptom and cycle information used to test and demonstrate the package.
 #'
-#' @format A data frame with 614 rows and 5 variables:
+#' @format A data frame with 619 rows and 5 variables:
 #' \describe{
 #'   \item{id}{Participant ID}
 #'   \item{date}{Date of symptom observation}
