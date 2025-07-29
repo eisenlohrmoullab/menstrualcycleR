@@ -669,7 +669,7 @@ cycle_plot_individual(
 
 This is what the raw data of symptom looks like across the first (and only cycle) for ID = 2: 
 
-```{r cycle_plot_menses_id_2_raw_plot, fig.width=7, fig.height=6}
+```{r cycle_plot_menses_id_2_raw_plot, fig.width=7, fig.height=5}
 cycle_plot_menses_id_2 <- cycle_plot_individual(
   cycle_df_scaled,
   id = 2, 
@@ -685,7 +685,7 @@ cycle_plot_menses_id_2$symptom$Cycle_1$plot
 
 As you can see, it is difficult to examine any trends. Smoothing using `y_scale = "roll"` or `y_scale = "rollingavg"` will help us understand what the trajectory looks like for participant ID = 2. 
 
-```{r cycle_plot_menses_id_2_roll_plot, fig.width=8, fig.height=6}
+```{r cycle_plot_menses_id_2_roll_plot, fig.width=7, fig.height=5}
 cycle_plot_menses_id_2 <- cycle_plot_individual(
   cycle_df_scaled,
   id = 2, 
@@ -736,13 +736,13 @@ cycle_plot_menses_id_2$symptom$Cycle_1$summary
 
 #### Cycle_1 plot for ID = 2
 
-```{r cycle_plot_menses_id_2_plot_access, fig.width=8, fig.height=6}
+```{r cycle_plot_menses_id_2_plot_access, fig.width=7, fig.height=5}
 cycle_plot_menses_id_2$symptom$Cycle_1$plot
 ```
 
 Cycles can also be examined ovulation-centered. 
 
-```{r cycle_plot_ov_id_2_summary, fig.width=8, fig.height=6}
+```{r cycle_plot_ov_id_2_summary, fig.width=7, fig.height=5}
 cycle_plot_ov_id_2 <- cycle_plot_individual(
   cycle_df_scaled,
   id = 2, 
@@ -977,7 +977,7 @@ plotdat$conf.high = pred$conf.high
 
 #### Plotting model-implied values 
 
-```{r gam_plot, fig.width=8, fig.height=6}
+```{r gam_plot, fig.width=7, fig.height=5}
 # Plotting
 gamplot <- ggplot(plotdat, aes(x = scaled_cycleday_impute, y = estimate)) +
   scale_x_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50), 
@@ -1091,7 +1091,7 @@ Okay now that we understand how variance can be partitioned in multilevel models
 
 #### Proportion of Total Within-Person Variance 
 
-```{r total_within_person, fig.width=8, fig.height=6}
+```{r total_within_person, fig.width=6, fig.height=4}
 # Step 1: Create the data frame
 variance_df <- data.frame(
   Component = c("Fixed effect of the cycle", 
@@ -1126,7 +1126,7 @@ ggplot(variance_df, ggplot2::aes(x = "", y = Proportion, fill = Label)) +
 
 #### Within-person Variance Accounted for by the Menstrual Cycle 
 
-```{r total_within_person_cycle, fig.width=8, fig.height=6}
+```{r total_within_person_cycle, fig.width=6, fig.height=4}
 # Step 1: Create the data frame
 variance_df <- data.frame(
   Component = c("Fixed effect of the cycle", 
