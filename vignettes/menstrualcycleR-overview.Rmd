@@ -1181,6 +1181,8 @@ By reporting **variance partitioning metrics**—such as breakdowns of total var
 
 - Symul, L., & Eisenlohr-Moul, T. (2025). *cpass: PMDD and MRMD diagnoses following the Carolina Premenstrual Assessment Scoring System (C-PASS)* (R package version 0.1.0).
 
+- Wood, S.N., Pya, N., & Saefken, B. (2016). *Smoothing parameter and model selection for general smooth models*. Journal of the American Statistical Association, 111, 1548–1575. https://doi.org/10.1080/01621459.2016.1180986
+
 - Wood, S. N. (2017). *Generalized Additive Models: An Introduction with R* (2nd ed.). Chapman and Hall/CRC.
 
 - Zeileis, A., & Grothendieck, G. (2005). zoo: S3 infrastructure for regular and irregular time series. *Journal of Statistical Software*, *14*(6), 1–27. https://doi.org/10.18637/jss.v014.i06
