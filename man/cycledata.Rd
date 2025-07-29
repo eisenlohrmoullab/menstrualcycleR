@@ -5,7 +5,7 @@
 \alias{cycledata}
 \title{Example longitudinal daily dataset with cycle measures}
 \format{
-A data frame with 614 rows and 5 variables:
+A data frame with 619 rows and 5 variables:
 \describe{
 \item{id}{Participant ID}
 \item{date}{Date of symptom observation}
