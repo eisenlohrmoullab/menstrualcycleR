@@ -30,11 +30,7 @@ Imports:
     shinyjs,
     gam.hp,
     mgcv,
-    cpass, 
-    menstrualcycleR
-Remotes:
-    eisenlohrmoullab/menstrualcycleR,
-    lasy/cpass
+    cpass 
 NeedsCompilation: no
 Packaged: 2024-12-30 17:43:37 UTC; anishan
 Author: 
