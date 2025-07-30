@@ -1,5 +1,9 @@
+^renv$
+^renv\.lock$
 ^LICENSE\.md$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.gitignore$            
 ^\.DS_Store$             
+^doc$
+^Meta$
