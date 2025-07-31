@@ -52,6 +52,6 @@ data_with_scaling <- pacts_scaling(
   lower_cyclength_bound = 21, 
   upper_cyclength_bound = 35
 )
-
+plot_info_id_1$symptom$Cycle_1$plot
 
 }
