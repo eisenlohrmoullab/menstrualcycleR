@@ -104,7 +104,7 @@ process_luteal_phase_base <- function(data, id, date, menses) {
   # Luteal phase length variable 
   data = data %>%
     dplyr::mutate(
-      luteal_length = case_when(
+      luteal_length = dplyr::case_when(
         lutmax <= 18 &
           lutmax >= 7 ~ lutmax,
         TRUE ~ NA
@@ -459,7 +459,7 @@ process_luteal_phase_impute <- function(data, id, date, menses) {
   #   }
   # }
   data = data %>%
-    dplyr::mutate(lutmax_impute = case_when(!is.na(lutdaycount_impute) ~ 14, TRUE ~ NA))
+    dplyr::mutate(lutmax_impute = dplyr::case_when(!is.na(lutdaycount_impute) ~ 14, TRUE ~ NA))
   
   
   data <- data %>%

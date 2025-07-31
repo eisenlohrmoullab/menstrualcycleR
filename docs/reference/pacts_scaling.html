@@ -107,10 +107,10 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Load the example dataset</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">cycledata</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">cycle_df</span> <span class="op">=</span> <span class="va">cycledata</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">data_with_scaling</span> <span class="op">&lt;-</span> <span class="fu">pacts_scaling</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">data</span>, </span></span>
+<span class="r-in"><span>  <span class="va">cycle_df</span>, </span></span>
 <span class="r-in"><span>  id <span class="op">=</span> <span class="va">id</span>, </span></span>
 <span class="r-in"><span>  date <span class="op">=</span> <span class="va">daterated</span>, </span></span>
 <span class="r-in"><span>  menses <span class="op">=</span> <span class="va">menses</span>, </span></span>
@@ -118,7 +118,15 @@
 <span class="r-in"><span>  lower_cyclength_bound <span class="op">=</span> <span class="fl">21</span>, </span></span>
 <span class="r-in"><span>  upper_cyclength_bound <span class="op">=</span> <span class="fl">35</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in UseMethod("mutate"):</span> no applicable method for 'mutate' applied to an object of class "function"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> id: id</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> date: date</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> menses: menses</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ovtoday: ovtoday</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in dplyr::mutate(., luteal_length = case_when(lutmax &lt;= 18 &amp; lutmax &gt;=     7 ~ lutmax, TRUE ~ NA)):</span> <span style="color: #00BBBB;">ℹ</span> In argument: `luteal_length = case_when(lutmax &lt;= 18 &amp; lutmax &gt;= 7 ~</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span>   lutmax, TRUE ~ NA)`.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In group 1: `id = 1`.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `case_when()`:</span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> could not find function "case_when"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># View the result</span></span></span>
