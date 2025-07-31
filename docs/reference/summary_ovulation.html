@@ -91,20 +91,55 @@ Scaled cycle day variables are added to your dataframe after applying the <code>
 <span class="r-out co"><span class="r-pr">#&gt;</span> date: date</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> menses: menses</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ovtoday: ovtoday</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in dplyr::mutate(., luteal_length = case_when(lutmax &lt;= 18 &amp; lutmax &gt;=     7 ~ lutmax, TRUE ~ NA)):</span> <span style="color: #00BBBB;">ℹ</span> In argument: `luteal_length = case_when(lutmax &lt;= 18 &amp; lutmax &gt;= 7 ~</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>   lutmax, TRUE ~ NA)`.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In group 1: `id = 1`.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `case_when()`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> could not find function "case_when"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">ov_summary</span> <span class="op">=</span> <span class="fu">summary_ovulation</span><span class="op">(</span><span class="va">data_with_scaling</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'data_with_scaling' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ov_summary</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'ov_summary' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ovstatus_total</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          Total Confirmed Ovulation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> N cycles                        14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          Total Estimated Ovulation via 15day Backward Count</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> N cycles                                                 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ovstatus_id</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 25 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       id `Total cycles with confirmed ovulation` Total cycles with imputed ovu…¹</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>                                   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>     1                                       0                               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>     2                                       1                               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>     3                                       1                               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>     4                                       0                               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>     5                                       1                               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>     6                                       0                               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>     7                                       1                               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>     8                                       1                               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>     9                                       0                               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>    10                                       1                               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 15 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ abbreviated name:</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   ¹​`Total cycles with imputed ovulation via 15day Backward Count`</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="va">ov_summary</span><span class="op">$</span><span class="va">ovstatus_total</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'ov_summary' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          Total Confirmed Ovulation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> N cycles                        14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          Total Estimated Ovulation via 15day Backward Count</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> N cycles                                                 11</span>
 <span class="r-in"><span><span class="va">ov_summary</span><span class="op">$</span><span class="va">ovstatus_id</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'ov_summary' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 25 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       id `Total cycles with confirmed ovulation` Total cycles with imputed ovu…¹</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>                                   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>     1                                       0                               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>     2                                       1                               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>     3                                       1                               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>     4                                       0                               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>     5                                       1                               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>     6                                       0                               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>     7                                       1                               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>     8                                       1                               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>     9                                       0                               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>    10                                       1                               0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 15 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ abbreviated name:</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   ¹​`Total cycles with imputed ovulation via 15day Backward Count`</span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
