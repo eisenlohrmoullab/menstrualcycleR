@@ -33,7 +33,7 @@ cycle_plot_individual(
 A list where each cycle contains:
 \itemize{
 \item \verb{$plot}: The cycle-specific ggplot object with the ID displayed
-\item \verb{$summary}: The corresponding summary data (\code{dat_summary})
+\item \verb{$summary}: The corresponding summary data
 }
 }
 \description{
@@ -52,7 +52,9 @@ data_with_scaling <- pacts_scaling(
   lower_cyclength_bound = 21, 
   upper_cyclength_bound = 35
 )
-plot_info_id_1 <- cycle_plot_individual(data_with_scaling, id = 1, symptom = "symptom", centering = "menses", y_scale = "person-centered")
-plot_info_id_1$symptom$Cycle_1$plot
+
+plot_info_id_1 <- cycle_plot_individual(data_with_scaling, id = 1, symptom = "symptom", centering = "menses", y_scale = "person-centered_roll", rollingavg = 3)
+
+plot_info_id_1$symptom$Cycle_1
 
 }
