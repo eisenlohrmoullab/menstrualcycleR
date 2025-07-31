@@ -28,7 +28,7 @@
 #'
 #' @examples 
 #' # Load example dataset
-#' data(cycledata)
+#' cycle_df = cycledata
 #'
 #' data_with_scaling <- pacts_scaling(
 #'   data, 
