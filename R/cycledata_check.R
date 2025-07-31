@@ -31,7 +31,7 @@
 #' cycle_df = cycledata
 #'
 #' data_with_scaling <- pacts_scaling(
-#'   data, 
+#'   cycle_df, 
 #'   id = id, 
 #'   date = daterated, 
 #'   menses = menses, 
