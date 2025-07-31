@@ -53,7 +53,8 @@ cycle_plot_individual <- function(data, id, symptoms, centering = "menses",
   # Filter data for the specified ID
   data_filtered <- data %>% filter(id == !!id)
   data_filtered = as.data.frame(data_filtered)
-  data_filtered <- data_filtered %>% dplyr::filter(!is.na(cyclenum))
+  #data_filtered <- data_filtered %>% dplyr::filter(!is.na(cyclenum))
+  data_filtered <- data_filtered %>% dplyr::filter(!is.na(.data$cyclenum))
   
   # Ensure data is still a dataframe after filtering
   if (nrow(data_filtered) == 0) {
