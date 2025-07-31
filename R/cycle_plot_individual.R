@@ -13,7 +13,7 @@
 #'
 #' @return A list where each cycle contains:
 #' - `$plot`: The cycle-specific ggplot object with the ID displayed
-#' - `$summary`: The corresponding summary data (`dat_summary`)
+#' - `$summary`: The corresponding summary data 
 #' @export
 #'
 #' @examples
@@ -28,8 +28,10 @@
 #'   lower_cyclength_bound = 21, 
 #'   upper_cyclength_bound = 35
 #' )
-#' plot_info_id_1 <- cycle_plot_individual(data_with_scaling, id = 1, symptom = "symptom", centering = "menses", y_scale = "person-centered")
-#' plot_info_id_1$symptom$Cycle_1$plot
+#' 
+#' plot_info_id_1 <- cycle_plot_individual(data_with_scaling, id = 1, symptom = "symptom", centering = "menses", y_scale = "person-centered_roll", rollingavg = 3)
+#' 
+#' plot_info_id_1$symptom$Cycle_1
 #' 
 
 
