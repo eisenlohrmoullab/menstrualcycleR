@@ -1927,17 +1927,21 @@ the model:</p>
 entire sample.</li>
 <li><strong>Random effects</strong> capture how individuals deviate from
 those average trends.</li>
+<li><strong>Within-person effects</strong> describe day-to-day
+fluctuations across time.</li>
+<li><strong>Between-person effects</strong> describe how individuals
+differ in their average level of an outcome.</li>
 </ul>
 <p>In the context of menstrual cycle research, we are particularly
 interested in how much of the variation in an outcome (e.g., mood,
 sleep, pain) can be attributed to:</p>
 <ul>
 <li>A sample-wide, average effect of the cycle (<strong>fixed effect of
-the cycle</strong>).</li>
+the cycle and within-person</strong>).</li>
 <li>Individual differences in how people change across the cycle
-(<strong>random slope effects</strong>).</li>
+(<strong>random slope of the cycle and within-person</strong>).</li>
 <li>Stable individual differences not explained by the cycle
-(<strong>random intercepts</strong>).</li>
+(<strong>random intercept and between-person</strong>).</li>
 </ul>
 </div>
 <div id="partitioning-variance-a-primer" class="section level4" number="5.5.2">
@@ -2109,20 +2113,21 @@ output:</p>
 <ul>
 <li><p><strong>s(scaled_cycleday_impute)</strong>:<br />
 The <strong>fixed effect of cycle time</strong> explains
-<strong>51.1%</strong> (0.5110) <strong>0.5460</strong> of total outcome
-variance. This shows that a large portion of outcome variation is
-captured by average, population-level cycle dynamics.</p></li>
+<strong>51.1%</strong> (0.5110) of <strong>total outcome
+variance</strong>. This shows that a large portion of outcome variation
+is captured by average, population-level cycle dynamics.</p></li>
 <li><p><strong>s(id, bs = “re”)</strong>:<br />
 The <strong>random intercept</strong> explains <strong>2.12%</strong>
-(0.0212) of total outcome variance. This reflects <strong>between-person
-differences</strong> in average outcome level—i.e., individual baselines
-not explained by cycle dynamics but could be explained by unmeasured
-trait variables (e.g. age, BMI).</p></li>
+(0.0212) of <strong>total outcome variance</strong>. This reflects
+<strong>between-person differences</strong> in average outcome
+level—i.e., individual baselines not explained by cycle dynamics but
+could be explained by unmeasured trait variables (e.g. age,
+BMI).</p></li>
 <li><p><strong>s(scaled_cycleday_impute, id)</strong>:<br />
-The <strong>random slope effect</strong> explains <strong>2.12%</strong>
-(0.0212) of total outcome variance. This reflects <strong>individual
-differences in trajectories of the outcome across the cycle</strong>,
-above and beyond the average pattern.</p></li>
+The <strong>random slope effect</strong> explains <strong>2.88%</strong>
+(0.0288) of <strong>total outcome variance</strong>. This reflects
+<strong>individual differences in trajectories of the outcome across the
+cycle</strong>, above and beyond the average pattern.</p></li>
 </ul>
 <p>Okay now that we understand how variance can be partitioned in
 multilevel models and in GAMMs, lets take a look at calculating
