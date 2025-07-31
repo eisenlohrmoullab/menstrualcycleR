@@ -57,6 +57,7 @@
 #' 
 
 pacts_scaling <- function(data, id, date, menses, ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35) {
+  `%>%` <- magrittr::`%>%`
   id <- rlang::enquo(id)
   date <- rlang::enquo(date)
   menses <- rlang::enquo(menses)
