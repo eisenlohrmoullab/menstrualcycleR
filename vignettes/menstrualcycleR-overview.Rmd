@@ -1008,12 +1008,14 @@ Effect sizes in multilevel models are more complex than in simple regression bec
 
 - **Fixed effects** estimate average trends across the entire sample.
 - **Random effects** capture how individuals deviate from those average trends.
+- **Within-person effects** describe day-to-day fluctuations across time.
+- **Between-person effects** describe how individuals differ in their average level of an outcome.
 
 In the context of menstrual cycle research, we are particularly interested in how much of the variation in an outcome (e.g., mood, sleep, pain) can be attributed to:
 
-- A sample-wide, average effect of the cycle (**fixed effect of the cycle**).
-- Individual differences in how people change across the cycle (**random slope effects**).
-- Stable individual differences not explained by the cycle (**random intercepts**).
+- A sample-wide, average effect of the cycle (**fixed effect of the cycle and within-person**).
+- Individual differences in how people change across the cycle (**random slope of the cycle and within-person**).
+- Stable individual differences not explained by the cycle (**random intercept and between-person**).
 
 #### Partitioning Variance: A Primer
 
@@ -1078,13 +1080,13 @@ var.part$hierarchical.partitioning
 While model-explained variance can differ based on model parameters, the total outcome variance is stable for a particular outcome in a dataset. Proportion of total outcome variance can be compared between models with the same outcome to understand the influence of different predictors. For this reason, we interpret the **Individual** column of the `gam.hp` output: 
 
 - **s(scaled_cycleday_impute)**:  
-  The **fixed effect of cycle time** explains **51.1%** (0.5110)  **0.5460** of total outcome variance. This shows that a large portion of outcome variation is captured by average, population-level cycle dynamics.
+  The **fixed effect of cycle time** explains **51.1%** (0.5110) of **total outcome variance**. This shows that a large portion of outcome variation is captured by average, population-level cycle dynamics.
 
 - **s(id, bs = "re")**:  
-  The **random intercept** explains **2.12%** (0.0212) of total outcome variance. This reflects **between-person differences** in average outcome level—i.e., individual baselines not explained by cycle dynamics but could be explained by unmeasured trait variables (e.g. age, BMI).
+  The **random intercept** explains **2.12%** (0.0212) of **total outcome variance**. This reflects **between-person differences** in average outcome level—i.e., individual baselines not explained by cycle dynamics but could be explained by unmeasured trait variables (e.g. age, BMI).
 
 - **s(scaled_cycleday_impute, id)**:  
-  The **random slope effect** explains **2.12%** (0.0212) of total outcome variance. This reflects **individual differences in trajectories of the outcome across the cycle**, above and beyond the average pattern.
+  The **random slope effect** explains **2.88%** (0.0288) of **total outcome variance**. This reflects **individual differences in trajectories of the outcome across the cycle**, above and beyond the average pattern.
 
 
 Okay now that we understand how variance can be partitioned in multilevel models and in GAMMs, lets take a look at calculating **total within-person variance** and **within-person variance accounted for by the cycle**. 
