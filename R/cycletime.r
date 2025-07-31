@@ -29,11 +29,11 @@
 #'
 #' @examples 
 #' # Load the example dataset
-#' data(cycledata)
+#' cycle_df = cycledata
 #'
 #' # First, calculate menses-to-menses cycle lengths
-#' data <- calculate_mcyclength(
-#'   data, 
+#' cycle_df <- calculate_mcyclength(
+#'   cycle_df, 
 #'   id = id, 
 #'   date = daterated, 
 #'   menses = menses, 
@@ -41,8 +41,8 @@
 #' )
 #'
 #' # Then, create cycle time variables
-#' data <- calculate_cycletime(
-#'   data, 
+#' cycle_df <- calculate_cycletime(
+#'   cycle_df, 
 #'   id = id, 
 #'   date = daterated, 
 #'   menses = menses, 
@@ -50,7 +50,7 @@
 #' )
 #'
 #' # View the result
-#' print(data)
+#' print(cycle_df)
 #' 
 #' @noRd
 

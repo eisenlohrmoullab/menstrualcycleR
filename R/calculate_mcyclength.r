@@ -25,10 +25,10 @@
 #' 
 #' @examples 
 #' # Load the example dataset
-#' data(cycledata)
+#' cycle_df = cycledata
 #' 
 #' # Calculate menses-to-menses cycle lengths
-#' result <- calculate_mcyclength(data = data, 
+#' result <- calculate_mcyclength(data = cycle_df, 
 #'                                 id = id, 
 #'                                 date = daterated, 
 #'                                 menses = menses, 
