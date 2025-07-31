@@ -91,7 +91,7 @@ For example, <code>c("symptom1", "symptom2", "symptom3")</code>, where each name
 <span class="r-in"><span>  lower_cyclength_bound <span class="op">=</span> <span class="fl">21</span>, </span></span>
 <span class="r-in"><span>  upper_cyclength_bound <span class="op">=</span> <span class="fl">35</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in data %&gt;% dplyr::mutate(id = !!id, date = !!date, menses = !!menses,     ovtoday = !!ovtoday):</span> could not find function "%&gt;%"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in UseMethod("mutate"):</span> no applicable method for 'mutate' applied to an object of class "function"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Analyze symptom data availability</span></span></span>
 <span class="r-in"><span><span class="va">data_available_info</span> <span class="op">&lt;-</span> <span class="fu">cycledata_check</span><span class="op">(</span></span></span>
