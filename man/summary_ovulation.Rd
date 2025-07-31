@@ -53,10 +53,10 @@ For further guidance on ovulation identification and the rationale for the -15 d
 }
 }
 \examples{
-data(cycledata)
+cycle_df = cycledata
 
 data_with_scaling <- pacts_scaling(
-  data, 
+  cycle_df, 
   id = id, 
   date = daterated, 
   menses = menses, 
