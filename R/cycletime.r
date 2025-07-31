@@ -35,7 +35,7 @@
 #' data <- calculate_mcyclength(
 #'   data, 
 #'   id = id, 
-#'   date = date, 
+#'   date = daterated, 
 #'   menses = menses, 
 #'   ovtoday = ovtoday
 #' )
@@ -44,7 +44,7 @@
 #' data <- calculate_cycletime(
 #'   data, 
 #'   id = id, 
-#'   date = date, 
+#'   date = daterated, 
 #'   menses = menses, 
 #'   ovtoday = ovtoday
 #' )

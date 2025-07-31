@@ -30,7 +30,7 @@
 #' # Calculate menses-to-menses cycle lengths
 #' result <- calculate_mcyclength(data = data, 
 #'                                 id = id, 
-#'                                 date = date, 
+#'                                 date = daterated, 
 #'                                 menses = menses, 
 #'                                 ovtoday = ovtoday)
 #' 
