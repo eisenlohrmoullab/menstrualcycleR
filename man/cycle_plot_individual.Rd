@@ -52,6 +52,7 @@ data_with_scaling <- pacts_scaling(
   lower_cyclength_bound = 21, 
   upper_cyclength_bound = 35
 )
+plot_info_id_1 <- cycle_plot_individual(data_with_scaling, id = 1, symptom = "symptom", centering = "menses", y_scale = "person-centered")
 plot_info_id_1$symptom$Cycle_1$plot
 
 }
