@@ -45,7 +45,7 @@ data(cycledata)
 data_with_scaling <- pacts_scaling(
   data, 
   id = id, 
-  date = date, 
+  date = daterated, 
   menses = menses, 
   ovtoday = ovtoday, 
   lower_cyclength_bound = 21, 
