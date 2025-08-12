@@ -73,5 +73,17 @@ pacts_scaling <- function(data, id, date, menses, ovtoday, lower_cyclength_bound
   
   data = calculate_mcyclength(data, id, date, menses, ovtoday)
   data = calculate_cycletime(data, id, date, menses, ovtoday, lower_cyclength_bound, upper_cyclength_bound)
+  
+  data$cyclic_time = ifelse(ovtoday == 1|ovtoday_impute == 1, 1, cyclic_time)
+  data$cyclic_time_impute = ifelse(ovtoday == 1|ovtoday_impute == 1, 1, cyclic_time_impute)
+  data$scaled_cycleday = ifelse(ovtoday == 1|ovtoday_impute == 1, 1, scaled_cycleday)
+  data$scaled_cycleday_impute = ifelse(ovtoday == 1|ovtoday_impute == 1, 1, scaled_cycleday_impute)
+  data$cyclic_time_ov = ifelse(ovtoday == 1|ovtoday_impute == 1, 0, cyclic_time_ov)
+  data$cyclic_time_imp_ov = ifelse(ovtoday == 1|ovtoday_impute == 1, 0, cyclic_time_imp_ov)
+  data$scaled_cycleday_ov = ifelse(ovtoday == 1|ovtoday_impute == 1, 0, scaled_cycleday_ov)
+  data$scaled_cycleday_imp_ov = ifelse(ovtoday == 1|ovtoday_impute == 1, 0, scaled_cycleday_imp_ov)
+  
+  data = data %>% arrange(id, date) %>% ungroup()
+  
   return(data)
 }
