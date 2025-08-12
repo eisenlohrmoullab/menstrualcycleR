@@ -127,7 +127,7 @@ calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength
         TRUE ~ scaled_cycleday_imp_ov
       ), 
       cyclic_time = dplyr::case_when(
-        ovtoday | ovtoday_impute == 1 ~ 1, 
+        ovtoday  == 1 ~ 1, 
         TRUE ~ cyclic_time
       ), 
       cyclic_time_impute = dplyr::case_when(
@@ -135,7 +135,7 @@ calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength
         TRUE ~ cyclic_time_impute
       ), 
       scaled_cycleday = dplyr::case_when(
-        ovtoday | ovtoday_impute == 1 ~ 1, 
+        ovtoday  == 1 ~ 1, 
         TRUE ~ scaled_cycleday
       ), 
       scaled_cycleday_impute = dplyr::case_when(
@@ -143,7 +143,7 @@ calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength
         TRUE ~ scaled_cycleday_impute
       ), 
       cyclic_time_ov = dplyr::case_when(
-        ovtoday | ovtoday_impute == 1 ~ 0, 
+        ovtoday  == 1 ~ 0, 
         TRUE ~ cyclic_time_ov
       ), 
       cyclic_time_imp_ov = dplyr::case_when(
@@ -151,7 +151,7 @@ calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength
         TRUE ~ cyclic_time_imp_ov
       ), 
       scaled_cycleday_ov = dplyr::case_when(
-        ovtoday | ovtoday_impute == 1 ~ 0, 
+        ovtoday  == 1 ~ 0, 
         TRUE ~ scaled_cycleday_ov
       ), 
       scaled_cycleday_imp_ov = dplyr::case_when(
