@@ -764,11 +764,11 @@ create_scaled_cycleday <- function(data, id, date, menses) {
       ),
       cyclic_time_ov = dplyr::case_when(
         !!menses == 1 & !is.na(dplyr::lag(cyclic_time_ov)) ~ 1,
-        TRUE ~ cyclic_time_imp_ov
+        TRUE ~ cyclic_time_ov
       ),
       scaled_cycleday_ov = dplyr::case_when(
         !!menses == 1 & !is.na(dplyr::lag(scaled_cycleday_ov)) ~ -1,
-        TRUE ~ scaled_cycleday_imp_ov
+        TRUE ~ scaled_cycleday_ov
       )
     )
   
