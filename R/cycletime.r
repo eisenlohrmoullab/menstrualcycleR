@@ -128,6 +128,16 @@ calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength
       )
     )
   
+    data$cyclic_time = ifelse(ovtoday == 1|ovtoday_impute == 1, 1, cyclic_time)
+    data$cyclic_time_impute = ifelse(ovtoday == 1|ovtoday_impute == 1, 1, cyclic_time_impute)
+    data$scaled_cycleday = ifelse(ovtoday == 1|ovtoday_impute == 1, 1, scaled_cycleday)
+    data$scaled_cycleday_impute = ifelse(ovtoday == 1|ovtoday_impute == 1, 1, scaled_cycleday_impute)
+    data$cyclic_time_ov = ifelse(ovtoday == 1|ovtoday_impute == 1, 0, cyclic_time_ov)
+    data$cyclic_time_imp_ov = ifelse(ovtoday == 1|ovtoday_impute == 1, 0, cyclic_time_imp_ov)
+    data$scaled_cycleday_ov = ifelse(ovtoday == 1|ovtoday_impute == 1, 0, scaled_cycleday_ov)
+    data$scaled_cycleday_imp_ov = ifelse(ovtoday == 1|ovtoday_impute == 1, 0, scaled_cycleday_imp_ov)
+    
+    data = data %>% arrange(id, date) %>% ungroup()
   #Select and return the relevant columns
   data <- data %>%
     dplyr::select(
