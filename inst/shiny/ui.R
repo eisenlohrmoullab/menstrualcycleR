@@ -106,12 +106,28 @@ ui <- fluidPage(
                    selectInput("y_scale_mode", "Y-axis Scale", choices = c("person-centered", "person-centered_roll", "raw", "roll")),
                    numericInput("rollingavg_input", "Rolling Day Average", value = 5, min = 1),
                    checkboxInput("include_impute_toggle", "Include Imputed Data", value = TRUE),
+                   uiOutput("symptom_yaxis_controls"),
                    actionButton("run_individual_plot", "Generate Plots", class = "btn-primary")
                  ),
                  mainPanel(
+                   # 🔽 Add this block ABOVE the plot UI
+                   tags$div(
+                     tags$h4("Legend"),
+                     tags$ul(
+                       tags$li(tags$span(style = "color:red;", "Red dashed line = maximum symptom level")),
+                       tags$li(tags$span(style = "color:blue;", "Blue dashed line = minimum symptom level")),
+                       tags$li("Black dotted line = y = 4 reference (only for raw/roll)")
+                     ),
+                     downloadButton("download_all_plots", "Download All Plots"),
+                     downloadButton("download_all_summaries", "Download All Summaries (Excel)"),
+                     tags$hr()
+                   ),
+                   
+                   # 🔽 This stays as-is
                    uiOutput("individual_plot_output")
                  )
         ),
+        
         
         # Add this within your tabsetPanel() in the mainPanel section
         
