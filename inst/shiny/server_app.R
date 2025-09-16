@@ -329,12 +329,12 @@ server <- function(input, output, session) {
                   # Add horizontal lines
                   line_layers <- list(
                     geom_hline(yintercept = ymin_data, linetype = "dashed", color = "blue"),
-                    geom_hline(yintercept = ymax_data, linetype = "dashed", color = "red")
+                    geom_hline(yintercept = ymax_data, linetype = "dashed", color = "blue")
                   )
                   
                   if (input$y_scale_mode %in% c("raw", "roll")) {
                     line_layers <- append(line_layers, list(
-                      geom_hline(yintercept = 4, linetype = "dotted", color = "black")
+                      geom_hline(yintercept = 4, linetype = "dotted", color = "red")
                     ))
                   }
                   
@@ -348,15 +348,15 @@ server <- function(input, output, session) {
                     annotate("text", x = x_max, y = ymin_data, label = paste0("Min: ", round(ymin_data, 2)),
                              hjust = 0.7, vjust = 1, size = 3, color = "blue"),
                     
-                    geom_hline(yintercept = ymax_data, linetype = "dashed", color = "red"),
+                    geom_hline(yintercept = ymax_data, linetype = "dashed", color = "blue"),
                     annotate("text", x = x_max, y = ymax_data, label = paste0("Max: ", round(ymax_data, 2)),
-                             hjust = 0.7, vjust = -0.2, size = 3, color = "red")
+                             hjust = 0.7, vjust = -0.2, size = 3, color = "blue")
                   )
                   
                   # Add dotted y=4 line if raw or roll
                   if (input$y_scale_mode %in% c("raw", "roll")) {
                     line_layers <- append(line_layers, list(
-                      geom_hline(yintercept = 4, linetype = "dotted", color = "black")
+                      geom_hline(yintercept = 4, linetype = "dotted", color = "red")
                     ))
                   }
                   
@@ -407,14 +407,14 @@ server <- function(input, output, session) {
                       annotate("text", x = x_max, y = ymin_data, label = paste0("Min: ", round(ymin_data, 2)),
                                hjust = 0.7, vjust = 1, size = 3, color = "blue"),
                       
-                      geom_hline(yintercept = ymax_data, linetype = "dashed", color = "red"),
+                      geom_hline(yintercept = ymax_data, linetype = "dashed", color = "blue"),
                       annotate("text", x = x_max, y = ymax_data, label = paste0("Max: ", round(ymax_data, 2)),
-                               hjust = 0.7, vjust = -0.2, size = 3, color = "red")
+                               hjust = 0.7, vjust = -0.2, size = 3, color = "blue")
                     )
                     
                     if (input$y_scale_mode %in% c("raw", "roll")) {
                       line_layers <- append(line_layers, list(
-                        geom_hline(yintercept = 4, linetype = "dotted", color = "black")
+                        geom_hline(yintercept = 4, linetype = "dotted", color = "red")
                       ))
                     }
                     
@@ -507,14 +507,14 @@ server <- function(input, output, session) {
                 annotate("text", x = x_max, y = ymin_data, label = paste0("Min: ", round(ymin_data, 2)),
                          hjust = 0.7, vjust = 1, size = 3, color = "blue"),
                 
-                geom_hline(yintercept = ymax_data, linetype = "dashed", color = "red"),
+                geom_hline(yintercept = ymax_data, linetype = "dashed", color = "blue"),
                 annotate("text", x = x_max, y = ymax_data, label = paste0("Max: ", round(ymax_data, 2)),
-                         hjust = 0.7, vjust = -0.2, size = 3, color = "red")
+                         hjust = 0.7, vjust = -0.2, size = 3, color = "blue")
               )
               
               if (input$y_scale_mode %in% c("raw", "roll")) {
                 line_layers <- append(line_layers, list(
-                  geom_hline(yintercept = 4, linetype = "dotted", color = "black")
+                  geom_hline(yintercept = 4, linetype = "dotted", color = "red")
                 ))
               }
               
