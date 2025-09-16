@@ -114,9 +114,8 @@ ui <- fluidPage(
                    tags$div(
                      tags$h4("Legend"),
                      tags$ul(
-                       tags$li(tags$span(style = "color:red;", "Red dashed line = maximum symptom level")),
-                       tags$li(tags$span(style = "color:blue;", "Blue dashed line = minimum symptom level")),
-                       tags$li("Black dotted line = y = 4 reference (only for raw/roll)")
+                       tags$li(tags$span(style = "color:blue;", "Blue dashed line = maximum symptom level")),
+                       tags$li("color:red;", "Red dotted line = y = 4 reference (only for raw/roll)")
                      ),
                      downloadButton("download_all_plots", "Download All Plots"),
                      downloadButton("download_all_summaries", "Download All Summaries (Excel)"),
