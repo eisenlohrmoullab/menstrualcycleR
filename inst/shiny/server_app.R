@@ -6,6 +6,7 @@ library(ggplot2)
 library(shinyjs)
 library(cpass)
 library(purrr)
+library(writexl)
 
 
 
@@ -237,77 +238,326 @@ server <- function(input, output, session) {
     updateCheckboxGroupInput(session, "selected_symptoms", choices = symptom_choices)
   })
   
-  observeEvent(input$run_individual_plot, {
-    req(processed_data(), input$selected_id, input$selected_symptoms)
-    
-    results <- menstrualcycleR::cycle_plot_individual(
-      data = processed_data(),
-      id = input$selected_id,
-      symptoms = input$selected_symptoms,
-      centering = input$centering_mode,
-      y_scale = input$y_scale_mode,
-      include_impute = isTRUE(input$include_impute_toggle),
-      rollingavg = as.numeric(input$rollingavg_input)
-    )
-    
-    output$individual_plot_output <- renderUI({
-      output_list <- list()
-      
-      for (symptom in names(results)) {
-        for (cycle_name in names(results[[symptom]])) {
-          plot_id <- paste0("plot_", symptom, "_", cycle_name)
-          summary_id <- paste0("summary_", symptom, "_", cycle_name)
-          toggle_button_id <- paste0("toggle_", summary_id)
-          download_summary_id <- paste0("download_", summary_id)
-          download_plot_id <- paste0("download_plot_", symptom, "_", cycle_name)
-          
-          local({
-            s <- symptom
-            c <- cycle_name
-            p_id <- plot_id
-            s_id <- summary_id
-            d_id <- download_summary_id
-            dp_id <- download_plot_id
-            toggle_id <- paste0(s_id, "_container")
-            
-            output[[p_id]] <- renderPlot({ results[[s]][[c]]$plot })
-            output[[s_id]] <- renderTable({ results[[s]][[c]]$summary })
-            
-            output[[d_id]] <- downloadHandler(
-              filename = function() paste0("summary_", s, "_", c, ".csv"),
-              content = function(file) {
-                write.csv(results[[s]][[c]]$summary, file, row.names = FALSE)
-              }
-            )
-            
-            output[[dp_id]] <- downloadHandler(
-              filename = function() paste0("plot_", s, "_", c, ".png"),
-              content = function(file) {
-                ggsave(file, plot = results[[s]][[c]]$plot, device = "png", width = 8, height = 6, dpi = 300)
-              }
-            )
-            
-            observeEvent(input[[toggle_button_id]], {
-              shinyjs::toggle(toggle_id)
-            })
-          })
-          
-          output_list[[length(output_list) + 1]] <- tagList(
-            tags$h4(paste("Symptom:", symptom, "|", cycle_name)),
-            plotOutput(plot_id),
-            downloadButton(download_plot_id, "Download Plot"),
-            actionButton(toggle_button_id, "View Summary"),
-            hidden(div(id = paste0(summary_id, "_container"), tableOutput(summary_id))),
-            downloadButton(download_summary_id, "Download Summary"),
+  ## individual plots
+  
+  # NEW: Dynamically generate y-min and y-max inputs for selected symptoms
+     results_storage <- reactiveVal()
+      output$symptom_yaxis_controls <- renderUI({
+        req(input$selected_symptoms)
+        
+        lapply(input$selected_symptoms, function(symptom) {
+          tagList(
+            tags$h5(paste("Y-axis range for:", symptom)),
+            numericInput(paste0("ymin_", symptom), "Y-min", value = NULL),
+            numericInput(paste0("ymax_", symptom), "Y-max", value = NULL),
             tags$hr()
           )
-        }
-      }
+        })
+      })
       
-      do.call(tagList, output_list)
-    })
-  })
   
+      observeEvent(input$run_individual_plot, {
+        req(processed_data(), input$selected_id, input$selected_symptoms)
+        
+        # MODIFIED: Generate plots
+        results <- menstrualcycleR::cycle_plot_individual(
+          data = processed_data(),
+          id = input$selected_id,
+          symptoms = input$selected_symptoms,
+          centering = input$centering_mode,
+          y_scale = input$y_scale_mode,
+          include_impute = isTRUE(input$include_impute_toggle),
+          rollingavg = as.numeric(input$rollingavg_input)
+        )
+        results_storage(results)
+        # NEW: Build y-axis limits (defaults to 1–6 if blank)
+        y_axis_limits <- lapply(input$selected_symptoms, function(symptom) {
+          ymin <- input[[paste0("ymin_", symptom)]]
+          ymax <- input[[paste0("ymax_", symptom)]]
+          
+          if (input$y_scale_mode %in% c("raw", "roll")) {
+            if (is.null(ymin) || is.na(ymin)) ymin <- 1
+            if (is.null(ymax) || is.na(ymax)) ymax <- 6
+          }
+          
+          if (!is.null(ymin) && !is.null(ymax)) {
+            return(c(ymin, ymax))
+          } else {
+            return(NULL)  # Let ggplot auto-scale
+          }
+        })
+        names(y_axis_limits) <- input$selected_symptoms
+        
+        # MODIFIED: Now render plots with y-axis limit
+        output$individual_plot_output <- renderUI({
+          output_list <- list()
+          
+          for (symptom in names(results)) {
+            for (cycle_name in names(results[[symptom]])) {
+              plot_id <- paste0("plot_", symptom, "_", cycle_name)
+              summary_id <- paste0("summary_", symptom, "_", cycle_name)
+              #toggle_button_id <- paste0("toggle_", summary_id)
+              download_summary_id <- paste0("download_", summary_id)
+              download_plot_id <- paste0("download_plot_", symptom, "_", cycle_name)
+              
+              local({
+                s <- symptom
+                c <- cycle_name
+                p_id <- plot_id
+                s_id <- summary_id
+                d_id <- download_summary_id
+                dp_id <- download_plot_id
+                toggle_id <- paste0(s_id, "_container")
+                
+                # Apply per-symptom y-axis range and dashed colored lines
+                output[[p_id]] <- renderPlot({
+                  base_plot <- results[[s]][[c]]$plot
+                  
+                  # Get summary for min/max
+                  summary_df <- results[[s]][[c]]$summary
+                  
+                  value_col <- switch(input$y_scale_mode,
+                                      "person-centered" = "mean_dev",
+                                      "person-centered_roll" = "mean_dev_roll",
+                                      "raw" = "raw_sx",
+                                      "roll" = "sx_roll"
+                  )
+                  
+                  ymax_data <- max(summary_df[[value_col]], na.rm = TRUE)
+                  ymin_data <- min(summary_df[[value_col]], na.rm = TRUE)
+                  
+                  # Add horizontal lines
+                  line_layers <- list(
+                    geom_hline(yintercept = ymin_data, linetype = "dashed", color = "blue"),
+                    geom_hline(yintercept = ymax_data, linetype = "dashed", color = "red")
+                  )
+                  
+                  if (input$y_scale_mode %in% c("raw", "roll")) {
+                    line_layers <- append(line_layers, list(
+                      geom_hline(yintercept = 4, linetype = "dotted", color = "black")
+                    ))
+                  }
+                  
+                  # Apply all layers
+                  # Calculate right-edge x position for annotations
+                  x_max <- max(ggplot_build(base_plot)$data[[1]]$x, na.rm = TRUE)
+                  
+                  # Add horizontal lines
+                  line_layers <- list(
+                    geom_hline(yintercept = ymin_data, linetype = "dashed", color = "blue"),
+                    annotate("text", x = x_max, y = ymin_data, label = paste0("Min: ", round(ymin_data, 2)),
+                             hjust = 0.7, vjust = 1, size = 3, color = "blue"),
+                    
+                    geom_hline(yintercept = ymax_data, linetype = "dashed", color = "red"),
+                    annotate("text", x = x_max, y = ymax_data, label = paste0("Max: ", round(ymax_data, 2)),
+                             hjust = 0.7, vjust = -0.2, size = 3, color = "red")
+                  )
+                  
+                  # Add dotted y=4 line if raw or roll
+                  if (input$y_scale_mode %in% c("raw", "roll")) {
+                    line_layers <- append(line_layers, list(
+                      geom_hline(yintercept = 4, linetype = "dotted", color = "black")
+                    ))
+                  }
+                  
+                  # Build plot
+                  plot_final <- base_plot + line_layers
+                  
+                  # Apply user y-limits if present
+                  if (!is.null(y_axis_limits[[s]])) {
+                    plot_final <- plot_final + coord_cartesian(ylim = y_axis_limits[[s]])
+                  }
+                  
+                  plot_final
+                })
+                
+                output[[s_id]] <- renderTable({ results[[s]][[c]]$summary })
+                
+                output[[d_id]] <- downloadHandler(
+                  filename = function() paste0("summary_", s, "_", c, ".csv"),
+                  content = function(file) {
+                    write.csv(results[[s]][[c]]$summary, file, row.names = FALSE)
+                  }
+                )
+                
+                output[[dp_id]] <- downloadHandler(
+                  filename = function() paste0("plot_", s, "_", c, ".png"),
+                  content = function(file) {
+                    base_plot <- results[[s]][[c]]$plot
+                    summary_df <- results[[s]][[c]]$summary
+                    
+                    value_col <- switch(input$y_scale_mode,
+                                        "person-centered" = "mean_dev",
+                                        "person-centered_roll" = "mean_dev_roll",
+                                        "raw" = "raw_sx",
+                                        "roll" = "sx_roll"
+                    )
+                    
+                    ymax_data <- max(summary_df[[value_col]], na.rm = TRUE)
+                    ymin_data <- min(summary_df[[value_col]], na.rm = TRUE)
+                    
+                    # Defensive fallback
+                    x_max <- tryCatch(
+                      max(ggplot_build(base_plot)$data[[1]]$x, na.rm = TRUE),
+                      error = function(e) NA_real_
+                    )
+                    
+                    line_layers <- list(
+                      geom_hline(yintercept = ymin_data, linetype = "dashed", color = "blue"),
+                      annotate("text", x = x_max, y = ymin_data, label = paste0("Min: ", round(ymin_data, 2)),
+                               hjust = 0.7, vjust = 1, size = 3, color = "blue"),
+                      
+                      geom_hline(yintercept = ymax_data, linetype = "dashed", color = "red"),
+                      annotate("text", x = x_max, y = ymax_data, label = paste0("Max: ", round(ymax_data, 2)),
+                               hjust = 0.7, vjust = -0.2, size = 3, color = "red")
+                    )
+                    
+                    if (input$y_scale_mode %in% c("raw", "roll")) {
+                      line_layers <- append(line_layers, list(
+                        geom_hline(yintercept = 4, linetype = "dotted", color = "black")
+                      ))
+                    }
+                    
+                    plot_final <- base_plot + line_layers
+                    
+                    # Add y-limits if set
+                    if (!is.null(y_axis_limits[[s]])) {
+                      plot_final <- plot_final + coord_cartesian(ylim = y_axis_limits[[s]])
+                    }
+                    
+                    ggsave(file, plot = plot_final, device = "png", width = 8, height = 6, dpi = 300)
+                  }
+                )
+                
+                
+                
+               
+
+              })
+              
+              output_list[[length(output_list) + 1]] <- tagList(
+                tags$h4(paste("Symptom:", symptom, "|", cycle_name)),
+                plotOutput(plot_id),
+                downloadButton(download_plot_id, "Download Plot"),
+                # actionButton(toggle_button_id, "View Summary"),
+                # hidden(div(id = paste0(summary_id, "_container"), tableOutput(summary_id))),
+                downloadButton(download_summary_id, "Download Summary"),
+                tags$hr()
+              )
+            }
+          }
+          
+          do.call(tagList, output_list)
+        })
+      })
+      
+      output$download_all_summaries <- downloadHandler(
+        filename = function() {
+          paste0("summary_data_", Sys.Date(), ".xlsx")
+        },
+        content = function(file) {
+          res <- results_storage()
+          req(res)  # error out early if NULL
+          
+          all_summaries <- list()
+          
+          for (s in names(res)) {
+            for (c in names(res[[s]])) {
+              sheetname <- paste0(s, "_", c)
+              all_summaries[[sheetname]] <- res[[s]][[c]]$summary
+            }
+          }
+          
+          writexl::write_xlsx(all_summaries, path = file)
+        }
+      )
+      
+      output$download_all_plots <- downloadHandler(
+        filename = function() {
+          paste0("individual_cycle_plots_", Sys.Date(), ".pdf")
+        },
+        content = function(file) {
+          res <- results_storage()
+          req(res)
+          
+          plots_to_save <- list()
+          
+          for (s in names(res)) {
+            for (c in names(res[[s]])) {
+              base_plot <- res[[s]][[c]]$plot
+              summary_df <- res[[s]][[c]]$summary
+              
+              value_col <- switch(input$y_scale_mode,
+                                  "person-centered" = "mean_dev",
+                                  "person-centered_roll" = "mean_dev_roll",
+                                  "raw" = "raw_sx",
+                                  "roll" = "sx_roll"
+              )
+              
+              ymax_data <- max(summary_df[[value_col]], na.rm = TRUE)
+              ymin_data <- min(summary_df[[value_col]], na.rm = TRUE)
+              
+              x_max <- tryCatch(
+                max(ggplot_build(base_plot)$data[[1]]$x, na.rm = TRUE),
+                error = function(e) NA_real_
+              )
+              
+              line_layers <- list(
+                geom_hline(yintercept = ymin_data, linetype = "dashed", color = "blue"),
+                annotate("text", x = x_max, y = ymin_data, label = paste0("Min: ", round(ymin_data, 2)),
+                         hjust = 0.7, vjust = 1, size = 3, color = "blue"),
+                
+                geom_hline(yintercept = ymax_data, linetype = "dashed", color = "red"),
+                annotate("text", x = x_max, y = ymax_data, label = paste0("Max: ", round(ymax_data, 2)),
+                         hjust = 0.7, vjust = -0.2, size = 3, color = "red")
+              )
+              
+              if (input$y_scale_mode %in% c("raw", "roll")) {
+                line_layers <- append(line_layers, list(
+                  geom_hline(yintercept = 4, linetype = "dotted", color = "black")
+                ))
+              }
+              
+              plot_final <- base_plot + line_layers
+              
+              # Optional: apply user-specified y-limits if they exist
+              y_axis_limits <- lapply(input$selected_symptoms, function(symptom) {
+                ymin <- input[[paste0("ymin_", symptom)]]
+                ymax <- input[[paste0("ymax_", symptom)]]
+                if (input$y_scale_mode %in% c("raw", "roll")) {
+                  if (is.null(ymin) || is.na(ymin)) ymin <- 1
+                  if (is.null(ymax) || is.na(ymax)) ymax <- 6
+                }
+                if (!is.null(ymin) && !is.null(ymax)) c(ymin, ymax) else NULL
+              })
+              names(y_axis_limits) <- input$selected_symptoms
+              
+              if (!is.null(y_axis_limits[[s]])) {
+                plot_final <- plot_final + coord_cartesian(ylim = y_axis_limits[[s]])
+              }
+              
+              plots_to_save <- c(plots_to_save, list(plot_final))
+            }
+          }
+          
+          # Write to PDF, 6 plots per page in landscape
+          grDevices::pdf(file, width = 14, height = 8.5)
+          if (length(plots_to_save) > 0) {
+            for (i in seq(1, length(plots_to_save), by = 6)) {
+              gridExtra::grid.arrange(
+                grobs = plots_to_save[i:min(i+5, length(plots_to_save))],
+                ncol = 3
+              )
+            }
+          } else {
+            grid::grid.text("No plots to display.")
+          }
+          dev.off()
+        }
+      )
+      
+      
+  #------------
   
   # CPASS Section
   # ---- CPASS Helper Function ----
