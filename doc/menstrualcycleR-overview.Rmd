@@ -969,7 +969,7 @@ The best way to understand the nonlinear trend of an outcome, described by a GAM
 #### First, we need to compute predicted or model-implied values
 
 ```{r}
-plotdat <- expand.grid(scaled_cycleday_impute = seq(-1, 1, by = 0.05),
+plotdat <- expand.grid(cyclic_time_impute = seq(-1, 1, by = 0.05),
                       id = 0) # setting id = 0 suppresses random effects, to model the just the fixed effect (sample-wide) of your outcome across the cycle
 
 # Predict using the model for each dataset and add predictions
@@ -983,7 +983,7 @@ plotdat$conf.high = pred$conf.high
 
 ```{r gam_plot, fig.width=7, fig.height=5}
 # Plotting
-gamplot <- ggplot(plotdat, aes(x = scaled_cycleday_impute, y = estimate)) +
+gamplot <- ggplot(plotdat, aes(x = cyclic_time_impute, y = estimate)) +
   scale_x_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50), 
                      labels = c("0%L", "50%L", "Menses Onset", "50%F", "Ovulation")) +
   labs(x = "", y = "Symptom") + # You can change the y-axis label to reflect your outcome

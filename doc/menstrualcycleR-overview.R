@@ -200,7 +200,7 @@ cycle_plot_ov_id_2$symptom$Cycle_1$plot
 cycle_df_scaled$symptom_log = log(cycle_df_scaled$symptom + 1) #log-transforming our outcome variable symptom
 
 ## -----------------------------------------------------------------------------
-selected_vars <- c("scaled_cycleday_impute", "symptom_log" )
+selected_vars <- c("cyclic_time_impute", "symptom_log" )
 datSX <- cycle_df_scaled[complete.cases(cycle_df_scaled[selected_vars]), ]
 
 ## -----------------------------------------------------------------------------
@@ -208,15 +208,16 @@ datSX$id = as.factor(datSX$id) # ALWAYS factor id before putting it in a gam for
 
 gamm1 <- mgcv::gam(
   symptom_log ~ 
-    s(scaled_cycleday_impute) + 
+    s(cyclic_time_impute, bs = "cc") + 
     s(id, bs = 're') + 
-    s(scaled_cycleday_impute, id, bs = 're'),
+    s(cyclic_time_impute, id, bs = c('re', 'cc')),
+  knots = list(cyclic_time_impute = c(-1, 1)),
   data = datSX, 
   method = 'REML'
 )
 
 ## -----------------------------------------------------------------------------
-plotdat <- expand.grid(scaled_cycleday_impute = seq(-1, 1, by = 0.05),
+plotdat <- expand.grid(cyclic_time_impute = seq(-1, 1, by = 0.05),
                       id = 0) # setting id = 0 suppresses random effects, to model the just the fixed effect (sample-wide) of your outcome across the cycle
 
 # Predict using the model for each dataset and add predictions
@@ -227,7 +228,7 @@ plotdat$conf.high = pred$conf.high
 
 ## ----gam_plot, fig.width=7, fig.height=5--------------------------------------
 # Plotting
-gamplot <- ggplot(plotdat, aes(x = scaled_cycleday_impute, y = estimate)) +
+gamplot <- ggplot(plotdat, aes(x = cyclic_time_impute, y = estimate)) +
   scale_x_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50), 
                      labels = c("0%L", "50%L", "Menses Onset", "50%F", "Ovulation")) +
   labs(x = "", y = "Symptom") + # You can change the y-axis label to reflect your outcome
@@ -249,7 +250,7 @@ knitr::kable(
   data.frame(
     Level = c("Level-1/Within-person", "Level-1/Within-person", "Level-2/Between-person", "Level-2/Between-person"),
     Effect_Type = c("Fixed effect", "Random slope", "Intercept", "Random intercept"),
-    GAMM_Component = c("s(scaled_cycleday_impute)", "s(scaled_cycleday_impute, id, bs = 're')", "Parametric Intercept", "`s(id, bs = 're')`"),
+    GAMM_Component = c("s(cyclic_time_impute, bs = 'cc')", "s(cyclic_time_impute, id, bs = c('re', 'cc'))", "Parametric Intercept", "`s(id, bs = 're')`"),
     Description = c(
       "Average within-person change across the time",
       "Individual differences in trajectories of outcome across time",
