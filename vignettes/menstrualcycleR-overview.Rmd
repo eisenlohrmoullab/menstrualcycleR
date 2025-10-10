@@ -810,7 +810,7 @@ We will now demonstrate how to use GAMMs on the sample dataset provided by `mens
 
 ### Running a GAMM
 
-- To utilize the most observations available to us, we will use the variable `scaled_cycleday_impute` as the predictor. 
+- To utilize the most observations available to us, we will use the variable `cyclic_time_impute` as the predictor. 
 
 #### Data Preparation 
 
@@ -827,7 +827,7 @@ GAMMs in the `mgcv` package use **listwise deletion**, meaning the model will on
 
 
 ```{r}
-selected_vars <- c("scaled_cycleday_impute", "symptom_log" )
+selected_vars <- c("cyclic_time_impute", "symptom_log" )
 datSX <- cycle_df_scaled[complete.cases(cycle_df_scaled[selected_vars]), ]
 ```
 
@@ -838,9 +838,10 @@ datSX$id = as.factor(datSX$id) # ALWAYS factor id before putting it in a gam for
 
 gamm1 <- mgcv::gam(
   symptom_log ~ 
-    s(scaled_cycleday_impute) + 
+    s(cyclic_time_impute, bs = "cc") + 
     s(id, bs = 're') + 
-    s(scaled_cycleday_impute, id, bs = 're'),
+    s(cyclic_time_impute, id, bs = c('re', 'cc')),
+  knots = list(cyclic_time_impute = c(-1, 1)),
   data = datSX, 
   method = 'REML'
 )
@@ -851,14 +852,17 @@ This model includes:
 - **`symptom_log`**  
   The outcome variable (log-transformed symptom). 
   
-- **`s(scaled_cycleday_impute)`**  
-  A smooth term modeling the **fixed effect** of cycle time (scaled, centered on menses) across the sample. This captures **nonlinear, average trends** in the symptom over the cycle.
+- **`s(cyclic_time_impute, bs = "cc")`**  
+  A cyclic cubic spline smooth term modeling the **fixed effect** of cycle time across the sample. The `bs = "cc"` specifies a cyclic cubic regression spline, which ensures that the smooth function wraps around smoothly at the cycle boundaries (-1 and 1). This captures **nonlinear, average trends** in the symptom over the cycle while respecting the cyclic nature of menstrual cycle time.
 
 - **`s(id, bs = 're')`**  
   A **random intercept** for each participant. This accounts for **individual differences in average symptom level**.
 
-- **`s(scaled_cycleday_impute, id, bs = 're')`**  
-  A **random slope**: models how each participant's cycle trajectory may deviate from the population-level pattern. This allows **person-specific nonlinear trends** across the cycle.
+- **`s(cyclic_time_impute, id, bs = c('re', 'cc'))`**  
+  A **random slope with cyclic structure**: models how each participant's cycle trajectory may deviate from the population-level pattern. The combination of `'re'` and `'cc'` basis functions allows **person-specific nonlinear trends** that also wrap around smoothly at the cycle boundaries.
+
+- **`knots = list(cyclic_time_impute = c(-1, 1))`**  
+  Specifies the knot locations at the boundaries (-1 and 1) for the cyclic smooth terms. This ensures the smooth functions connect smoothly at these endpoints, properly representing the circular nature of the menstrual cycle.
 
 - **`data = datSX`**  
   The dataset used for model fitting. It should contain only complete cases for all model variables.
@@ -889,13 +893,13 @@ Link function: identity
 
 #### **Model Formula**
 ```
-symptom_log ~ s(scaled_cycleday_impute) + s(id, bs = "re") + 
-              s(scaled_cycleday_impute, id, bs = "re")
+symptom_log ~ s(cyclic_time_impute, bs = "cc") + s(id, bs = "re") + 
+              s(cyclic_time_impute, id, bs = c("re", "cc"))
 ```
 - This model includes:
-  - A smooth term for **population-level cyclic trends**.
+  - A cyclic smooth term for **population-level cyclic trends**.
   - A **random intercept smooth function** for each participant.
-  - A **random slope smooth function** capturing **individual-specific trajectories** across the cycle.
+  - A **random slope smooth function with cyclic structure** capturing **individual-specific trajectories** across the cycle.
 
 ---
 
@@ -909,15 +913,15 @@ symptom_log ~ s(scaled_cycleday_impute) + s(id, bs = "re") +
 
 #### **Smooth Terms**
 ```r
-s(scaled_cycleday_impute)     edf = 8.49   F = 64.99   p < 2e-16 ***
-s(id)                         edf = 12.69  F = 1.34    p = 0.00082 ***
-s(scaled_cycleday_impute,id)  edf = 15.80  F = 1.96    p = 4.37e-05 ***
+s(cyclic_time_impute)              edf = 8.49   F = 64.99   p < 2e-16 ***
+s(id)                              edf = 12.69  F = 1.34    p = 0.00082 ***
+s(cyclic_time_impute,id)           edf = 15.80  F = 1.96    p = 4.37e-05 ***
 ```
 
 Each smooth term contributes to explaining nonlinear or hierarchical effects:
 
-- **`s(scaled_cycleday_impute)`**:  
-  Captures the **overall nonlinear trend** in symptom expression across the standardized cycle.  
+- **`s(cyclic_time_impute, bs = "cc")`**:  
+  Captures the **overall nonlinear trend** in symptom expression across the menstrual cycle using a cyclic cubic spline.  
   - The **high edf** (≈8.5) reflects flexibility in the shape of the curve. Higher edf indicates more "wiggles" and complexity in the nonlinear pattern.
   - The **very small p-value** suggests this population-level pattern is **strongly significant** for nonlinearity
 
@@ -925,8 +929,8 @@ Each smooth term contributes to explaining nonlinear or hierarchical effects:
   Models **random intercept** to account for **baseline differences** across individuals.
   - The significant p-value (`p = 0.00082`) indicates meaningful variation in symptom baseline levels.
 
-- **`s(scaled_cycleday_impute, id, bs = "re")`**:  
-  Captures **individual-specific deviations** from the average symptom trajectory across the cycle.
+- **`s(cyclic_time_impute, id, bs = c("re", "cc"))`**:  
+  Captures **individual-specific deviations** from the average symptom trajectory across the cycle, with cyclic structure.
   - The effect is **statistically significant** (`p = 4.37e-05`), indicating nonlinear **heterogeneity** in how individuals experience symptom changes across time.
 
 ---
@@ -965,7 +969,7 @@ The best way to understand the nonlinear trend of an outcome, described by a GAM
 #### First, we need to compute predicted or model-implied values
 
 ```{r}
-plotdat <- expand.grid(scaled_cycleday_impute = seq(-1, 1, by = 0.05),
+plotdat <- expand.grid(cyclic_time_impute = seq(-1, 1, by = 0.05),
                       id = 0) # setting id = 0 suppresses random effects, to model the just the fixed effect (sample-wide) of your outcome across the cycle
 
 # Predict using the model for each dataset and add predictions
@@ -979,7 +983,7 @@ plotdat$conf.high = pred$conf.high
 
 ```{r gam_plot, fig.width=7, fig.height=5}
 # Plotting
-gamplot <- ggplot(plotdat, aes(x = scaled_cycleday_impute, y = estimate)) +
+gamplot <- ggplot(plotdat, aes(x = cyclic_time_impute, y = estimate)) +
   scale_x_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50), 
                      labels = c("0%L", "50%L", "Menses Onset", "50%F", "Ovulation")) +
   labs(x = "", y = "Symptom") + # You can change the y-axis label to reflect your outcome
@@ -1038,7 +1042,7 @@ knitr::kable(
   data.frame(
     Level = c("Level-1/Within-person", "Level-1/Within-person", "Level-2/Between-person", "Level-2/Between-person"),
     Effect_Type = c("Fixed effect", "Random slope", "Intercept", "Random intercept"),
-    GAMM_Component = c("s(scaled_cycleday_impute)", "s(scaled_cycleday_impute, id, bs = 're')", "Parametric Intercept", "`s(id, bs = 're')`"),
+    GAMM_Component = c("s(cyclic_time_impute, bs = 'cc')", "s(cyclic_time_impute, id, bs = c('re', 'cc'))", "Parametric Intercept", "`s(id, bs = 're')`"),
     Description = c(
       "Average within-person change across the time",
       "Individual differences in trajectories of outcome across time",
@@ -1079,13 +1083,13 @@ var.part$hierarchical.partitioning
 
 While model-explained variance can differ based on model parameters, the total outcome variance is stable for a particular outcome in a dataset. Proportion of total outcome variance can be compared between models with the same outcome to understand the influence of different predictors. For this reason, we interpret the **Individual** column of the `gam.hp` output: 
 
-- **s(scaled_cycleday_impute)**:  
+- **s(cyclic_time_impute)**:  
   The **fixed effect of cycle time** explains **51.1%** (0.5110) of **total outcome variance**. This shows that a large portion of outcome variation is captured by average, population-level cycle dynamics.
 
 - **s(id, bs = "re")**:  
   The **random intercept** explains **2.12%** (0.0212) of **total outcome variance**. This reflects **between-person differences** in average outcome level—i.e., individual baselines not explained by cycle dynamics but could be explained by unmeasured trait variables (e.g. age, BMI).
 
-- **s(scaled_cycleday_impute, id)**:  
+- **s(cyclic_time_impute, id)**:  
   The **random slope effect** explains **2.88%** (0.0288) of **total outcome variance**. This reflects **individual differences in trajectories of the outcome across the cycle**, above and beyond the average pattern.
 
 
