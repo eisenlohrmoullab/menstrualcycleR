@@ -398,21 +398,58 @@ dataset.</p>
 <li><p><code>scaled_cycleday</code>:<br>
 A continuous cycle time variable centered on <strong>menses
 onset</strong> (<code>menses == 1 → 0</code>), ranging from –1 (start of
-luteal phase) to +1 (ovulation). Includes <strong>only
-biomarker-confirmed</strong> ovulation cycles.</p></li>
+luteal phase) to +1 (ovulation). This maps -1 and +1 as adjacent days.
+This is what the supplementary analyses of Nagpal et al. (2025) include.
+Includes <strong>only biomarker-confirmed</strong> ovulation
+cycles.</p></li>
 <li><p><code>scaled_cycleday_impute</code>:<br>
 Same as above, but also includes cycles with <strong>imputed
 ovulation</strong> (assigned to day –15 before next menses). Increases
-dataset coverage, but with lower precision.</p></li>
+dataset coverage, but with lower precision. This maps -1 and +1 as
+adjacent days. This is what the supplementary analyses of Nagpal et
+al. (2025) include.</p></li>
 <li><p><code>scaled_cycleday_ov</code>:<br>
 A cycle time variable centered on <strong>ovulation</strong>
 (<code>ovtoday == 1 → 0</code>), ranging from –1 (start of follicular
-phase) to +1 (end of luteal phase). Biomarker-confirmed ovulation
-only.</p></li>
+phase) to +1 (end of luteal phase). Biomarker-confirmed ovulation only.
+This maps -1 and +1 as adjacent days. This is what the supplementary
+analyses of Nagpal et al. (2025) include.</p></li>
 <li><p><code>scaled_cycleday_imp_ov</code>:<br>
 Same as above, but includes <strong>imputed ovulation</strong>
 (<code>ovtoday_impute == 1</code>) for cycles lacking confirmation.
-Centered on either confirmed or imputed ovulation.</p></li>
+Centered on either confirmed or imputed ovulation. This maps -1 and +1
+as adjacent days. This is what the supplementary analyses of Nagpal et
+al. (2025) include.</p></li>
+<li><p><code>cyclic_time</code>:<br>
+A continuous cycle time variable centered on <strong>menses
+onset</strong> (<code>menses == 1 → 0</code>), ranging from –1 (start of
+luteal phase) to +1 (ovulation). Includes <strong>only
+biomarker-confirmed</strong> ovulation cycles. This ensures that -1 and
++1 are hormonally equivalent, rather than adjacent. This is what the
+main analyses of Nagpal et al. (2025) include. Other iterations of cycle
+time (<code>scaled_cycleday</code>) are being phased out.</p></li>
+<li><p><code>cyclic_time_impute</code>:<br>
+Same as above, but also includes cycles with <strong>imputed
+ovulation</strong> (assigned to day –15 before next menses). Increases
+dataset coverage, but with lower precision. This ensures that -1 and +1
+are hormonally equivalent, rather than adjacent. This is what the main
+analyses of Nagpal et al. (2025) include. Other iterations of cycle time
+(<code>scaled_cycleday</code>) are being phased out.</p></li>
+<li><p><code>cyclic_time_ov</code>:<br>
+A cycle time variable centered on <strong>ovulation</strong>
+(<code>ovtoday == 1 → 0</code>), ranging from –1 (start of follicular
+phase) to +1 (end of luteal phase). Biomarker-confirmed ovulation only.
+This ensures that -1 and +1 are hormonally equivalent, rather than
+adjacent. This is what the main analyses of Nagpal et al. (2025)
+include. Other iterations of cycle time (<code>scaled_cycleday</code>)
+are being phased out.</p></li>
+<li><p><code>cyclic_time_imp_ov</code>:<br>
+Same as above, but includes <strong>imputed ovulation</strong>
+(<code>ovtoday_impute == 1</code>) for cycles lacking confirmation.
+Centered on either confirmed or imputed ovulation. This ensures that -1
+and +1 are hormonally equivalent, rather than adjacent. This is what the
+main analyses of Nagpal et al. (2025) include. Other iterations of cycle
+time (<code>scaled_cycleday</code>) are being phased out.</p></li>
 <li><p><code>ovtoday_impute</code>:<br>
 A binary indicator identifying <strong>imputed ovulation days</strong>
 (value = 1), estimated as 15 days before the next menses onset.</p></li>
@@ -755,14 +792,10 @@ A binary indicator identifying <strong>imputed ovulation days</strong>
 <li><p><code>mcyclength</code>: Indicates the length of a
 menses-to-menses cycle an observation belongs to.</p></li>
 <li><p><code>luteal_length</code>: Indicates the length of the luteal
-phase an observation belongs to, when ovulation was not
-imputed.</p></li>
+phase an observation belongs to, when ovulation was not imputed. This is
+computed only for cycles that meet the criteria to be scaled.</p></li>
 <li><p><code>cycle_inomplete</code> A binary indicator identifying if
 the observation is part of an incomplete menses-to-menses cycle</p></li>
-</ul>
-<p>The following additional variables may be helpful for menstrual cycle
-analysis, but are not discussed in detail in Nagpal et al., (2025).</p>
-<ul>
 <li><p><code>cyclic_time</code> A continuous cycle time variable
 centered on <strong>menses onset</strong>
 (<code>menses == 1 → 0</code>), ranging from –1 to +1. Unlike
@@ -914,9 +947,9 @@ rolling averages. Rolling averages are supported by the package
 <li><p><code>data</code>:<br>
 A dataframe containing the cycle-aligned data. Must include the relevant
 scaled cycle time variables (<code>scaled_cycleday</code>,
-<code>scaled_cycleday_ov</code>, etc.) and the symptom column. This
-function will only work if your dataset has been run through
-<code><a href="../reference/pacts_scaling.html">pacts_scaling()</a></code> first.</p></li>
+<code>scaled_cycleday_ov</code>, <code>cyclic_time</code>, etc.) and the
+symptom column. This function will only work if your dataset has been
+run through <code><a href="../reference/pacts_scaling.html">pacts_scaling()</a></code> first.</p></li>
 <li><p><code>symptom</code>:<br>
 A string specifying the name of the symptom or outcome variable to
 visualize.</p></li>
@@ -1021,15 +1054,15 @@ the trajectory of the symptom variable across the cycle.</p></li>
 <span><span class="co">#&gt;       id date       menses ovtoday symptom daterated  m2mcount mcyclength</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1 2024-01-20      1       0       5 2024-01-20        1         24</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     2 2024-01-20      1       0       4 2024-01-20        1         26</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     3 2024-01-20      1       0       3 2024-01-20        1         30</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     4 2024-01-20      1       0       5 2024-01-20        1         30</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     5 2024-01-20      1       0       5 2024-01-20        1         22</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     6 2024-01-20      1       0       5 2024-01-20        1         35</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     7 2024-01-20      1       0       5 2024-01-20        1         24</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     8 2024-01-20      1       0       3 2024-01-20        1         32</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     9 2024-01-20      1       0       5 2024-01-20        1         33</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>    10 2024-01-20      1       0       5 2024-01-20        1         32</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     1 2024-01-21      0       0       5 2024-01-21        2         24</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     1 2024-01-22      0       0       3 2024-01-22        3         24</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     1 2024-01-23      0       0      <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>                4         24</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     1 2024-01-24      0       0       2 2024-01-24        5         24</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     1 2024-01-25      0       0       1 2024-01-25        6         24</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     1 2024-01-26      0       0       1 2024-01-26        7         24</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     1 2024-01-27      0       0       1 2024-01-27        8         24</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     1 2024-01-28      0       0       3 2024-01-28        9         24</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     1 2024-01-29      0       0       4 2024-01-29       10         24</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 734 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 17 more variables: cycle_incomplete &lt;dbl&gt;, cyclenum &lt;int&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   ovtoday_impute &lt;int&gt;, scaled_cycleday &lt;dbl&gt;, scaled_cycleday_ov &lt;dbl&gt;,</span></span></span>
@@ -1348,16 +1381,31 @@ American Statistical Association, 111</em>, 1548–1575. <a href="https://doi.or
 <strong>random effects</strong> (individual-level variation) are modeled
 as <strong>smooth terms</strong>, providing flexibility to capture
 nonlinearity without assuming a specific functional form.</p></li>
-<li><p>Smooth terms are constructed using <strong>thin plate regression
-splines</strong>, the default and recommended basis in the
-<code>mgcv</code> package. These splines are automatically penalized to
-minimize overfitting and promote interpretability.</p></li>
+<li><p>The default basis function smooth terms are constructed with in
+<code>mgcv</code> are <strong>thin plate regression splines</strong>;
+however for menstrual cycle analyses where we are examining multiple
+cycles per person, we will use <strong>cyclic cubic regression
+splines</strong> and specifying -1 and +1 as equivalent using the
+knots() parameter. These splines are automatically penalized to minimize
+overfitting and promote interpretability. Cyclic smooths are used to
+designate a natural point in which the the minimum an maximum are
+equivalent, and the covariate space wraps around itself. -1 and +1 in
+the cyclic_time variable both represent ovulation (or menses-onset when
+ovulation-centered), and so we specify this with cyclic
+smooths.</p></li>
 <li><p>Time-varying predictors created by
 <code>menstrualcycleR</code>—such as
 <code>scaled_cycleday_impute</code>, <code>scaled_cycleday</code>, or
 <code>scaled_cycleday_imp_ov</code>—can be directly included as smooth
 terms in the model specification (e.g.,
-<code>s(scaled_cycleday_impute)</code>).</p></li>
+<code>s(scaled_cycleday_impute)</code>). The corresponding
+<code>cyclic_time</code> variables specify -1 and +1 as the same time
+point in the cycle (ovulation, when menses-centered and menses-onset =
+0; or menses-onset, when ovulation-centered and ovulation = 0). The
+<code>cyclic_time</code> variables should be used when using
+<strong>cyclic cubic regression splines</strong>, as shown in the
+example below. This was also the parameterization used in the main
+models in Nagpal et al., 2025.</p></li>
 <li><p>Missing data are addressed using <strong>listwise
 deletion</strong>: only observations with complete data for the outcome
 and all predictors are retained in the model fitting process.
@@ -1386,7 +1434,7 @@ provided by <code>menstrualcycleR</code>.</p>
 </h3>
 <ul>
 <li>To utilize the most observations available to us, we will use the
-variable <code>scaled_cycleday_impute</code> as the predictor.</li>
+variable <code>cyclic_time_impute</code> as the predictor.</li>
 </ul>
 <div class="section level4">
 <h4 id="data-preparation">Data Preparation<a class="anchor" aria-label="anchor" href="#data-preparation"></a>
@@ -1401,8 +1449,8 @@ residuals.</p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_df_scaled</span><span class="op">$</span><span class="va">symptom_log</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">cycle_df_scaled</span><span class="op">$</span><span class="va">symptom</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span> <span class="co">#log-transforming our outcome variable symptom</span></span></code></pre></div>
 <p>We now create a dataframe called <code>datSX</code> that includes
-only complete cases for the variables
-<code>scaled_cycleday_impute</code> and <code>symptom_log</code>.</p>
+only complete cases for the variables <code>cyclic_time_impute</code>
+and <code>symptom_log</code>.</p>
 <p>GAMMs in the <code>mgcv</code> package use <strong>listwise
 deletion</strong>, meaning the model will only include rows with
 <strong>no missing values</strong> across any variables in the formula.
@@ -1411,7 +1459,7 @@ determine exactly how many observations will be included in the model.
 This ensures transparency and avoids confusion when interpreting model
 results.</p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">selected_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"scaled_cycleday_impute"</span>, <span class="st">"symptom_log"</span> <span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">selected_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cyclic_time_impute"</span>, <span class="st">"symptom_log"</span> <span class="op">)</span></span>
 <span><span class="va">datSX</span> <span class="op">&lt;-</span> <span class="va">cycle_df_scaled</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/stats/complete.cases.html" class="external-link">complete.cases</a></span><span class="op">(</span><span class="va">cycle_df_scaled</span><span class="op">[</span><span class="va">selected_vars</span><span class="op">]</span><span class="op">)</span>, <span class="op">]</span></span></code></pre></div>
 <p>Let’s run the GAMM!</p>
 <div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
@@ -1419,9 +1467,10 @@ results.</p>
 <span></span>
 <span><span class="va">gamm1</span> <span class="op">&lt;-</span> <span class="fu">mgcv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">gam</a></span><span class="op">(</span></span>
 <span>  <span class="va">symptom_log</span> <span class="op">~</span> </span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">scaled_cycleday_impute</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">cyclic_time_impute</span>, bs <span class="op">=</span> <span class="st">"cc"</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">id</span>, bs <span class="op">=</span> <span class="st">'re'</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">scaled_cycleday_impute</span>, <span class="va">id</span>, bs <span class="op">=</span> <span class="st">'re'</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">cyclic_time_impute</span>, <span class="va">id</span>, bs<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"re"</span>, <span class="st">"cc"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  knots<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cyclic_time_impute <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">datSX</span>, </span>
 <span>  method <span class="op">=</span> <span class="st">'REML'</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -1429,16 +1478,17 @@ results.</p>
 <ul>
 <li><p><strong><code>symptom_log</code></strong><br>
 The outcome variable (log-transformed symptom).</p></li>
-<li><p><strong><code>s(scaled_cycleday_impute)</code></strong><br>
+<li><p><strong><code>s(cyclic_time_impute)</code></strong><br>
 A smooth term modeling the <strong>fixed effect</strong> of cycle time
-(scaled, centered on menses) across the sample. This captures
-<strong>nonlinear, average trends</strong> in the symptom over the
-cycle.</p></li>
+(scaled, centered on menses) across the sample, where -1 and +1 both
+represent the same hormonal timepoint across the cycle (ovulation). This
+captures <strong>nonlinear, average trends</strong> in the symptom over
+the cycle.</p></li>
 <li><p><strong><code>s(id, bs = 're')</code></strong><br>
 A <strong>random intercept</strong> for each participant. This accounts
 for <strong>individual differences in average symptom
 level</strong>.</p></li>
-<li><p><strong><code>s(scaled_cycleday_impute, id, bs = 're')</code></strong><br>
+<li><p><strong><code>s(cyclic_time_impute, id, bs = 're')</code></strong><br>
 A <strong>random slope</strong>: models how each participant’s cycle
 trajectory may deviate from the population-level pattern. This allows
 <strong>person-specific nonlinear trends</strong> across the
@@ -1479,8 +1529,8 @@ appropriate for continuous, unbounded outcome variables.</li>
 <h4 id="model-formula">
 <strong>Model Formula</strong><a class="anchor" aria-label="anchor" href="#model-formula"></a>
 </h4>
-<pre><code><span><span class="va">symptom_log</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">scaled_cycleday_impute</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">id</span>, bs <span class="op">=</span> <span class="st">"re"</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>              <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">scaled_cycleday_impute</span>, <span class="va">id</span>, bs <span class="op">=</span> <span class="st">"re"</span><span class="op">)</span></span></code></pre>
+<pre><code><span><span class="va">symptom_log</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">cyclic_time_impute</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">id</span>, bs <span class="op">=</span> <span class="st">"re"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>              <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">cyclic_time_impute</span>, <span class="va">id</span>, bs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"re"</span>, <span class="st">"cc"</span><span class="op">)</span> <span class="op">)</span></span></code></pre>
 <ul>
 <li>This model includes:
 <ul>
@@ -1499,7 +1549,7 @@ participant.</li>
 <h4 id="parametric-coefficients">
 <strong>Parametric Coefficients</strong><a class="anchor" aria-label="anchor" href="#parametric-coefficients"></a>
 </h4>
-<pre><code>(Intercept)  1.30485    0.01821   71.65   &lt;2e-16 ***</code></pre>
+<pre><code>(Intercept)  1.30722    0.01806   72.36   &lt;2e-16 ***</code></pre>
 <ul>
 <li>The <strong>intercept</strong> represents the average value of the
 log-transformed symptom when all smooth terms are at their reference
@@ -1511,18 +1561,18 @@ level.</li>
 <h4 id="smooth-terms">
 <strong>Smooth Terms</strong><a class="anchor" aria-label="anchor" href="#smooth-terms"></a>
 </h4>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a><span class="fu">s</span>(scaled_cycleday_impute)     edf <span class="ot">=</span> <span class="fl">8.49</span>   F <span class="ot">=</span> <span class="fl">64.99</span>   p <span class="sc">&lt;</span> <span class="fl">2e-16</span> <span class="sc">**</span><span class="er">*</span></span>
-<span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a><span class="fu">s</span>(id)                         edf <span class="ot">=</span> <span class="fl">12.69</span>  F <span class="ot">=</span> <span class="fl">1.34</span>    p <span class="ot">=</span> <span class="fl">0.00082</span> <span class="sc">**</span><span class="er">*</span></span>
-<span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a><span class="fu">s</span>(scaled_cycleday_impute,id)  edf <span class="ot">=</span> <span class="fl">15.80</span>  F <span class="ot">=</span> <span class="fl">1.96</span>    p <span class="ot">=</span> <span class="fl">4.37e-05</span> <span class="sc">**</span><span class="er">*</span></span></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a><span class="fu">s</span>(cyclic_time_impute)     edf <span class="ot">=</span> <span class="fl">7.43</span>   F <span class="ot">=</span> <span class="fl">79.04</span>   p <span class="sc">&lt;</span> <span class="fl">2e-16</span> <span class="sc">**</span><span class="er">*</span></span>
+<span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a><span class="fu">s</span>(id)                     edf <span class="ot">=</span> <span class="fl">12.53</span>  F <span class="ot">=</span> <span class="fl">1.31</span>    p <span class="ot">=</span> <span class="fl">0.00106</span> <span class="sc">**</span></span>
+<span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a><span class="fu">s</span>(cyclic_time_impute,id)  edf <span class="ot">=</span> <span class="fl">15.89</span>  F <span class="ot">=</span> <span class="fl">1.83</span>    p <span class="ot">=</span> <span class="fl">8.36e-05</span> <span class="sc">**</span><span class="er">*</span></span></code></pre></div>
 <p>Each smooth term contributes to explaining nonlinear or hierarchical
 effects:</p>
 <ul>
 <li>
-<strong><code>s(scaled_cycleday_impute)</code></strong>:<br>
+<strong><code>s(cyclic_time_impute)</code></strong>:<br>
 Captures the <strong>overall nonlinear trend</strong> in symptom
 expression across the standardized cycle.
 <ul>
-<li>The <strong>high edf</strong> (≈8.5) reflects flexibility in the
+<li>The <strong>high edf</strong> (≈7.4) reflects flexibility in the
 shape of the curve. Higher edf indicates more “wiggles” and complexity
 in the nonlinear pattern.</li>
 <li>The <strong>very small p-value</strong> suggests this
@@ -1535,17 +1585,17 @@ nonlinearity</li>
 Models <strong>random intercept</strong> to account for <strong>baseline
 differences</strong> across individuals.
 <ul>
-<li>The significant p-value (<code>p = 0.00082</code>) indicates
+<li>The significant p-value (<code>p = 0.001</code>) indicates
 meaningful variation in symptom baseline levels.</li>
 </ul>
 </li>
 <li>
-<strong><code>s(scaled_cycleday_impute, id, bs = "re")</code></strong>:<br>
+<strong><code>s(cyclic_time_impute, id, bs = "re")</code></strong>:<br>
 Captures <strong>individual-specific deviations</strong> from the
 average symptom trajectory across the cycle.
 <ul>
 <li>The effect is <strong>statistically significant</strong>
-(<code>p = 4.37e-05</code>), indicating nonlinear
+(<code>p = 8.36e-05</code>), indicating nonlinear
 <strong>heterogeneity</strong> in how individuals experience symptom
 changes across time.</li>
 </ul>
@@ -1557,13 +1607,13 @@ changes across time.</li>
 <h4 id="model-fit">
 <strong>Model Fit</strong><a class="anchor" aria-label="anchor" href="#model-fit"></a>
 </h4>
-<pre><code>R-sq.(adj) =  0.531   
-Deviance explained = 56.1%
--REML = 122.04  
-Scale est. = 0.07643   
+<pre><code>R-sq.(adj) =  0.533   
+Deviance explained = 56.2%
+-REML = 117.46  
+Scale est. = 0.076068   
 n = 575</code></pre>
 <ul>
-<li><p><strong>Adjusted R²</strong> of 0.531:<br>
+<li><p><strong>Adjusted R²</strong> of 0.533:<br>
 The model explains over <strong>53% of the variance</strong> in the
 log-transformed symptom outcome. It is roughly the squared correlation
 between observed and fitted values, adjusted for model complexity. It is
@@ -1604,7 +1654,7 @@ plotting functions, but for now we will share the code below.</p>
 <h4 id="first-we-need-to-compute-predicted-or-model-implied-values">First, we need to compute predicted or model-implied values<a class="anchor" aria-label="anchor" href="#first-we-need-to-compute-predicted-or-model-implied-values"></a>
 </h4>
 <div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">plotdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>scaled_cycleday_impute <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span>, by <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span>,</span>
+<code class="sourceCode R"><span><span class="va">plotdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>cyclic_time_impute <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span>, by <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span>,</span>
 <span>                      id <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="co"># setting id = 0 suppresses random effects, to model the just the fixed effect (sample-wide) of your outcome across the cycle</span></span>
 <span></span>
 <span><span class="co"># Predict using the model for each dataset and add predictions</span></span>
@@ -1618,14 +1668,16 @@ plotting functions, but for now we will share the code below.</p>
 </h4>
 <div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plotting</span></span>
-<span><span class="va">gamplot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">plotdat</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">scaled_cycleday_impute</span>, y <span class="op">=</span> <span class="va">estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="va">gamplot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">plotdat</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">cyclic_time_impute</span>, y <span class="op">=</span> <span class="va">estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span>, by <span class="op">=</span> <span class="fl">0.50</span><span class="op">)</span>, </span>
-<span>                     labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"0%L"</span>, <span class="st">"50%L"</span>, <span class="st">"Menses Onset"</span>, <span class="st">"50%F"</span>, <span class="st">"Ovulation"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>                     labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Ovulation"</span>, <span class="st">"50%L"</span>, <span class="st">"Menses Onset"</span>, <span class="st">"50%F"</span>, <span class="st">"Ovulation"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="st">"Symptom"</span><span class="op">)</span> <span class="op">+</span> <span class="co"># You can change the y-axis label to reflect your outcome</span></span>
 <span>  </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="op">-</span><span class="fl">0.04</span>, xmax <span class="op">=</span> <span class="fl">0.04</span>, ymin <span class="op">=</span> <span class="op">-</span><span class="cn">Inf</span>, ymax <span class="op">=</span> <span class="cn">Inf</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect</a></span><span class="op">(</span>xmin <span class="op">=</span><span class="op">-</span><span class="fl">0</span>, xmax <span class="op">=</span> <span class="fl">0.08</span>, ymin <span class="op">=</span> <span class="op">-</span><span class="cn">Inf</span>, ymax <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>            fill <span class="op">=</span> <span class="st">"grey70"</span>, alpha <span class="op">=</span> <span class="fl">0.2</span>, color <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="fl">0.92</span>, xmax <span class="op">=</span> <span class="fl">1</span>, ymin <span class="op">=</span> <span class="op">-</span><span class="cn">Inf</span>, ymax <span class="op">=</span> <span class="cn">Inf</span>,</span>
+<span>            fill <span class="op">=</span> <span class="st">"grey87"</span>, alpha <span class="op">=</span> <span class="fl">0.2</span>, color <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, xmax <span class="op">=</span> <span class="op">-</span><span class="fl">0.92</span>, ymin <span class="op">=</span> <span class="op">-</span><span class="cn">Inf</span>, ymax <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>            fill <span class="op">=</span> <span class="st">"grey87"</span>, alpha <span class="op">=</span> <span class="fl">0.2</span>, color <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">1</span>, show.legend <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="co"># Adding CI ribbon with translucent light grey color</span></span>
@@ -1726,7 +1778,7 @@ Modeling</caption>
 <colgroup>
 <col width="5%">
 <col width="4%">
-<col width="10%">
+<col width="11%">
 <col width="21%">
 <col width="57%">
 </colgroup>
@@ -1741,14 +1793,14 @@ Modeling</caption>
 <tr class="odd">
 <td align="left">Level-1/Within-person</td>
 <td align="left">Fixed effect</td>
-<td align="left">s(scaled_cycleday_impute)</td>
+<td align="left">s(cyclic_time_impute)</td>
 <td align="left">Average within-person change across the time</td>
 <td align="left">Captures overall dynamic pattern across the cycle</td>
 </tr>
 <tr class="even">
 <td align="left">Level-1/Within-person</td>
 <td align="left">Random slope</td>
-<td align="left">s(scaled_cycleday_impute, id, bs = ‘re’)</td>
+<td align="left">s(cyclic_time_impute, id, bs = c(‘cc’, ‘re’))</td>
 <td align="left">Individual differences in trajectories of outcome
 across time</td>
 <td align="left">Accounts for heterogeneity/individual differences in
@@ -1800,10 +1852,14 @@ crucial goal for rigorous cycle science.</p>
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">var.part</span> <span class="op">=</span> <span class="fu">gam.hp</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/gam.hp/man/gam.hp.html" class="external-link">gam.hp</a></span><span class="op">(</span><span class="va">gamm1</span><span class="op">)</span></span>
 <span><span class="va">var.part</span><span class="op">$</span><span class="va">hierarchical.partitioning</span> </span>
-<span><span class="co">#&gt;                                      Unique Average.share Individual I.perc(%)</span></span>
-<span><span class="co">#&gt; s(scaled_cycleday_impute)            0.5460       -0.0350     0.5110     91.09</span></span>
-<span><span class="co">#&gt; s(id,bs="re")                        0.0345       -0.0133     0.0212      3.78</span></span>
-<span><span class="co">#&gt; s(scaled_cycleday_impute,id,bs="re") 0.0460       -0.0172     0.0288      5.13</span></span></code></pre></div>
+<span><span class="co">#&gt;                                          Unique Average.share Individual</span></span>
+<span><span class="co">#&gt; s(cyclic_time_impute,bs="cc")            0.5480       -0.0342     0.5138</span></span>
+<span><span class="co">#&gt; s(id,bs="re")                            0.0337       -0.0129     0.0208</span></span>
+<span><span class="co">#&gt; s(cyclic_time_impute,id,bs=c("re","cc")) 0.0443       -0.0167     0.0276</span></span>
+<span><span class="co">#&gt;                                          I.perc(%)</span></span>
+<span><span class="co">#&gt; s(cyclic_time_impute,bs="cc")                91.39</span></span>
+<span><span class="co">#&gt; s(id,bs="re")                                 3.70</span></span>
+<span><span class="co">#&gt; s(cyclic_time_impute,id,bs=c("re","cc"))      4.91</span></span></code></pre></div>
 <table class="table">
 <colgroup>
 <col width="64%">
@@ -1851,21 +1907,21 @@ predictors. For this reason, we interpret the
 <strong>Individual</strong> column of the <code>gam.hp</code>
 output:</p>
 <ul>
-<li><p><strong>s(scaled_cycleday_impute)</strong>:<br>
+<li><p><strong>s(cyclic_time_impute)</strong>:<br>
 The <strong>fixed effect of cycle time</strong> explains
-<strong>51.1%</strong> (0.5110) of <strong>total outcome
+<strong>51.4%</strong> (0.5138) of <strong>total outcome
 variance</strong>. This shows that a large portion of outcome variation
 is captured by average, population-level cycle dynamics.</p></li>
 <li><p><strong>s(id, bs = “re”)</strong>:<br>
-The <strong>random intercept</strong> explains <strong>2.12%</strong>
-(0.0212) of <strong>total outcome variance</strong>. This reflects
+The <strong>random intercept</strong> explains <strong>2.1%</strong>
+(0.0208) of <strong>total outcome variance</strong>. This reflects
 <strong>between-person differences</strong> in average outcome
 level—i.e., individual baselines not explained by cycle dynamics but
 could be explained by unmeasured trait variables (e.g. age,
 BMI).</p></li>
-<li><p><strong>s(scaled_cycleday_impute, id)</strong>:<br>
-The <strong>random slope effect</strong> explains <strong>2.88%</strong>
-(0.0288) of <strong>total outcome variance</strong>. This reflects
+<li><p><strong>s(cyclic_time_impute, id)</strong>:<br>
+The <strong>random slope effect</strong> explains <strong>2.76%</strong>
+(0.0276) of <strong>total outcome variance</strong>. This reflects
 <strong>individual differences in trajectories of the outcome across the
 cycle</strong>, above and beyond the average pattern.</p></li>
 </ul>
@@ -1883,10 +1939,10 @@ variance accounted for by the cycle</strong>.</p>
 <span>  Component <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Fixed effect of the cycle"</span>, </span>
 <span>                <span class="st">"Random slope of the cycle"</span>, </span>
 <span>                <span class="st">"Within-person residual"</span><span class="op">)</span>,</span>
-<span>  Term <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"s(scaled_cycleday_impute)"</span>, </span>
-<span>           <span class="st">"s(scaled_cycleday_impute, id)"</span>, </span>
+<span>  Term <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"s(cyclic_time_impute)"</span>, </span>
+<span>           <span class="st">"s(cyclic_time_impute, id)"</span>, </span>
 <span>           <span class="st">"Residual (1 - Deviance Explained)"</span><span class="op">)</span>,</span>
-<span>  Proportion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5460</span>, <span class="fl">0.0212</span>, <span class="fl">0.4328</span><span class="op">)</span>  </span>
+<span>  Proportion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5138</span>, <span class="fl">0.0276</span>, <span class="fl">0.438</span><span class="op">)</span>  </span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Normalize </span></span>
@@ -1911,18 +1967,18 @@ variance accounted for by the cycle</strong>.</p>
 <tbody>
 <tr class="odd">
 <td align="left">Fixed effect of the cycle</td>
-<td align="left">s(scaled_cycleday_impute)</td>
-<td align="right">0.5460</td>
+<td align="left">s(cyclic_time_impute)</td>
+<td align="right">0.5138</td>
 </tr>
 <tr class="even">
 <td align="left">Random slope of the cycle</td>
-<td align="left">s(scaled_cycleday_impute, id)</td>
-<td align="right">0.0212</td>
+<td align="left">s(cyclic_time_impute, id)</td>
+<td align="right">0.0276</td>
 </tr>
 <tr class="odd">
 <td align="left">Within-person residual</td>
 <td align="left">Residual (1 - Deviance Explained)</td>
-<td align="right">0.4328</td>
+<td align="right">0.4380</td>
 </tr>
 </tbody>
 </table>
@@ -1945,9 +2001,9 @@ variance accounted for by the cycle</strong>.</p>
 <span><span class="va">variance_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  Component <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Fixed effect of the cycle"</span>, </span>
 <span>                <span class="st">"Random slope of the cycle"</span><span class="op">)</span>,</span>
-<span>  Term <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"s(scaled_cycleday_impute)"</span>, </span>
-<span>           <span class="st">"s(scaled_cycleday_impute, id)"</span><span class="op">)</span>,</span>
-<span>  Proportion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5460</span>, <span class="fl">0.0212</span><span class="op">)</span>  </span>
+<span>  Term <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"s(cyclic_time_impute)"</span>, </span>
+<span>           <span class="st">"s(cyclic_time_impute, id)"</span><span class="op">)</span>,</span>
+<span>  Proportion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5138</span>, <span class="fl">0.0276</span><span class="op">)</span>  </span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Normalize </span></span>
@@ -1960,9 +2016,9 @@ variance accounted for by the cycle</strong>.</p>
 <span>      col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Component"</span>, <span class="st">"Model Term"</span>, <span class="st">"Within-Person Variance Accounted for by the Cycle"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
-<col width="24%">
-<col width="28%">
-<col width="47%">
+<col width="25%">
+<col width="25%">
+<col width="49%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Component</th>
@@ -1972,13 +2028,13 @@ variance accounted for by the cycle</strong>.</p>
 <tbody>
 <tr class="odd">
 <td align="left">Fixed effect of the cycle</td>
-<td align="left">s(scaled_cycleday_impute)</td>
-<td align="right">0.5460</td>
+<td align="left">s(cyclic_time_impute)</td>
+<td align="right">0.5138</td>
 </tr>
 <tr class="even">
 <td align="left">Random slope of the cycle</td>
-<td align="left">s(scaled_cycleday_impute, id)</td>
-<td align="right">0.0212</td>
+<td align="left">s(cyclic_time_impute, id)</td>
+<td align="right">0.0276</td>
 </tr>
 </tbody>
 </table>
