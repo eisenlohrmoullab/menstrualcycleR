@@ -233,16 +233,31 @@ The `menstrualcycleR` package contains four main categories of functions:
 This function adds standardized cycle time variables to your dataset.
 
 - `scaled_cycleday`:  
-  A continuous cycle time variable centered on **menses onset** (`menses == 1 → 0`), ranging from –1 (start of luteal phase) to +1 (ovulation). Includes **only biomarker-confirmed** ovulation cycles.
+  A continuous cycle time variable centered on **menses onset** (`menses == 1 → 0`), ranging from –1 (start of luteal phase) to +1 (ovulation). This maps -1 and +1 as adjacent days. This is what the supplementary analyses of Nagpal et al. (2025) include. Includes **only biomarker-confirmed** ovulation cycles.
 
 - `scaled_cycleday_impute`:  
-  Same as above, but also includes cycles with **imputed ovulation** (assigned to day –15 before next menses). Increases dataset coverage, but with lower precision.
+  Same as above, but also includes cycles with **imputed ovulation** (assigned to day –15 before next menses). Increases dataset coverage, but with lower precision. This maps -1 and +1 as adjacent days. This is what the supplementary analyses of Nagpal et al. (2025) include.
 
 - `scaled_cycleday_ov`:  
-  A cycle time variable centered on **ovulation** (`ovtoday == 1 → 0`), ranging from –1 (start of follicular phase) to +1 (end of luteal phase). Biomarker-confirmed ovulation only.
+  A cycle time variable centered on **ovulation** (`ovtoday == 1 → 0`), ranging from –1 (start of follicular phase) to +1 (end of luteal phase). Biomarker-confirmed ovulation only. This maps -1 and +1 as adjacent days. This is what the supplementary analyses of Nagpal et al. (2025) include.
 
 - `scaled_cycleday_imp_ov`:  
-  Same as above, but includes **imputed ovulation** (`ovtoday_impute == 1`) for cycles lacking confirmation. Centered on either confirmed or imputed ovulation.
+  Same as above, but includes **imputed ovulation** (`ovtoday_impute == 1`) for cycles lacking confirmation. Centered on either confirmed or imputed ovulation. This maps -1 and +1 as adjacent days. This is what the supplementary analyses of Nagpal et al. (2025) include.
+  
+- `cyclic_time`:  
+  A continuous cycle time variable centered on **menses onset** (`menses == 1 → 0`), ranging from –1 (start of luteal phase) to +1 (ovulation).  Includes **only biomarker-confirmed** ovulation cycles. This ensures that -1 and +1 are hormonally equivalent, rather than adjacent. This is what the main analyses of Nagpal et al. (2025) include. Other iterations of cycle time (`scaled_cycleday`) are being phased out. 
+
+- `cyclic_time_impute`:  
+  Same as above, but also includes cycles with **imputed ovulation** (assigned to day –15 before next menses). Increases dataset coverage, but with lower precision. This ensures that -1 and +1 are hormonally equivalent, rather than adjacent. This is what the main analyses of Nagpal et al. (2025) include. Other iterations of cycle time (`scaled_cycleday`) are being phased out. 
+
+- `cyclic_time_ov`:  
+  A cycle time variable centered on **ovulation** (`ovtoday == 1 → 0`), ranging from –1 (start of follicular phase) to +1 (end of luteal phase). Biomarker-confirmed ovulation only. This ensures that -1 and +1 are hormonally equivalent, rather than adjacent. This is what the main analyses of Nagpal et al. (2025) include. Other iterations of cycle time (`scaled_cycleday`) are being phased out. 
+
+- `cyclic_time_imp_ov`:  
+  Same as above, but includes **imputed ovulation** (`ovtoday_impute == 1`) for cycles lacking confirmation. Centered on either confirmed or imputed ovulation. This ensures that -1 and +1 are hormonally equivalent, rather than adjacent. This is what the main analyses of Nagpal et al. (2025) include. Other iterations of cycle time (`scaled_cycleday`) are being phased out.   
+  
+  
+  
 
 - `ovtoday_impute`:  
   A binary indicator identifying **imputed ovulation days** (value = 1), estimated as 15 days before the next menses onset.
@@ -399,14 +414,11 @@ names(cycle_df_scaled)
   Indicates the length of a menses-to-menses cycle an observation belongs to. 
   
 - `luteal_length`: 
-  Indicates the length of the luteal phase an observation belongs to, when ovulation was not imputed. 
+  Indicates the length of the luteal phase an observation belongs to, when ovulation was not imputed. This is computed only for cycles that meet the criteria to be scaled. 
   
 - `cycle_inomplete`
   A binary indicator identifying if the observation is part of an incomplete menses-to-menses cycle 
   
-
-The following additional variables may be helpful for menstrual cycle analysis, but are not discussed in detail in Nagpal et al., (2025). 
-
 - `cyclic_time`
  A continuous cycle time variable centered on **menses onset** (`menses == 1 → 0`), ranging from –1 to +1. Unlike `scaled_cycleday`, -1 and + 1 are parameterized to have the same hormonal meaning of **ovulation**.  Includes **only biomarker-confirmed** ovulation cycles.
 
@@ -497,7 +509,7 @@ cycle_plot(
 
 
 - `data`:  
-  A dataframe containing the cycle-aligned data. Must include the relevant scaled cycle time variables (`scaled_cycleday`, `scaled_cycleday_ov`, etc.) and the symptom column. This function will only work if your dataset has been run through `pacts_scaling()` first.
+  A dataframe containing the cycle-aligned data. Must include the relevant scaled cycle time variables (`scaled_cycleday`, `scaled_cycleday_ov`, `cyclic_time`, etc.) and the symptom column. This function will only work if your dataset has been run through `pacts_scaling()` first.
 
 - `symptom`:  
   A string specifying the name of the symptom or outcome variable to visualize.
