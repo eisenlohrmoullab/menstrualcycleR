@@ -5,6 +5,6 @@ account: menstrualcycledata
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 14328053
-bundleId: 10913076
+bundleId: 10913090
 url: https://menstrualcycledata.shinyapps.io/shiny/
 version: 1

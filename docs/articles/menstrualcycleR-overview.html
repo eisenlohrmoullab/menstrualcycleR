@@ -1338,13 +1338,15 @@ accounting for repeated measures within individuals.</p>
 flexibly estimate curved trajectories without assuming a specific
 polynomial shape. This makes them especially well-suited for capturing
 the <strong>dynamic and cyclical</strong> nature of menstrual cycle
-data.In our examples, we use <strong>thin plate regression
-splines</strong> as the basis for smooth terms. Thin plate splines are a
-flexible and efficient smoothing method implemented by default in the
-<code>mgcv</code> package (Wood, 2017). They work by placing a penalty
-on the “wiggliness” of the fitted curve—ensuring the model captures
+data. In our examples, we use <strong>cubic cyclic regression
+splines</strong> as the basis for smooth terms. Cubic cyclic regression
+splines are a flexible and efficient smoothing method implemented by
+default in the <code>mgcv</code> package (Wood, 2017) that ensure
+continuity and cyclicity of cyclic_time variables, ensurring hormonal
+equivalency at the endpoints of -1/+1. They work by placing a penalty on
+the “wiggliness” of the fitted curve—ensuring the model captures
 important trends without overfitting noise.</p>
-<p>Key characteristics of smooth functions using thin plate splines:</p>
+<p>Key characteristics of smooth functions:</p>
 <ul>
 <li>They adapt to the data’s shape without requiring pre-specified knot
 placement.</li>
