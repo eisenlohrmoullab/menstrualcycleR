@@ -778,9 +778,9 @@ Okay — now that you've used `menstrualcycleR` to generate standardized menstru
 
 To answer this, we turn to **generalized additive mixed models (GAMMs)** via the `mgcv` R package (Wood, 2017). GAMMs allow you to statistically evaluate whether there are meaningful, nonlinear changes in your outcome across time in the cycle, while accounting for repeated measures within individuals.
 
-GAMMs extend linear mixed-effects models by incorporating **smooth functions** of predictors, allowing researchers to flexibly estimate curved trajectories without assuming a specific polynomial shape. This makes them especially well-suited for capturing the **dynamic and cyclical** nature of menstrual cycle data.In our examples, we use **thin plate regression splines** as the basis for smooth terms. Thin plate splines are a flexible and efficient smoothing method implemented by default in the `mgcv` package (Wood, 2017). They work by placing a penalty on the "wiggliness" of the fitted curve—ensuring the model captures important trends without overfitting noise.
+GAMMs extend linear mixed-effects models by incorporating **smooth functions** of predictors, allowing researchers to flexibly estimate curved trajectories without assuming a specific polynomial shape. This makes them especially well-suited for capturing the **dynamic and cyclical** nature of menstrual cycle data. In our examples, we use **cubic cyclic regression splines** as the basis for smooth terms. Cubic cyclic regression splines are a flexible and efficient smoothing method implemented by default in the `mgcv` package (Wood, 2017) that ensure continuity and cyclicity of cyclic_time variables, ensurring hormonal equivalency at the endpoints of -1/+1. They work by placing a penalty on the "wiggliness" of the fitted curve—ensuring the model captures important trends without overfitting noise.
 
-Key characteristics of smooth functions using thin plate splines:
+Key characteristics of smooth functions:
 
 - They adapt to the data’s shape without requiring pre-specified knot placement.
 - Smoother fits have **lower effective degrees of freedom (EDF)**; more flexible (wiggly) fits have **higher EDF**.
