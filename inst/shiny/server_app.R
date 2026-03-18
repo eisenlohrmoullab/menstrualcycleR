@@ -610,7 +610,7 @@ server <- function(input, output, session) {
 
     cycleCount <- function(x) {
       inds <- which(x == 1)
-      if (!length(inds)) return(0)
+      if (!length(inds)) return(rep(NA_real_, length(x)))
       num <- lapply(inds, function(i) {
         num <- seq_along(x) - i
         num[num >= 0] <- num[num >= 0] + 1
