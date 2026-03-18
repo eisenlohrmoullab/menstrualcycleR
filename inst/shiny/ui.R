@@ -145,7 +145,8 @@ ui <- fluidPage(
                  )
         ),
         
-        tabPanel("Download Data", downloadButton("download_results", "Download Processed Data"))
+        tabPanel("Download Data", downloadButton("download_results", "Download Processed Data")), 
+        tabPanel("Download CPASS Analysis", downloadButton("download_cpass_analysis", "Download CPASS Analysis"))
       )
     )
   ),
