@@ -13,6 +13,7 @@ library(writexl)
 
 server <- function(input, output, session) {
   user_data <- reactiveVal(NULL)
+ 
   
   observeEvent(input$load_data, {
     req(input$file)
@@ -563,6 +564,7 @@ server <- function(input, output, session) {
   # ---- CPASS Helper Function ----
   #defining cpass_data as a reactive val
   cpass_data <- reactiveVal()
+  cpass_results <- reactiveVal()
   add_cpass_count <- function(data, days_before = 8, days_after = 10) {
     # Step 1: Identify each menses start (first day per episode)
     menses_rows <- data %>%
@@ -633,6 +635,10 @@ server <- function(input, output, session) {
       dplyr::filter(!is.na(cycle), !is.na(item))
 
     input1 <- cpass::as_cpass_data(df1_long, sep_event = "menses")
+    
+    # run diagnosis and item-level diagnosis table
+    diagnosis <- cpass::cpass(input1)
+    cpass_dxdata <- diagnosis$item_level_diagnosis
 
     # Main diagnostic plot
     plots <- list()
@@ -644,7 +650,10 @@ server <- function(input, output, session) {
       plots[[paste0("Cycle_", cyc)]] <- cpass::plot_subject_obs(input1 %>% dplyr::filter(subject == id_number, cycle == cyc))
     }
 
-    return(plots)
+    return(list(
+      plots = plots, 
+      cpass_dxdata = cpass_dxdata
+    ))
   }
 
   # ---- CPASS UI Rendering for Symptom Map ----
@@ -702,7 +711,7 @@ server <- function(input, output, session) {
   # ---- Run CPASS Analysis ----
   observeEvent(input$run_cpass, {
     req(processed_data(), input$cpass_id_select)
-
+    
     isolate({
       # Build symptom_map from dropdown selections
       symptom_inputs <- names(input)[grepl("^map_", names(input))]
@@ -711,13 +720,15 @@ server <- function(input, output, session) {
         gsub("^map_", "", symptom_inputs)
       )
       symptom_map <- symptom_map[!is.na(unlist(symptom_map))]
-
+      
+      req(length(symptom_map) > 0)
       
       # Add cpass_count column
       updated_data <- add_cpass_count(processed_data())
       cpass_data(updated_data)
-      # Run CPASS and store plots
-      plots <- tryCatch({
+      
+      # Run CPASS and store full results
+      result <- tryCatch({
         cpass_process(
           dataframe = cpass_data(),
           symptom_map = unlist(symptom_map),
@@ -727,24 +738,28 @@ server <- function(input, output, session) {
         showNotification(paste("CPASS Error:", e$message), type = "error")
         return(NULL)
       })
-
+      
+      req(result)
+      cpass_results(result)
+      
       # Display CPASS plots dynamically with download buttons
       output$cpass_plot_ui <- renderUI({
-        req(plots)
-
+        req(cpass_results())
+        plots <- cpass_results()$plots
+        
         plot_uis <- lapply(names(plots), function(name) {
           plot_id <- paste0("cpass_plot_", name)
           download_id <- paste0("download_plot_", name)
-
+          
           local({
             n <- name
             pid <- plot_id
             did <- download_id
-
+            
             output[[pid]] <- renderPlot({
               plots[[n]]
             })
-
+            
             output[[did]] <- downloadHandler(
               filename = function() paste0("cpass_plot_", n, "_", Sys.Date(), ".jpeg"),
               content = function(file) {
@@ -752,7 +767,7 @@ server <- function(input, output, session) {
               }
             )
           })
-
+          
           wellPanel(
             tags$h4(paste("CPASS Plot:", name), style = "margin-bottom: 15px;"),
             plotOutput(plot_id, height = "800px"),
@@ -761,16 +776,27 @@ server <- function(input, output, session) {
             style = "margin-bottom: 50px;"
           )
         })
-
+        
         do.call(tagList, plot_uis)
       })
     })
   })
-
-
+#-------------------
   output$download_results <- downloadHandler(
     filename = function() { paste("processed_cycle_data_", Sys.Date(), ".csv", sep = "") },
     content = function(file) { write.csv(processed_data(), file, row.names = FALSE) }
+  )
+  
+  output$download_cpass_analysis <- downloadHandler(
+    filename = function() {
+      paste0("cpass_item_level_diagnosis_", input$cpass_id_select, "_", Sys.Date(), ".csv")
+    },
+    content = function(file) {
+      req(cpass_results())
+      req(cpass_results()$cpass_dxdata)
+      
+      write.csv(cpass_results()$cpass_dxdata, file, row.names = FALSE)
+    }
   )
 }
 
