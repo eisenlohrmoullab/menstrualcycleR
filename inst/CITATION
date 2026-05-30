@@ -1,0 +1,19 @@
+bibentry(
+  bibtype  = "Article",
+  title    = "Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the menstrualcycleR package",
+  author   = c(
+    person("Anisha", "Nagpal"),
+    person("Katja M.", "Schmalenberger"),
+    person("Jordan C.", "Barone"),
+    person("Elizabeth", "Mulligan"),
+    person("Allison", "Stumper"),
+    person("Loran", "Knol"),
+    person("Jan", "Failenschmid"),
+    person("Jeff", "Kiesner"),
+    person("Jessica R.", "Peters"),
+    person("Tory A.", "Eisenlohr-Moul")
+  ),
+  journal  = "Psychoneuroendocrinology",
+  year     = "2025",
+  pages    = "107584"
+)
