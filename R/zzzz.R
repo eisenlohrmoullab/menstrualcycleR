@@ -4,8 +4,9 @@ utils::globalVariables(c("ovtoday_impute", "scaled_cycleday", "scaled_cycleday_o
   packageStartupMessage(
     "Welcome to the menstrualcycleR package!\n",
     "If you use this package, please cite:\n",
-    "Nagpal, A., Schmalenberger, K. M., Barone, J., Mulligan, E. M., Stumper, A., Knol, L., … Eisenlohr-Moul, T. A., PhD. (2025, May 6). ",
+    "Nagpal, A., Schmalenberger, K. M., Barone, J. C., Mulligan, E., Stumper, A., Knol, L., ",
+    "Failenschmid, J., Kiesner, J., Peters, J. R., & Eisenlohr-Moul, T. A. (2025). ",
     "Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the `menstrualcycleR` package. ",
-    "https://doi.org/10.31219/osf.io/hd5xw_v1"
+    "Psychoneuroendocrinology, 107584."
   )
 }
