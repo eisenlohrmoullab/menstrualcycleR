@@ -80,7 +80,6 @@ data_with_scaling <- pacts_scaling(
 #> date: date
 #> menses: menses
 #> ovtoday: ovtoday
-#> Error in ungroup(.): could not find function "ungroup"
 
 
 ```

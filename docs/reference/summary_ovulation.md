@@ -102,14 +102,53 @@ data_with_scaling <- pacts_scaling(
 #> date: date
 #> menses: menses
 #> ovtoday: ovtoday
-#> Error in ungroup(.): could not find function "ungroup"
 
 ov_summary = summary_ovulation(data_with_scaling)
-#> Error: object 'data_with_scaling' not found
 print(ov_summary)
-#> Error: object 'ov_summary' not found
+#> $ovstatus_total
+#>          Total Confirmed Ovulation
+#> N cycles                        14
+#>          Total Estimated Ovulation via 15day Backward Count
+#> N cycles                                                 11
+#> 
+#> $ovstatus_id
+#> # A tibble: 25 × 3
+#>       id `Total cycles with confirmed ovulation` Total cycles with imputed ovu…¹
+#>    <int>                                   <dbl>                           <dbl>
+#>  1     1                                       0                               1
+#>  2     2                                       1                               0
+#>  3     3                                       1                               0
+#>  4     4                                       0                               1
+#>  5     5                                       1                               0
+#>  6     6                                       0                               1
+#>  7     7                                       1                               0
+#>  8     8                                       1                               0
+#>  9     9                                       0                               1
+#> 10    10                                       1                               0
+#> # ℹ 15 more rows
+#> # ℹ abbreviated name:
+#> #   ¹​`Total cycles with imputed ovulation via 15day Backward Count`
+#> 
 ov_summary$ovstatus_total
-#> Error: object 'ov_summary' not found
+#>          Total Confirmed Ovulation
+#> N cycles                        14
+#>          Total Estimated Ovulation via 15day Backward Count
+#> N cycles                                                 11
 ov_summary$ovstatus_id
-#> Error: object 'ov_summary' not found
+#> # A tibble: 25 × 3
+#>       id `Total cycles with confirmed ovulation` Total cycles with imputed ovu…¹
+#>    <int>                                   <dbl>                           <dbl>
+#>  1     1                                       0                               1
+#>  2     2                                       1                               0
+#>  3     3                                       1                               0
+#>  4     4                                       0                               1
+#>  5     5                                       1                               0
+#>  6     6                                       0                               1
+#>  7     7                                       1                               0
+#>  8     8                                       1                               0
+#>  9     9                                       0                               1
+#> 10    10                                       1                               0
+#> # ℹ 15 more rows
+#> # ℹ abbreviated name:
+#> #   ¹​`Total cycles with imputed ovulation via 15day Backward Count`
 ```

@@ -71,20 +71,34 @@ data_with_scaling <- pacts_scaling(
 #> date: date
 #> menses: menses
 #> ovtoday: ovtoday
-#> Error in ungroup(.): could not find function "ungroup"
 
 # Analyze symptom data availability
 data_available_info <- cycledata_check(
   data_with_scaling, 
   symptom_columns = c("symptom")
 )
-#> Error: object 'data_with_scaling' not found
+#> Warning: ID number 8 has < 10 observations for symptom
 
 # View results
 print(data_available_info$by_id)
-#> Error: object 'data_available_info' not found
+#> # A tibble: 25 × 4
+#>       id symptom_nonNA symptom_luteal symptom_follicular
+#>    <int>         <int>          <int>              <int>
+#>  1     1            20             10                 10
+#>  2     2            22             12                 10
+#>  3     3            26             13                 13
+#>  4     4            26             11                 15
+#>  5     5            18              6                 12
+#>  6     6            31             12                 19
+#>  7     7            20              6                 14
+#>  8     8             9              0                  9
+#>  9     9            29             13                 16
+#> 10    10            28             11                 17
+#> # ℹ 15 more rows
 print(data_available_info$overall)
-#> Error: object 'data_available_info' not found
+#> # A tibble: 1 × 3
+#>   symptom_nonNA symptom_luteal symptom_follicular
+#>           <int>          <int>              <int>
+#> 1           575            218                357
 print(data_available_info$data_symptom_plots$symptom)
-#> Error: object 'data_available_info' not found
 ```

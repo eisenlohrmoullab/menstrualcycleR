@@ -151,10 +151,27 @@ data_with_scaling <- pacts_scaling(
 #> date: date
 #> menses: menses
 #> ovtoday: ovtoday
-#> Error in ungroup(.): could not find function "ungroup"
 
 
 # View the result
 print(data_with_scaling)
-#> Error: object 'data_with_scaling' not found
+#> # A tibble: 744 × 20
+#>       id date       menses ovtoday symptom daterated  m2mcount mcyclength
+#>    <int> <date>      <dbl>   <dbl>   <dbl> <date>        <dbl>      <dbl>
+#>  1     1 2024-01-20      1       0       5 2024-01-20        1         24
+#>  2     1 2024-01-21      0       0       5 2024-01-21        2         24
+#>  3     1 2024-01-22      0       0       3 2024-01-22        3         24
+#>  4     1 2024-01-23      0       0      NA NA                4         24
+#>  5     1 2024-01-24      0       0       2 2024-01-24        5         24
+#>  6     1 2024-01-25      0       0       1 2024-01-25        6         24
+#>  7     1 2024-01-26      0       0       1 2024-01-26        7         24
+#>  8     1 2024-01-27      0       0       1 2024-01-27        8         24
+#>  9     1 2024-01-28      0       0       3 2024-01-28        9         24
+#> 10     1 2024-01-29      0       0       4 2024-01-29       10         24
+#> # ℹ 734 more rows
+#> # ℹ 12 more variables: cycle_incomplete <dbl>, cyclenum <int>,
+#> #   ovtoday_impute <int>, scaled_cycleday <dbl>, scaled_cycleday_ov <dbl>,
+#> #   scaled_cycleday_impute <dbl>, scaled_cycleday_imp_ov <dbl>,
+#> #   cyclic_time <dbl>, cyclic_time_impute <dbl>, cyclic_time_ov <dbl>,
+#> #   cyclic_time_imp_ov <dbl>, luteal_length <dbl>
 ```

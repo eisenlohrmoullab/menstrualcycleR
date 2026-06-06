@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">menstrualcycleR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,6 +35,11 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.1" id="menstrualcycler-011">menstrualcycleR 0.1.1<a class="anchor" aria-label="anchor" href="#menstrualcycler-011"></a></h2>
+<ul><li>
+<code><a href="../reference/pacts_scaling.html">pacts_scaling()</a></code> and <code><a href="../reference/cycle_plot_individual.html">cycle_plot_individual()</a></code> no longer require <code>dplyr</code>/<code>tidyverse</code> to be attached. Several internal calls to dplyr verbs (<code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/nth.html" class="external-link">first()</a></code>) and to <code><a href="https://rlang.r-lib.org/reference/sym.html" class="external-link">rlang::sym()</a></code> were not namespace-qualified, so a bare <code><a href="https://osf.io/preprints/osf/hd5xw_v1?view_only=" class="external-link">library(menstrualcycleR)</a></code> produced <code>Error: could not find function "ungroup"</code>. All such calls are now qualified (<code>dplyr::</code>/<code>rlang::</code>), and every exported function works with the package loaded on its own.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="menstrualcycler-010">menstrualcycleR 0.1.0<a class="anchor" aria-label="anchor" href="#menstrualcycler-010"></a></h2>
 <p>First release of <strong>menstrualcycleR</strong>, the companion R package to:</p>

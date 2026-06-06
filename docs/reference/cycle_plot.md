@@ -93,7 +93,6 @@ data_with_scaling <- pacts_scaling(
 #> date: date
 #> menses: menses
 #> ovtoday: ovtoday
-#> Error in ungroup(.): could not find function "ungroup"
 
 cycle_plot_data <- cycle_plot(
   data_with_scaling,
@@ -102,7 +101,11 @@ cycle_plot_data <- cycle_plot(
   include_impute = TRUE,
   y_scale = "person-centered"
 )
-#> Error: object 'data_with_scaling' not found
+#> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+#> ℹ Please use `linewidth` instead.
+#> ℹ The deprecated feature was likely used in the menstrualcycleR package.
+#>   Please report the issue to the authors.
 cycle_plot_data$plot
-#> Error: object 'cycle_plot_data' not found
+#> Warning: Removed 1 row containing missing values or values outside the scale range
+#> (`geom_line()`).
 ```

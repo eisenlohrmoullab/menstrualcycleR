@@ -1,5 +1,22 @@
 # Changelog
 
+## menstrualcycleR 0.1.1
+
+- [`pacts_scaling()`](../reference/pacts_scaling.md) and
+  [`cycle_plot_individual()`](../reference/cycle_plot_individual.md) no
+  longer require `dplyr`/`tidyverse` to be attached. Several internal
+  calls to dplyr verbs
+  ([`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html),
+  [`filter()`](https://dplyr.tidyverse.org/reference/filter.html),
+  [`case_when()`](https://dplyr.tidyverse.org/reference/case_when.html),
+  [`first()`](https://dplyr.tidyverse.org/reference/nth.html)) and to
+  [`rlang::sym()`](https://rlang.r-lib.org/reference/sym.html) were not
+  namespace-qualified, so a bare
+  [`library(menstrualcycleR)`](https://osf.io/preprints/osf/hd5xw_v1?view_only=)
+  produced `Error: could not find function "ungroup"`. All such calls
+  are now qualified (`dplyr::`/`rlang::`), and every exported function
+  works with the package loaded on its own.
+
 ## menstrualcycleR 0.1.0
 
 First release of **menstrualcycleR**, the companion R package to:
