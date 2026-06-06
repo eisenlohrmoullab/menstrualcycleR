@@ -1,0 +1,47 @@
+# How to Install and Load `menstrualcycleR`
+
+To install and load the `menstrualcycleR` package, follow these steps:
+
+1.  Install the `remotes` package (if not already installed):
+    `install.packages("remotes")`
+
+2.  Install `menstrualcycleR` from GitHub
+
+`remotes::install_github("eisenlohrmoullab/menstrualcycleR")`
+
+3.  Load the package
+
+[`library(menstrualcycleR)`](https://osf.io/preprints/osf/hd5xw_v1?view_only=)
+
+To utilize the shinyapp, visit:
+<https://menstrualcycledata.shinyapps.io/shiny/>
+
+For a tutorial on using `menstrualcycleR` visit:
+<https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.html>
+
+![](https://github.com/user-attachments/assets/0502430c-75d9-4fdb-9b59-f3bafd16bb9c)
+
+# Package index
+
+## All functions
+
+- [`cycle_plot()`](cycle_plot.md) : Plot Symptom Data Across the
+  Menstrual Cycle
+- [`cycle_plot_individual()`](cycle_plot_individual.md) : Generate
+  Cycle-Specific Plots and Summary Data for a Given ID
+- [`cycledata`](cycledata.md) : Example longitudinal daily dataset with
+  cycle measures
+- [`cycledata_check()`](cycledata_check.md) : Analyze Non-Missing
+  Symptom Data by Cycle Phase
+- [`launch_app()`](launch_app.md) : Launch the Menstrual Cycle Shiny App
+- [`pacts_scaling()`](pacts_scaling.md) : Phase-Aligned Cycle Time
+  Scaling (PACTS)
+- [`summary_ovulation()`](summary_ovulation.md) : Summarize Ovulation
+  Confirmation and Imputation
+
+# Articles
+
+### All vignettes
+
+- [Getting Started with menstrualcycleR and Phase-Aligned Cycle Time
+  Scaling (PACTS)](menstrualcycleR-overview.md):

@@ -1,0 +1,22 @@
+# How to Install and Load `menstrualcycleR`
+
+To install and load the `menstrualcycleR` package, follow these steps:
+
+1.  Install the `remotes` package (if not already installed):
+    `install.packages("remotes")`
+
+2.  Install `menstrualcycleR` from GitHub
+
+`remotes::install_github("eisenlohrmoullab/menstrualcycleR")`
+
+3.  Load the package
+
+[`library(menstrualcycleR)`](https://osf.io/preprints/osf/hd5xw_v1?view_only=)
+
+To utilize the shinyapp, visit:
+<https://menstrualcycledata.shinyapps.io/shiny/>
+
+For a tutorial on using `menstrualcycleR` visit:
+<https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.html>
+
+![](https://github.com/user-attachments/assets/0502430c-75d9-4fdb-9b59-f3bafd16bb9c)
