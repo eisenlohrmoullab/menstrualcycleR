@@ -1,3 +1,7 @@
+# menstrualcycleR 0.1.1
+
+* `pacts_scaling()` and `cycle_plot_individual()` no longer require `dplyr`/`tidyverse` to be attached. Several internal calls to dplyr verbs (`ungroup()`, `filter()`, `case_when()`, `first()`) and to `rlang::sym()` were not namespace-qualified, so a bare `library(menstrualcycleR)` produced `Error: could not find function "ungroup"`. All such calls are now qualified (`dplyr::`/`rlang::`), and every exported function works with the package loaded on its own.
+
 # menstrualcycleR 0.1.0
 
 First release of **menstrualcycleR**, the companion R package to:

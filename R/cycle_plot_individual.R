@@ -49,7 +49,7 @@ cycle_plot_individual <- function(data, id, symptoms, centering = "menses",
   id <- as.numeric(id)
   
   # Filter data for the specified ID
-  data_filtered <- data %>% filter(id == !!id)
+  data_filtered <- data %>% dplyr::filter(id == !!id)
   data_filtered = as.data.frame(data_filtered)
   #data_filtered <- data_filtered %>% dplyr::filter(!is.na(cyclenum))
   #data_filtered <- data_filtered %>% dplyr::filter(!is.na(.data$cyclenum))
@@ -63,7 +63,7 @@ cycle_plot_individual <- function(data, id, symptoms, centering = "menses",
   # Function to process cycle data for each symptom
   process_cycle_data <- function(df, symptom) {
     df <- df %>%
-      dplyr::mutate(!!symptom := as.numeric(!!sym(symptom)))
+      dplyr::mutate(!!symptom := as.numeric(!!rlang::sym(symptom)))
     
     forwardCount <- function(x) {
       inds <- which(x == 1)
@@ -85,34 +85,34 @@ cycle_plot_individual <- function(data, id, symptoms, centering = "menses",
     
     df <- df %>%
       dplyr::mutate(
-        !!paste0(symptom, ".m") := mean(!!sym(symptom), na.rm = TRUE),
-        !!paste0(symptom, ".d") := !!sym(symptom) - !!sym(paste0(symptom, ".m"))
+        !!paste0(symptom, ".m") := mean(!!rlang::sym(symptom), na.rm = TRUE),
+        !!paste0(symptom, ".d") := !!rlang::sym(symptom) - !!rlang::sym(paste0(symptom, ".m"))
       ) %>%
       dplyr::ungroup()
     
     df <- df %>%
       dplyr::mutate(
-        !!paste0(symptom, ".d.roll") := if (sum(!is.na(!!sym(paste0(symptom, ".d")))) < 2) {
+        !!paste0(symptom, ".d.roll") := if (sum(!is.na(!!rlang::sym(paste0(symptom, ".d")))) < 2) {
           NA_real_
         } else {
-          zoo::rollapply(!!sym(paste0(symptom, ".d")), rollingavg, FUN = function(x) mean(x, na.rm = TRUE), align = "center", fill = NA, partial = T)
+          zoo::rollapply(!!rlang::sym(paste0(symptom, ".d")), rollingavg, FUN = function(x) mean(x, na.rm = TRUE), align = "center", fill = NA, partial = T)
         },
-        !!paste0(symptom, ".m.roll") := if (sum(!is.na(!!sym(paste0(symptom, ".m")))) < 2) {
+        !!paste0(symptom, ".m.roll") := if (sum(!is.na(!!rlang::sym(paste0(symptom, ".m")))) < 2) {
           NA_real_
         } else {
-          zoo::rollapply(!!sym(paste0(symptom, ".m")), rollingavg, FUN = function(x) mean(x, na.rm = TRUE), align = "center", fill = NA, partial = T)
+          zoo::rollapply(!!rlang::sym(paste0(symptom, ".m")), rollingavg, FUN = function(x) mean(x, na.rm = TRUE), align = "center", fill = NA, partial = T)
         },
-        !!paste0(symptom, ".roll") := if (sum(!is.na(!!sym(symptom))) < 2) {
+        !!paste0(symptom, ".roll") := if (sum(!is.na(!!rlang::sym(symptom))) < 2) {
           NA_real_
         } else {
-          zoo::rollapply(!!sym(symptom), rollingavg, FUN = function(x) mean(x, na.rm = TRUE), align = "center", fill = NA, partial = T)
+          zoo::rollapply(!!rlang::sym(symptom), rollingavg, FUN = function(x) mean(x, na.rm = TRUE), align = "center", fill = NA, partial = T)
         }
       ) %>%
       dplyr::ungroup()
     
     df <- df %>%
       dplyr::mutate(
-        cycleday_perc = case_when(
+        cycleday_perc = dplyr::case_when(
           centering == "menses" & include_impute ~ (.data$scaled_cycleday_impute + 1) / 2,
           centering == "menses" & !include_impute ~ (.data$scaled_cycleday + 1) / 2,
           centering == "ovulation" & include_impute ~ (.data$scaled_cycleday_imp_ov + 1) / 2,
@@ -129,12 +129,12 @@ cycle_plot_individual <- function(data, id, symptoms, centering = "menses",
     dat_summary <- df %>%
       dplyr::group_by(cycleday_5perc) %>%
       dplyr::summarise(
-        mean_dev = mean(!!sym(paste0(symptom, ".d")), na.rm = TRUE),
-        mean_dev_roll = mean(!!sym(paste0(symptom, ".d.roll")), na.rm = TRUE),
-        raw_sx = mean(!!sym(symptom), na.rm = TRUE),
-        sx_roll = mean(!!sym(paste0(symptom, ".roll")), na.rm = TRUE),
+        mean_dev = mean(!!rlang::sym(paste0(symptom, ".d")), na.rm = TRUE),
+        mean_dev_roll = mean(!!rlang::sym(paste0(symptom, ".d.roll")), na.rm = TRUE),
+        raw_sx = mean(!!rlang::sym(symptom), na.rm = TRUE),
+        sx_roll = mean(!!rlang::sym(paste0(symptom, ".roll")), na.rm = TRUE),
         cycleday = mean(forwardcount, na.rm = TRUE) + 1,
-        mcyclength = first(mcyclength),
+        mcyclength = dplyr::first(mcyclength),
         .groups = "drop"
       )
     

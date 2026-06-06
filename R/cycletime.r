@@ -160,7 +160,7 @@ calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength
       )
     )
     
-    data = data %>% dplyr::arrange(id, date) %>% ungroup()
+    data = data %>% dplyr::arrange(id, date) %>% dplyr::ungroup()
   #Select and return the relevant columns
   data <- data %>%
     dplyr::select(
