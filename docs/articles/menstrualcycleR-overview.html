@@ -119,7 +119,7 @@ within-phase changes that are masked by averaging over phases.</li>
 splines, and time-varying predictors can be used to model within- and
 between-person variation in cycle dynamics.</li>
 </ul>
-<p>See Eisenlohr-Moul et al. (2020), Schmalenberger et al. (2024), and
+<p>See Eisenlohr-Moul et al. (2020), Schmalenberger et al. (2021), and
 Reen &amp; Kiesner (2016) for supporting discussions.</p>
 <hr>
 </div>
@@ -144,7 +144,7 @@ dysmenorrhea)</p>
 with menses = 0, with negative values representing the <strong>luteal
 phase</strong> and positive values representing the <strong>follicular
 phase</strong>. When modeling ovulation-centered, estimated day of
-ovulation = 0, and psotive values represent the <strong>follicular
+ovulation = 0, and positive values represent the <strong>follicular
 phase</strong> and negative values represent the <strong>luteal
 phase</strong>. This allows for flexible model fitting while retaining a
 biologically meaningful time structure.</p>
@@ -255,10 +255,10 @@ show:</p>
 <p>This range can be modified by the user, especially in cases where
 ovulation is confirmed for all cycles and the study population includes
 naturally shorter or longer cycles.</p>
-<p>Additonally, <code>menstrualcycleR</code> will only scale luteal
-phases if the length is <strong>7 and 18 days</strong>. This judgement
-is based on norms from over 600,000 ovulatory cycles reported in Bull et
-al., (2019).</p>
+<p>Additionally, <code>menstrualcycleR</code> will only scale luteal
+phases if the length is <strong>between 7 and 18 days</strong>. This
+judgement is based on norms from over 600,000 ovulatory cycles reported
+in Bull et al., (2019).</p>
 <hr>
 </div>
 <div class="section level3">
@@ -313,8 +313,8 @@ excluded.</td>
 <p>Currently the <code>menstrualcycleR</code> package is hosted on the
 Eisenlohr-Moul Lab’s (CLEAR Lab: Clarifying the Endocrinology of Acute
 Risk) GitHub repository.</p>
-<p>To install it from GitHub, install and load the package `remotes`` by
-running:</p>
+<p>To install it from GitHub, install and load the package
+<code>remotes</code> by running:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -339,10 +339,10 @@ running:</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Attaching core tidyverse packages</span> ──────────────────────── tidyverse 2.0.0 ──</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr    </span> 1.1.4     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">readr    </span> 2.1.5</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">forcats  </span> 1.0.0     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">stringr  </span> 1.5.1</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2  </span> 3.5.2     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tibble   </span> 3.3.0</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">forcats  </span> 1.0.1     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">stringr  </span> 1.6.0</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2  </span> 4.0.0     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tibble   </span> 3.3.0</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">lubridate</span> 1.9.4     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tidyr    </span> 1.3.1</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr    </span> 1.1.0     </span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr    </span> 1.2.0     </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Conflicts</span> ────────────────────────────────────────── tidyverse_conflicts() ──</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">filter()</span> masks <span style="color: #0000BB;">stats</span>::filter()</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">lag()</span>    masks <span style="color: #0000BB;">stats</span>::lag()</span></span>
@@ -358,12 +358,11 @@ running:</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span></code></pre></div>
 <p>Additionally in this vignette, we will cover options to use the
 continuous cycle time measures generated by <code>menstrualcycleR</code>
-in nonlinear multilevel analyses using the <code>mgcv</code>,
-<code>gam.hp</code>, and <code>marginaleffects</code> packages. You can
-install and load these packages by running:</p>
+in nonlinear multilevel analyses using the <code>mgcv</code> and
+<code>marginaleffects</code> packages. You can install and load these
+packages by running:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"mgcv"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"gam.hp"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"marginaleffects"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">mgcv</span><span class="op">)</span></span>
@@ -373,10 +372,7 @@ install and load these packages by running:</p>
 <span><span class="co">#&gt; The following object is masked from 'package:dplyr':</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     collapse</span></span>
-<span><span class="co">#&gt; This is mgcv 1.9-1. For overview type 'help("mgcv-package")'.</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/laijiangshan/gam.hp" class="external-link">gam.hp</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Thank you for using this package! If you use this package in your research, please cite the following references</span></span>
-<span><span class="co">#&gt; Jiangshan Lai, Jing Tang, Tingyuan Li, Aiying Zhan, Lingfeng Mao. 2024. Evaluating the relative importance of predictors in Generalized Additive Models using the gam.hp R package. Plant Diversity, 46(4): 542-546</span></span>
+<span><span class="co">#&gt; This is mgcv 1.9-3. For overview type 'help("mgcv-package")'.</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://marginaleffects.com/" class="external-link">marginaleffects</a></span><span class="op">)</span></span></code></pre></div>
 <hr>
 </div>
@@ -433,23 +429,20 @@ Same as above, but also includes cycles with <strong>imputed
 ovulation</strong> (assigned to day –15 before next menses). Increases
 dataset coverage, but with lower precision. This ensures that -1 and +1
 are hormonally equivalent, rather than adjacent. This is what the main
-analyses of Nagpal et al. (2025) include. Other iterations of cycle time
-(<code>scaled_cycleday</code>) are being phased out.</p></li>
+analyses of Nagpal et al. (2025) include.</p></li>
 <li><p><code>cyclic_time_ov</code>:<br>
 A cycle time variable centered on <strong>ovulation</strong>
 (<code>ovtoday == 1 → 0</code>), ranging from –1 (start of follicular
 phase) to +1 (end of luteal phase). Biomarker-confirmed ovulation only.
 This ensures that -1 and +1 are hormonally equivalent, rather than
 adjacent. This is what the main analyses of Nagpal et al. (2025)
-include. Other iterations of cycle time (<code>scaled_cycleday</code>)
-are being phased out.</p></li>
+include.</p></li>
 <li><p><code>cyclic_time_imp_ov</code>:<br>
 Same as above, but includes <strong>imputed ovulation</strong>
 (<code>ovtoday_impute == 1</code>) for cycles lacking confirmation.
 Centered on either confirmed or imputed ovulation. This ensures that -1
 and +1 are hormonally equivalent, rather than adjacent. This is what the
-main analyses of Nagpal et al. (2025) include. Other iterations of cycle
-time (<code>scaled_cycleday</code>) are being phased out.</p></li>
+main analyses of Nagpal et al. (2025) include.</p></li>
 <li><p><code>ovtoday_impute</code>:<br>
 A binary indicator identifying <strong>imputed ovulation days</strong>
 (value = 1), estimated as 15 days before the next menses onset.</p></li>
@@ -579,8 +572,8 @@ al., (2025). Only cycles between 21 and 35 days will get scaled, or if a
 luteal phase with confirmed ovulation and menses onset is between 7-18
 days.</p>
 <p><code>cycle_df_scaled</code> will now have additional variables as
-well as observations. In this dataset we went from initially having 614
-observations in <code>cycle_df</code> and then having 739 observations
+well as observations. In this dataset we went from initially having 619
+observations in <code>cycle_df</code> and then having 744 observations
 in <code>cycle_df_scaled</code>. When scaling the cycle using
 <code><a href="../reference/pacts_scaling.html">pacts_scaling()</a></code>, each cycle is required to have a complete
 sequence of calendar days from menses onset to the next menses onset. If
@@ -794,7 +787,7 @@ menses-to-menses cycle an observation belongs to.</p></li>
 <li><p><code>luteal_length</code>: Indicates the length of the luteal
 phase an observation belongs to, when ovulation was not imputed. This is
 computed only for cycles that meet the criteria to be scaled.</p></li>
-<li><p><code>cycle_inomplete</code> A binary indicator identifying if
+<li><p><code>cycle_incomplete</code> A binary indicator identifying if
 the observation is part of an incomplete menses-to-menses cycle</p></li>
 <li><p><code>cyclic_time</code> A continuous cycle time variable
 centered on <strong>menses onset</strong>
@@ -825,7 +818,7 @@ ovulation.</p></li>
 </h3>
 <p>To examine how much non-missing data is available, apply
 <code><a href="../reference/cycledata_check.html">cycledata_check()</a></code>, inputting our resultant dataset from
-above (<code>df_with_scaling</code>) and choosing which outcomes you
+above (<code>cycle_df_scaled</code>) and choosing which outcomes you
 would like to look at. As of now, this function examines number of
 observations with a corresponding value for
 <code>scaled_cycleday_impute</code>. Here we are examining only 1
@@ -875,7 +868,7 @@ across the cycle:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">checkdata</span><span class="op">$</span><span class="va">data_symptom_plots</span></span>
 <span><span class="co">#&gt; $symptom</span></span></code></pre></div>
-<p><img src="menstrualcycleR-overview_files/figure-html/cycledata_check_plot%20-1.png" width="672"></p>
+<p><img src="menstrualcycleR-overview_files/figure-html/cycledata_check_plot%20-1.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="checking-ovulation-data-availability">Checking Ovulation Data Availability<a class="anchor" aria-label="anchor" href="#checking-ovulation-data-availability"></a>
@@ -1005,7 +998,7 @@ settings as:</p>
 <span>  partial <span class="op">=</span> <span class="cn">TRUE</span>    <span class="co"># allow smaller windows at the beginning and end</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <blockquote>
-<p>If you use the <code>"person_centered_roll"</code> option for the
+<p>If you use the <code>"person-centered_roll"</code> option for the
 <code>y_scale</code>, please cite the <code>zoo</code> package:<br>
 Zeileis A, Grothendieck G (2005). “zoo: S3 Infrastructure for Regular
 and Irregular Time Series.”<br><em>Journal of Statistical Software</em>, <em>14</em>(6), 1–27.<br><a href="https://doi.org/10.18637/jss.v014.i06" class="external-link">https://doi.org/10.18637/jss.v014.i06</a></p>
@@ -1023,7 +1016,14 @@ and Irregular Time Series.”<br><em>Journal of Statistical Software</em>, <em>1
 <span>  include_impute <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  y_scale <span class="op">=</span> <span class="st">"person-centered_roll"</span>, </span>
 <span>  se <span class="op">=</span> <span class="cn">T</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The deprecated feature was likely used in the <span style="color: #0000BB;">menstrualcycleR</span> package.</span></span>
+<span><span class="co">#&gt;   Please report the issue to the authors.</span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">generated.</span></span></span></code></pre></div>
 <p><code><a href="../reference/cycle_plot.html">cycle_plot()</a></code> returns a list with three components:</p>
 <ol style="list-style-type: decimal">
 <li>
@@ -1042,8 +1042,8 @@ It tells us how much higher or lower they are compared to their normal,
 and is used in “within-person” or “state-level” analyses.</p>
 <ol start="2" style="list-style-type: decimal">
 <li><p><strong>summary</strong>: A summary of the outcome variable at
-each 5% increment of the scaled cycle timeline.It also provides standard
-errors if <code>se = T</code> is included in the function
+each 5% increment of the scaled cycle timeline. It also provides
+standard errors if <code>se = T</code> is included in the function
 parameters.</p></li>
 <li><p><strong>plot</strong>: A <code>ggplot2</code> object visualizing
 the trajectory of the symptom variable across the cycle.</p></li>
@@ -1089,8 +1089,10 @@ the trajectory of the symptom variable across the cycle.</p></li>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_df_menses</span><span class="op">$</span><span class="va">plot</span></span>
 <span><span class="co">#&gt; Warning: Removed 1 row containing missing values or values outside the scale range</span></span>
-<span><span class="co">#&gt; (`geom_line()`).</span></span></code></pre></div>
-<p><img src="menstrualcycleR-overview_files/figure-html/cycle_plot_menses_raw_plot-1.png" width="672"></p>
+<span><span class="co">#&gt; (`geom_line()`).</span></span>
+<span><span class="co">#&gt; Warning: Removed 1 row containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; (`geom_ribbon()`).</span></span></code></pre></div>
+<p><img src="menstrualcycleR-overview_files/figure-html/cycle_plot_menses_raw_plot-1.png" class="r-plt" width="672"></p>
 <p>This plot is a ggplot object and can be edited using the package
 <code>ggplot2</code> and saved using the function
 <code><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave()</a></code>.</p>
@@ -1111,8 +1113,10 @@ the trajectory of the symptom variable across the cycle.</p></li>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_df_ov</span><span class="op">$</span><span class="va">plot</span></span>
 <span><span class="co">#&gt; Warning: Removed 1 row containing missing values or values outside the scale range</span></span>
-<span><span class="co">#&gt; (`geom_line()`).</span></span></code></pre></div>
-<p><img src="menstrualcycleR-overview_files/figure-html/cycle_plot_ov_roll_plot_access-1.png" width="672"></p>
+<span><span class="co">#&gt; (`geom_line()`).</span></span>
+<span><span class="co">#&gt; Warning: Removed 1 row containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; (`geom_ribbon()`).</span></span></code></pre></div>
+<p><img src="menstrualcycleR-overview_files/figure-html/cycle_plot_ov_roll_plot_access-1.png" class="r-plt" width="672"></p>
 </div>
 </div>
 <div class="section level3">
@@ -1184,7 +1188,7 @@ Applies only when using <code>"roll"</code> or
 <code>zoo::rollapply.</code></p>
 <blockquote>
 <p><strong>Note:</strong> If you use the
-<code>"person_centered_roll"</code> or <code>"roll"</code> option for
+<code>"person-centered_roll"</code> or <code>"roll"</code> option for
 the <code>y_scale</code>, please cite the <code>zoo</code>
 package:<br>
 Zeileis A, Grothendieck G (2005). “zoo: S3 Infrastructure for Regular
@@ -1211,10 +1215,10 @@ only cycle) for ID = 2:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cycle_plot_menses_id_2</span><span class="op">$</span><span class="va">symptom</span><span class="op">$</span><span class="va">Cycle_1</span><span class="op">$</span><span class="va">plot</span></span></code></pre></div>
-<p><img src="menstrualcycleR-overview_files/figure-html/cycle_plot_menses_id_2_raw_plot-1.png" width="672"></p>
+<p><img src="menstrualcycleR-overview_files/figure-html/cycle_plot_menses_id_2_raw_plot-1.png" class="r-plt" width="672"></p>
 <p>As you can see, it is difficult to examine any trends. Smoothing
 using <code>y_scale = "roll"</code> or
-<code>y_scale = "person_centered_roll"</code> will help us understand
+<code>y_scale = "person-centered_roll"</code> will help us understand
 what the trajectory looks like for participant ID = 2.</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_menses_id_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cycle_plot_individual.html">cycle_plot_individual</a></span><span class="op">(</span></span>
@@ -1228,7 +1232,7 @@ what the trajectory looks like for participant ID = 2.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cycle_plot_menses_id_2</span><span class="op">$</span><span class="va">symptom</span><span class="op">$</span><span class="va">Cycle_1</span><span class="op">$</span><span class="va">plot</span></span></code></pre></div>
-<p><img src="menstrualcycleR-overview_files/figure-html/cycle_plot_menses_id_2_roll_plot-1.png" width="672"></p>
+<p><img src="menstrualcycleR-overview_files/figure-html/cycle_plot_menses_id_2_roll_plot-1.png" class="r-plt" width="672"></p>
 <p><strong>Note on Rolling Averages</strong></p>
 <p>If <code>y_scale = "person-centered_roll"</code> or
 <code>y_scale = "roll"</code> is selected, rolling averages are
@@ -1295,7 +1299,7 @@ each menses-to-menses cycle a participant ID has in the dataset.</p>
 </h4>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_menses_id_2</span><span class="op">$</span><span class="va">symptom</span><span class="op">$</span><span class="va">Cycle_1</span><span class="op">$</span><span class="va">plot</span></span></code></pre></div>
-<p><img src="menstrualcycleR-overview_files/figure-html/cycle_plot_menses_id_2_plot_access-1.png" width="672"></p>
+<p><img src="menstrualcycleR-overview_files/figure-html/cycle_plot_menses_id_2_plot_access-1.png" class="r-plt" width="672"></p>
 <p>Cycles can also be examined ovulation-centered.</p>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_ov_id_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cycle_plot_individual.html">cycle_plot_individual</a></span><span class="op">(</span></span>
@@ -1309,7 +1313,7 @@ each menses-to-menses cycle a participant ID has in the dataset.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cycle_plot_ov_id_2</span><span class="op">$</span><span class="va">symptom</span><span class="op">$</span><span class="va">Cycle_1</span><span class="op">$</span><span class="va">plot</span></span></code></pre></div>
-<p><img src="menstrualcycleR-overview_files/figure-html/cycle_plot_ov_id_2_summary-1.png" width="672"></p>
+<p><img src="menstrualcycleR-overview_files/figure-html/cycle_plot_ov_id_2_summary-1.png" class="r-plt" width="672"></p>
 <p>All of these plots are ggplot objects and can be edited using the
 package <code>ggplot2</code> and saved using the function
 <code><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave()</a></code>.</p>
@@ -1340,12 +1344,12 @@ polynomial shape. This makes them especially well-suited for capturing
 the <strong>dynamic and cyclical</strong> nature of menstrual cycle
 data. In our examples, we use <strong>cubic cyclic regression
 splines</strong> as the basis for smooth terms. Cubic cyclic regression
-splines are a flexible and efficient smoothing method implemented by
-default in the <code>mgcv</code> package (Wood, 2017) that ensure
-continuity and cyclicity of cyclic_time variables, ensurring hormonal
-equivalency at the endpoints of -1/+1. They work by placing a penalty on
-the “wiggliness” of the fitted curve—ensuring the model captures
-important trends without overfitting noise.</p>
+splines are a flexible and efficient smoothing method implemented in the
+<code>mgcv</code> package (Wood, 2017) that ensure continuity and
+cyclicity of cyclic_time variables, ensuring hormonal equivalency at the
+endpoints of -1/+1. They work by placing a penalty on the “wiggliness”
+of the fitted curve—ensuring the model captures important trends without
+overfitting noise.</p>
 <p>Key characteristics of smooth functions:</p>
 <ul>
 <li>They adapt to the data’s shape without requiring pre-specified knot
@@ -1370,10 +1374,15 @@ individual-level variation across the menstrual cycle:</p>
 smoothness parameters, particularly in mixed-effects settings.</p></li>
 <li><p>In the below example, we assume a <strong>Gaussian
 distribution</strong> with an <strong>identity link function</strong>
-for the outcome variable. However, GAMMs can accommodate a variety of
-outcome distributions.<br><strong>Important:</strong> You should always assess the distribution of
-residuals and consider alternative families when appropriate (e.g.,
-Poisson for count data, binomial for binary outcomes).<br>
+for the outcome variable. However, GAMMs can accommodate a wide variety
+of outcome distributions, and alternative families <strong>can and
+should</strong> be specified whenever the outcome is not normally
+distributed. This is especially important in clinical research, where
+outcomes (e.g., symptom counts, skewed severity ratings, binary
+diagnoses) are frequently <strong>not</strong> Gaussian/normal.<br><strong>Important:</strong> Always assess the distribution of residuals
+and choose a family that matches your outcome (e.g., Poisson or negative
+binomial for count data, binomial for binary outcomes) rather than
+defaulting to Gaussian.<br>
 See <a href="https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/family.mgcv.html" class="external-link"><code>family.mgcv</code></a>
 and<br>
 Wood, S.N., Pya, N., &amp; Saefken, B. (2016). <em>Smoothing parameter
@@ -1383,35 +1392,33 @@ American Statistical Association, 111</em>, 1548–1575. <a href="https://doi.or
 <strong>random effects</strong> (individual-level variation) are modeled
 as <strong>smooth terms</strong>, providing flexibility to capture
 nonlinearity without assuming a specific functional form.</p></li>
-<li><p>The default basis function smooth terms are constructed with in
-<code>mgcv</code> are <strong>thin plate regression splines</strong>;
-however for menstrual cycle analyses where we are examining multiple
-cycles per person, we will use <strong>cyclic cubic regression
-splines</strong> and specifying -1 and +1 as equivalent using the
-knots() parameter. These splines are automatically penalized to minimize
-overfitting and promote interpretability. Cyclic smooths are used to
-designate a natural point in which the the minimum an maximum are
-equivalent, and the covariate space wraps around itself. -1 and +1 in
-the cyclic_time variable both represent ovulation (or menses-onset when
-ovulation-centered), and so we specify this with cyclic
-smooths.</p></li>
-<li><p>Time-varying predictors created by
-<code>menstrualcycleR</code>—such as
-<code>scaled_cycleday_impute</code>, <code>scaled_cycleday</code>, or
-<code>scaled_cycleday_imp_ov</code>—can be directly included as smooth
-terms in the model specification (e.g.,
-<code>s(scaled_cycleday_impute)</code>). The corresponding
-<code>cyclic_time</code> variables specify -1 and +1 as the same time
-point in the cycle (ovulation, when menses-centered and menses-onset =
-0; or menses-onset, when ovulation-centered and ovulation = 0). The
-<code>cyclic_time</code> variables should be used when using
-<strong>cyclic cubic regression splines</strong>, as shown in the
-example below. This was also the parameterization used in the main
-models in Nagpal et al., 2025.</p></li>
+<li><p>The default basis for smooth terms in <code>mgcv</code> is the
+<strong>thin plate regression spline</strong>; however, for menstrual
+cycle analyses where we examine multiple cycles per person, we use
+<strong>cyclic cubic regression splines</strong>, specifying -1 and +1
+as equivalent via the <code><a href="https://rdrr.io/r/stats/stepfun.html" class="external-link">knots()</a></code> argument. These splines are
+automatically penalized to minimize overfitting and promote
+interpretability. Cyclic smooths designate a natural point at which the
+minimum and maximum are equivalent and the covariate space wraps around
+itself: -1 and +1 in the <code>cyclic_time</code> variable both
+represent ovulation (or menses onset, when ovulation-centered), so we
+specify this with cyclic smooths.</p></li>
+<li><p>The <strong><code>cyclic_time</code></strong> variables created
+by <code>menstrualcycleR</code> are the recommended predictors for these
+models and are included as smooth terms in the model specification
+(e.g., <code>s(cyclic_time_impute, bs = "cc")</code>). They specify -1
+and +1 as the <strong>same</strong> point in the cycle (ovulation, when
+menses-centered and menses onset = 0; or menses onset, when
+ovulation-centered and ovulation = 0), which is what makes them
+appropriate for <strong>cyclic cubic regression splines</strong>, as
+shown in the example below. This was the parameterization used in the
+main models in Nagpal et al., 2025. (The earlier
+<code>scaled_cycleday*</code> variables, which treat -1 and +1 as
+adjacent days rather than hormonally equivalent, are being phased
+out.)</p></li>
 <li><p>Missing data are addressed using <strong>listwise
 deletion</strong>: only observations with complete data for the outcome
-and all predictors are retained in the model fitting process.
-“)</p></li>
+and all predictors are retained in the model fitting process.</p></li>
 </ul>
 <p>Compared to traditional modeling strategies (e.g., phase-based
 contrasts or linear time effects), GAMMs offer:</p>
@@ -1446,7 +1453,7 @@ because oftentimes many biological and behavioral outcomes (e.g. hormone
 levels, reaction times, symptom scores) are right-skewed.
 Log-transforming these outcomes often results in a distribution that is
 more symmetric and approximately normal. However, you should always
-assess your model for heteroscedascity and examine the distribution of
+assess your model for heteroscedasticity and examine the distribution of
 residuals.</p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_df_scaled</span><span class="op">$</span><span class="va">symptom_log</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">cycle_df_scaled</span><span class="op">$</span><span class="va">symptom</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span> <span class="co">#log-transforming our outcome variable symptom</span></span></code></pre></div>
@@ -1468,13 +1475,13 @@ results.</p>
 <code class="sourceCode R"><span><span class="va">datSX</span><span class="op">$</span><span class="va">id</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">datSX</span><span class="op">$</span><span class="va">id</span><span class="op">)</span> <span class="co"># ALWAYS factor id before putting it in a gam formula</span></span>
 <span></span>
 <span><span class="va">gamm1</span> <span class="op">&lt;-</span> <span class="fu">mgcv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">gam</a></span><span class="op">(</span></span>
-<span>  <span class="va">symptom_log</span> <span class="op">~</span> </span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">cyclic_time_impute</span>, bs <span class="op">=</span> <span class="st">"cc"</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">id</span>, bs <span class="op">=</span> <span class="st">'re'</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">cyclic_time_impute</span>, <span class="va">id</span>, bs<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"re"</span>, <span class="st">"cc"</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  knots<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cyclic_time_impute <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  data <span class="op">=</span> <span class="va">datSX</span>, </span>
-<span>  method <span class="op">=</span> <span class="st">'REML'</span></span>
+<span>  <span class="va">symptom_log</span> <span class="op">~</span> <span class="co"># outcome: log-transformed symptom score</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">cyclic_time_impute</span>, bs <span class="op">=</span> <span class="st">"cc"</span><span class="op">)</span> <span class="op">+</span> <span class="co"># fixed effect: population-average smooth of cycle time ("cc" = cyclic cubic spline)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">id</span>, bs <span class="op">=</span> <span class="st">'re'</span><span class="op">)</span> <span class="op">+</span> <span class="co"># random intercept: per-person differences in average symptom level</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">cyclic_time_impute</span>, <span class="va">id</span>, bs<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"re"</span>, <span class="st">"cc"</span><span class="op">)</span><span class="op">)</span>, <span class="co"># random slopes: per-person deviations in the cycle trajectory</span></span>
+<span>  knots<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cyclic_time_impute <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span>, <span class="co"># tie -1 and +1 to the same hormonal timepoint (cyclic boundary)</span></span>
+<span>  data <span class="op">=</span> <span class="va">datSX</span>, <span class="co"># data: complete cases only (listwise deletion)</span></span>
+<span>  method <span class="op">=</span> <span class="st">'REML'</span> <span class="co"># estimate smoothing parameters via REML</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>This model includes:</p>
 <ul>
@@ -1501,7 +1508,7 @@ cases for all model variables.</p></li>
 <li><p><strong><code>method = 'REML'</code></strong><br>
 Fits the model using Restricted Maximum Likelihood, which improves
 estimation of smoothness and variance components, especially in the
-presence of random effects. “)</p></li>
+presence of random effects.</p></li>
 </ul>
 </div>
 </div>
@@ -1657,10 +1664,10 @@ plotting functions, but for now we will share the code below.</p>
 </h4>
 <div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plotdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>cyclic_time_impute <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span>, by <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span>,</span>
-<span>                      id <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="co"># setting id = 0 suppresses random effects, to model the just the fixed effect (sample-wide) of your outcome across the cycle</span></span>
+<span>                      id <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="co"># setting id = 0 suppresses random effects, to model just the fixed effect (sample-wide) of your outcome across the cycle</span></span>
 <span></span>
 <span><span class="co"># Predict using the model for each dataset and add predictions</span></span>
-<span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu">marginaleffects</span><span class="fu">::</span><span class="fu"><a href="https://marginaleffects.com/man/r/predictions.html" class="external-link">predictions</a></span><span class="op">(</span><span class="va">gamm1</span>, newdata <span class="op">=</span> <span class="va">plotdat</span>, type <span class="op">=</span> <span class="st">"response"</span>, transform <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># applying a transform function, to undo to the log transformation on symptom. The transform can be removed if your outcome was not log-transformed </span></span>
+<span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu">marginaleffects</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/marginaleffects/man/predictions.html" class="external-link">predictions</a></span><span class="op">(</span><span class="va">gamm1</span>, newdata <span class="op">=</span> <span class="va">plotdat</span>, type <span class="op">=</span> <span class="st">"response"</span>, transform <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># applying a transform function, to undo the log transformation on symptom. The transform can be removed if your outcome was not log-transformed </span></span>
 <span><span class="va">plotdat</span><span class="op">$</span><span class="va">estimate</span> <span class="op">=</span> <span class="va">pred</span><span class="op">$</span><span class="va">estimate</span></span>
 <span><span class="va">plotdat</span><span class="op">$</span><span class="va">conf.low</span> <span class="op">=</span> <span class="va">pred</span><span class="op">$</span><span class="va">conf.low</span></span>
 <span><span class="va">plotdat</span><span class="op">$</span><span class="va">conf.high</span> <span class="op">=</span> <span class="va">pred</span><span class="op">$</span><span class="va">conf.high</span></span></code></pre></div>
@@ -1685,390 +1692,10 @@ plotting functions, but for now we will share the code below.</p>
 <span>  <span class="co"># Adding CI ribbon with translucent light grey color</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">conf.low</span>, ymax <span class="op">=</span> <span class="va">conf.high</span><span class="op">)</span>, fill <span class="op">=</span> <span class="st">"lightgrey"</span>, alpha <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">generated.</span></span></span>
 <span></span>
 <span><span class="co"># Print the plot</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">gamplot</span><span class="op">)</span></span></code></pre></div>
-<p><img src="menstrualcycleR-overview_files/figure-html/gam_plot-1.png" width="672"></p>
-</div>
-</div>
-<div class="section level3">
-<h3 id="understanding-effect-sizes-in-a-multilevel-context">Understanding Effect Sizes in a Multilevel Context<a class="anchor" aria-label="anchor" href="#understanding-effect-sizes-in-a-multilevel-context"></a>
-</h3>
-<p>When analyzing data with repeated observations per participant—such
-as daily symptom ratings across the menstrual cycle—it’s essential to
-understand how variability in the outcome can arise from both
-within-person (day-to-day fluctuations) and between-person
-(individual/trait-like differences) sources. Multilevel or hierarchical
-models, including Generalized Additive Mixed Models (GAMMs), are
-designed to account for this structure by estimating fixed and random
-effects.</p>
-<div class="section level4">
-<h4 id="why-multilevel-effect-sizes-matter">Why Multilevel Effect Sizes Matter<a class="anchor" aria-label="anchor" href="#why-multilevel-effect-sizes-matter"></a>
-</h4>
-<p>Effect sizes in multilevel models are more complex than in simple
-regression because they are tied to variance components across levels of
-the model:</p>
-<ul>
-<li>
-<strong>Fixed effects</strong> estimate average trends across the
-entire sample.</li>
-<li>
-<strong>Random effects</strong> capture how individuals deviate from
-those average trends.</li>
-<li>
-<strong>Within-person effects</strong> describe day-to-day
-fluctuations across time.</li>
-<li>
-<strong>Between-person effects</strong> describe how individuals
-differ in their average level of an outcome.</li>
-</ul>
-<p>In the context of menstrual cycle research, we are particularly
-interested in how much of the variation in an outcome (e.g., mood,
-sleep, pain) can be attributed to:</p>
-<ul>
-<li>A sample-wide, average effect of the cycle (<strong>fixed effect of
-the cycle and within-person</strong>).</li>
-<li>Individual differences in how people change across the cycle
-(<strong>random slope of the cycle and within-person</strong>).</li>
-<li>Stable individual differences not explained by the cycle
-(<strong>random intercept and between-person</strong>).</li>
-</ul>
-</div>
-<div class="section level4">
-<h4 id="partitioning-variance-a-primer">Partitioning Variance: A Primer<a class="anchor" aria-label="anchor" href="#partitioning-variance-a-primer"></a>
-</h4>
-<p>The GAMM summary output includes the <code>Deviance explained</code>
-statistic, which represents the proportion of total outcome variance
-explained by the model. To understand <strong>outcome variance NOT
-explained by the model</strong>:</p>
-<ul>
-<li><p><strong>Residual variance = 1 -
-<code>Deviance explained</code></strong><br>
-This quantifies the <strong>within-person error</strong>—that is, how
-much outcome variability is <em>not</em> accounted for by the model. In
-menstrual cycle research, this residual reflects symptom fluctuations
-that do not align with any fixed or random cycle pattern.</p></li>
-<li><p>The <strong>random intercept</strong> component can be
-interpreted analogously. It can be considered to capture
-<strong>between-person error</strong>: the degree to which individuals
-differ in their average level of the outcome. In other words, it
-reflects <strong>stable individual differences</strong> unrelated to
-cycle timing.</p></li>
-</ul>
-<hr>
-<p>While the <code>Deviance explained</code> statistic represents the
-overall proportion of variance in the outcome explained by the model,
-this is a composite value and does not distinguish between within-person
-and between-person variance.</p>
-<p>To disentangle this, we turn to frameworks like that of Rights &amp;
-Sterba (2019), which detail how to attribute variance to various fixed
-and random components. For GAMMs, we can extend this framework by using
-tools like the <code>gam.hp</code> package to quantify variance
-explained by specific predictors and determine whether they operate at
-the within- or between-person level.</p>
-<p>Below is a table summarizing the key types of predictors in menstrual
-cycle multilevel modeling and their interpretation, specific to
-menstrual cycle research:</p>
-<table class="table">
-<caption>Understanding Multilevel Effects in Menstrual Cycle
-Modeling</caption>
-<colgroup>
-<col width="5%">
-<col width="4%">
-<col width="11%">
-<col width="21%">
-<col width="57%">
-</colgroup>
-<thead><tr class="header">
-<th align="left">Level</th>
-<th align="left">Effect Type</th>
-<th align="left">GAMM Parameter</th>
-<th align="left">Description</th>
-<th align="left">Relevance to Cycle Research</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">Level-1/Within-person</td>
-<td align="left">Fixed effect</td>
-<td align="left">s(cyclic_time_impute)</td>
-<td align="left">Average within-person change across the time</td>
-<td align="left">Captures overall dynamic pattern across the cycle</td>
-</tr>
-<tr class="even">
-<td align="left">Level-1/Within-person</td>
-<td align="left">Random slope</td>
-<td align="left">s(cyclic_time_impute, id, bs = c(‘cc’, ‘re’))</td>
-<td align="left">Individual differences in trajectories of outcome
-across time</td>
-<td align="left">Accounts for heterogeneity/individual differences in
-outcomes across the cycle</td>
-</tr>
-<tr class="odd">
-<td align="left">Level-2/Between-person</td>
-<td align="left">Intercept</td>
-<td align="left">Parametric Intercept</td>
-<td align="left">Average value outcome value when all other predictors
-are at their reference level</td>
-<td align="left">Average level of outcome in the data</td>
-</tr>
-<tr class="even">
-<td align="left">Level-2/Between-person</td>
-<td align="left">Random intercept</td>
-<td align="left"><code>s(id, bs = 're')</code></td>
-<td align="left">Between-person differences in average outcome
-levels</td>
-<td align="left">These differences in between-person traits cannot be
-explained by cycle predictors and can be considered a type of
-<code>error</code>. They may be explained by other between-person
-variables not included in the model, such as age or BMI</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level4">
-<h4 id="key-takeaway">Key Takeaway<a class="anchor" aria-label="anchor" href="#key-takeaway"></a>
-</h4>
-<p>The menstrual cycle is inherently a <strong>within-person
-predictor</strong>—a time-varying process experienced repeatedly across
-individuals. When fitting models like GAMMs, we want to understand how
-much of the <strong>within-person variance</strong> in symptoms is
-explained by the cycle on average (fixed effect), and how much is
-explained by <strong>individual-specific cycle trajectories</strong>
-(random slopes). The <strong>random intercept</strong> represents
-<strong>between-person differences in symptom levels</strong>, which may
-reflect stable traits not driven by the cycle.</p>
-<p>We can partition model variance into these components, using the
-<code>gam.hp</code> package (Lai, et al., 2024). This helps us gain a
-clearer understanding of both the <strong>reliability</strong> and
-<strong>individual variability</strong> in menstrual cycle effects—a
-crucial goal for rigorous cycle science.</p>
-</div>
-<div class="section level4">
-<h4 id="hierarchical-variance-partitioning-with-gam-hp">Hierarchical Variance Partitioning with <code>gam.hp</code><a class="anchor" aria-label="anchor" href="#hierarchical-variance-partitioning-with-gam-hp"></a>
-</h4>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">var.part</span> <span class="op">=</span> <span class="fu">gam.hp</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/gam.hp/man/gam.hp.html" class="external-link">gam.hp</a></span><span class="op">(</span><span class="va">gamm1</span><span class="op">)</span></span>
-<span><span class="va">var.part</span><span class="op">$</span><span class="va">hierarchical.partitioning</span> </span>
-<span><span class="co">#&gt;                                          Unique Average.share Individual</span></span>
-<span><span class="co">#&gt; s(cyclic_time_impute,bs="cc")            0.5480       -0.0342     0.5138</span></span>
-<span><span class="co">#&gt; s(id,bs="re")                            0.0337       -0.0129     0.0208</span></span>
-<span><span class="co">#&gt; s(cyclic_time_impute,id,bs=c("re","cc")) 0.0443       -0.0167     0.0276</span></span>
-<span><span class="co">#&gt;                                          I.perc(%)</span></span>
-<span><span class="co">#&gt; s(cyclic_time_impute,bs="cc")                91.39</span></span>
-<span><span class="co">#&gt; s(id,bs="re")                                 3.70</span></span>
-<span><span class="co">#&gt; s(cyclic_time_impute,id,bs=c("re","cc"))      4.91</span></span></code></pre></div>
-<table class="table">
-<colgroup>
-<col width="64%">
-<col width="35%">
-</colgroup>
-<thead><tr class="header">
-<th>Column Name</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td><strong>Unique</strong></td>
-<td>The unique variance explained by this term alone, not shared with
-other terms in the model. This represents the proportion of variance
-<em>exclusively</em> attributable to that specific predictor.</td>
-</tr>
-<tr class="even">
-<td><strong>Average.share</strong></td>
-<td>The average proportion of shared variance across all predictors in
-the model. A negative value may appear when shared variance is low or
-suppressor effects are present.</td>
-</tr>
-<tr class="odd">
-<td><strong>Individual</strong></td>
-<td>The sum of the Unique and Average.share columns, representing the
-<strong>total contribution</strong> (both unique and shared) of this
-predictor to the model’s explained variance. This column provides an
-estimate of each predictor’s contribution to <strong>total outcome
-variance</strong>
-</td>
-</tr>
-<tr class="even">
-<td><strong>I.perc(%)</strong></td>
-<td>The <strong>percentage</strong> of the <strong>total model-explained
-variance</strong> attributed to this term. Useful for comparing the
-relative importance of each component.</td>
-</tr>
-</tbody>
-</table>
-<p>While model-explained variance can differ based on model parameters,
-the total outcome variance is stable for a particular outcome in a
-dataset. Proportion of total outcome variance can be compared between
-models with the same outcome to understand the influence of different
-predictors. For this reason, we interpret the
-<strong>Individual</strong> column of the <code>gam.hp</code>
-output:</p>
-<ul>
-<li><p><strong>s(cyclic_time_impute)</strong>:<br>
-The <strong>fixed effect of cycle time</strong> explains
-<strong>51.4%</strong> (0.5138) of <strong>total outcome
-variance</strong>. This shows that a large portion of outcome variation
-is captured by average, population-level cycle dynamics.</p></li>
-<li><p><strong>s(id, bs = “re”)</strong>:<br>
-The <strong>random intercept</strong> explains <strong>2.1%</strong>
-(0.0208) of <strong>total outcome variance</strong>. This reflects
-<strong>between-person differences</strong> in average outcome
-level—i.e., individual baselines not explained by cycle dynamics but
-could be explained by unmeasured trait variables (e.g. age,
-BMI).</p></li>
-<li><p><strong>s(cyclic_time_impute, id)</strong>:<br>
-The <strong>random slope effect</strong> explains <strong>2.76%</strong>
-(0.0276) of <strong>total outcome variance</strong>. This reflects
-<strong>individual differences in trajectories of the outcome across the
-cycle</strong>, above and beyond the average pattern.</p></li>
-</ul>
-<p>Okay now that we understand how variance can be partitioned in
-multilevel models and in GAMMs, lets take a look at calculating
-<strong>total within-person variance</strong> and <strong>within-person
-variance accounted for by the cycle</strong>.</p>
-</div>
-<div class="section level4">
-<h4 id="proportion-of-total-within-person-variance">Proportion of Total Within-Person Variance<a class="anchor" aria-label="anchor" href="#proportion-of-total-within-person-variance"></a>
-</h4>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Step 1: Create the data frame</span></span>
-<span><span class="va">variance_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  Component <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Fixed effect of the cycle"</span>, </span>
-<span>                <span class="st">"Random slope of the cycle"</span>, </span>
-<span>                <span class="st">"Within-person residual"</span><span class="op">)</span>,</span>
-<span>  Term <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"s(cyclic_time_impute)"</span>, </span>
-<span>           <span class="st">"s(cyclic_time_impute, id)"</span>, </span>
-<span>           <span class="st">"Residual (1 - Deviance Explained)"</span><span class="op">)</span>,</span>
-<span>  Proportion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5138</span>, <span class="fl">0.0276</span>, <span class="fl">0.438</span><span class="op">)</span>  </span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Normalize </span></span>
-<span><span class="va">variance_df</span> <span class="op">&lt;-</span> <span class="va">variance_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Percent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">Proportion</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Proportion</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>         Label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">Component</span>, <span class="st">"\n"</span>, <span class="va">Percent</span>, <span class="st">"%"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Step 2: Display table</span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">variance_df</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Component"</span>, <span class="st">"Term"</span>, <span class="st">"Proportion"</span><span class="op">)</span><span class="op">]</span>, </span>
-<span>      col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Component"</span>, <span class="st">"Model Term"</span>, <span class="st">"Proportion of Within-Person Variance"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<colgroup>
-<col width="26%">
-<col width="35%">
-<col width="38%">
-</colgroup>
-<thead><tr class="header">
-<th align="left">Component</th>
-<th align="left">Model Term</th>
-<th align="right">Proportion of Within-Person Variance</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">Fixed effect of the cycle</td>
-<td align="left">s(cyclic_time_impute)</td>
-<td align="right">0.5138</td>
-</tr>
-<tr class="even">
-<td align="left">Random slope of the cycle</td>
-<td align="left">s(cyclic_time_impute, id)</td>
-<td align="right">0.0276</td>
-</tr>
-<tr class="odd">
-<td align="left">Within-person residual</td>
-<td align="left">Residual (1 - Deviance Explained)</td>
-<td align="right">0.4380</td>
-</tr>
-</tbody>
-</table>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="co"># Step 3: Create pie chart</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">variance_df</span>, <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="va">Proportion</span>, fill <span class="op">=</span> <span class="va">Label</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">1</span>, color <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_polar.html" class="external-link">coord_polar</a></span><span class="op">(</span><span class="st">"y"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_void</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Total Within-person Variance"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="menstrualcycleR-overview_files/figure-html/total_within_person-1.png" width="576"></p>
-</div>
-<div class="section level4">
-<h4 id="within-person-variance-accounted-for-by-the-menstrual-cycle">Within-person Variance Accounted for by the Menstrual Cycle<a class="anchor" aria-label="anchor" href="#within-person-variance-accounted-for-by-the-menstrual-cycle"></a>
-</h4>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Step 1: Create the data frame</span></span>
-<span><span class="va">variance_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  Component <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Fixed effect of the cycle"</span>, </span>
-<span>                <span class="st">"Random slope of the cycle"</span><span class="op">)</span>,</span>
-<span>  Term <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"s(cyclic_time_impute)"</span>, </span>
-<span>           <span class="st">"s(cyclic_time_impute, id)"</span><span class="op">)</span>,</span>
-<span>  Proportion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5138</span>, <span class="fl">0.0276</span><span class="op">)</span>  </span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Normalize </span></span>
-<span><span class="va">variance_df</span> <span class="op">&lt;-</span> <span class="va">variance_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Percent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">Proportion</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Proportion</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>         Label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">Component</span>, <span class="st">"\n"</span>, <span class="va">Percent</span>, <span class="st">"%"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Step 2: Display table</span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">variance_df</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Component"</span>, <span class="st">"Term"</span>, <span class="st">"Proportion"</span><span class="op">)</span><span class="op">]</span>, </span>
-<span>      col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Component"</span>, <span class="st">"Model Term"</span>, <span class="st">"Within-Person Variance Accounted for by the Cycle"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<colgroup>
-<col width="25%">
-<col width="25%">
-<col width="49%">
-</colgroup>
-<thead><tr class="header">
-<th align="left">Component</th>
-<th align="left">Model Term</th>
-<th align="right">Within-Person Variance Accounted for by the Cycle</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">Fixed effect of the cycle</td>
-<td align="left">s(cyclic_time_impute)</td>
-<td align="right">0.5138</td>
-</tr>
-<tr class="even">
-<td align="left">Random slope of the cycle</td>
-<td align="left">s(cyclic_time_impute, id)</td>
-<td align="right">0.0276</td>
-</tr>
-</tbody>
-</table>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="co"># Step 3: Create pie chart</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">variance_df</span>,<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="va">Proportion</span>, fill <span class="op">=</span> <span class="va">Label</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">1</span>, color <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_polar.html" class="external-link">coord_polar</a></span><span class="op">(</span><span class="st">"y"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_void</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Within-person Variance accounted for by the cycle"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="menstrualcycleR-overview_files/figure-html/total_within_person_cycle-1.png" width="576"></p>
-</div>
-<div class="section level4">
-<h4 id="interpreting-effect-sizes-and-cycle-explained-variance">Interpreting Effect Sizes and Cycle-Explained Variance<a class="anchor" aria-label="anchor" href="#interpreting-effect-sizes-and-cycle-explained-variance"></a>
-</h4>
-<p>Understanding what constitutes a meaningful effect size or clinically
-significant cycle-explained variance in menstrual cycle research is
-still an evolving area. While no universal benchmarks currently exist,
-it is important to consider how statistical variance relates to
-<strong>clinically meaningful changes</strong> in outcomes across the
-cycle.</p>
-<p>By reporting <strong>variance partitioning metrics</strong>—such as
-breakdowns of total variance, total within-person variance, and
-within-person variance explained by the cycle—you contribute to a
-growing body of research that aims to clarify what levels of
-cycle-related variance are meaningful. Including these metrics provides
-<strong>greater transparency</strong>, promotes <strong>comparability
-across studies</strong>, and supports the development of
-<strong>evidence-based thresholds</strong> for interpreting effects in
-menstrual cycle research.</p>
+<p><img src="menstrualcycleR-overview_files/figure-html/gam_plot-1.png" class="r-plt" width="672"></p>
 </div>
 </div>
 </div>
@@ -2087,10 +1714,6 @@ M., Kiesner, J., Ditzen, B., &amp; Kleinstäuber, M. (2020). <em>Are
 there temporal subtypes of premenstrual dysphoric disorder?: Using
 group-based trajectory modeling to identify individual differences in
 symptom change.</em> <em>Psychological Medicine, 50(6)</em>, 964–972. <a href="https://doi.org/10.1017/S0033291719000849" class="external-link uri">https://doi.org/10.1017/S0033291719000849</a></p></li>
-<li><p>Lai, J., Tang, J., Li, T., Zhang, A., &amp; Mao, L. (2024).
-<em>Evaluating the relative importance of predictors in Generalized
-Additive Models using the gam.hp R package</em>. <em>Plant Diversity,
-46</em>(4), 542–546. <a href="https://doi.org/10.1016/j.pld.2024.06.002" class="external-link uri">https://doi.org/10.1016/j.pld.2024.06.002</a></p></li>
 <li><p>Nagpal, A., Schmalenberger, K. M., Barone, J., Mulligan, E. M.,
 Stumper, A., Knol, L., … Eisenlohr-Moul, T. A., PhD. (2025, May 6).
 <em>Studying the Menstrual Cycle as a Continuous Variable: Implementing
@@ -2099,10 +1722,6 @@ Phase-Aligned Cycle Time Scaling (PACTS) with the
 <li><p>Reen, E., &amp; Kiesner, J. (2016). Individual differences in
 self-reported difficulty sleeping across the menstrual cycle.
 <em>Archives of Women’s Mental Health, 19</em>(4), 599–608. <a href="https://doi.org/10.1007/s00737-016-0621-9" class="external-link uri">https://doi.org/10.1007/s00737-016-0621-9</a></p></li>
-<li><p>Rights, J. D., &amp; Sterba, S. K. (2019). <em>Quantifying
-explained variance in multilevel models: An integrative framework for
-defining R-squared measures</em>. <em>Psychological Methods, 24</em>(3),
-309–338. <a href="https://doi.org/10.1037/met0000184" class="external-link uri">https://doi.org/10.1037/met0000184</a></p></li>
 <li><p>Schmalenberger, K. M., Tauseef, H. A., Barone, J. C., Owens, S.
 A., Lieberman, L., Jarczok, M. N., Girdler, S. S., Kiesner, J., Ditzen,
 B., &amp; Eisenlohr-Moul, T. A. (2021). <em>How to study the menstrual
@@ -2132,7 +1751,7 @@ Statistical Software</em>, <em>14</em>(6), 1–27. <a href="https://doi.org/10.1
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
