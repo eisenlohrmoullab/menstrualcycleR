@@ -28,7 +28,6 @@ Imports:
     lubridate,
     shiny,
     shinyjs,
-    gam.hp,
     mgcv,
     cpass 
 NeedsCompilation: no
