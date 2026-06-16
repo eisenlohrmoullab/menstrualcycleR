@@ -1,6 +1,22 @@
 # Changelog
 
-## menstrualcycleR 0.1.1
+## menstrualcycleR 0.1.2
+
+- Fixed a bug in [`pacts_scaling()`](../reference/pacts_scaling.md)
+  where the **last participant in a dataset** could receive `NA` for the
+  scaled cycle-time variables across an entire phase (most visibly the
+  luteal phase, i.e. `scaled_cycleday` after `ovtoday == 1`). The
+  internal phase-length loops (`lutmax`, `folmax`, `folmax_impute` in
+  `helper.R`) detected the end of a phase by looking one row ahead and
+  stopped at `nrow(data) - 1`, so the final row of the dataset was never
+  treated as the end of a run. The result was position-dependent:
+  reordering participants so that another came last moved the problem to
+  that participant. The loops now treat the final dataset row as a valid
+  run-end, and a regression test asserts that a participant’s scaled
+  output is identical regardless of their position in the dataset.
+  Thanks to Elisabeth Conrad (Freie Universität Berlin) for the clear
+  bug report and reproduction. (\[reported via PACTS user
+  correspondence, June 2026\])
 
 - [`pacts_scaling()`](../reference/pacts_scaling.md) and
   [`cycle_plot_individual()`](../reference/cycle_plot_individual.md) no
