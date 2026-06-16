@@ -11,7 +11,7 @@ To install and load the `menstrualcycleR` package, follow these steps:
 
 3.  Load the package
 
-[`library(menstrualcycleR)`](https://osf.io/preprints/osf/hd5xw_v1?view_only=)
+[`library(menstrualcycleR)`](https://eisenlohrmoullab.github.io/menstrualcycleR)
 
 To utilize the shinyapp, visit:
 <https://menstrualcycledata.shinyapps.io/shiny/>
@@ -19,29 +19,34 @@ To utilize the shinyapp, visit:
 For a tutorial on using `menstrualcycleR` visit:
 <https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.html>
 
+For a history of changes by version, see the changelog:
+<https://eisenlohrmoullab.github.io/menstrualcycleR/news/index.html>
+
 ![](https://github.com/user-attachments/assets/0502430c-75d9-4fdb-9b59-f3bafd16bb9c)
 
 # Package index
 
 ## All functions
 
-- [`cycle_plot()`](cycle_plot.md) : Plot Symptom Data Across the
-  Menstrual Cycle
-- [`cycle_plot_individual()`](cycle_plot_individual.md) : Generate
-  Cycle-Specific Plots and Summary Data for a Given ID
-- [`cycledata`](cycledata.md) : Example longitudinal daily dataset with
-  cycle measures
-- [`cycledata_check()`](cycledata_check.md) : Analyze Non-Missing
-  Symptom Data by Cycle Phase
-- [`launch_app()`](launch_app.md) : Launch the Menstrual Cycle Shiny App
-- [`pacts_scaling()`](pacts_scaling.md) : Phase-Aligned Cycle Time
-  Scaling (PACTS)
-- [`summary_ovulation()`](summary_ovulation.md) : Summarize Ovulation
-  Confirmation and Imputation
+- [`cycle_plot()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot.md)
+  : Plot Symptom Data Across the Menstrual Cycle
+- [`cycle_plot_individual()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot_individual.md)
+  : Generate Cycle-Specific Plots and Summary Data for a Given ID
+- [`cycledata`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycledata.md)
+  : Example longitudinal daily dataset with cycle measures
+- [`cycledata_check()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycledata_check.md)
+  : Analyze Non-Missing Symptom Data by Cycle Phase
+- [`launch_app()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/launch_app.md)
+  : Launch the Menstrual Cycle Shiny App
+- [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+  : Phase-Aligned Cycle Time Scaling (PACTS)
+- [`summary_ovulation()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/summary_ovulation.md)
+  : Summarize Ovulation Confirmation and Imputation
 
 # Articles
 
 ### All vignettes
 
 - [Getting Started with menstrualcycleR and Phase-Aligned Cycle Time
-  Scaling (PACTS)](menstrualcycleR-overview.md):
+  Scaling
+  (PACTS)](https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.md):

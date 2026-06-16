@@ -10,6 +10,9 @@
 
 ## Citation
 
+Source:
+[`inst/CITATION`](https://github.com/eisenlohrmoullab/menstrualcycleR/blob/HEAD/inst/CITATION)
+
 Nagpal A, Schmalenberger K, Barone J, Mulligan E, Stumper A, Knol L,
 Failenschmid J, Kiesner J, Peters J, Eisenlohr-Moul T (2025). “Studying
 the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned

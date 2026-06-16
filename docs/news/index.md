@@ -2,7 +2,8 @@
 
 ## menstrualcycleR 0.1.2
 
-- Fixed a bug in [`pacts_scaling()`](../reference/pacts_scaling.md)
+- Fixed a bug in
+  [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
   where the **last participant in a dataset** could receive `NA` for the
   scaled cycle-time variables across an entire phase (most visibly the
   luteal phase, i.e. `scaled_cycleday` after `ovtoday == 1`). The
@@ -18,9 +19,10 @@
   bug report and reproduction. (\[reported via PACTS user
   correspondence, June 2026\])
 
-- [`pacts_scaling()`](../reference/pacts_scaling.md) and
-  [`cycle_plot_individual()`](../reference/cycle_plot_individual.md) no
-  longer require `dplyr`/`tidyverse` to be attached. Several internal
+- [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+  and
+  [`cycle_plot_individual()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot_individual.md)
+  no longer require `dplyr`/`tidyverse` to be attached. Several internal
   calls to dplyr verbs
   ([`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html),
   [`filter()`](https://dplyr.tidyverse.org/reference/filter.html),
@@ -28,7 +30,7 @@
   [`first()`](https://dplyr.tidyverse.org/reference/nth.html)) and to
   [`rlang::sym()`](https://rlang.r-lib.org/reference/sym.html) were not
   namespace-qualified, so a bare
-  [`library(menstrualcycleR)`](https://osf.io/preprints/osf/hd5xw_v1?view_only=)
+  [`library(menstrualcycleR)`](https://eisenlohrmoullab.github.io/menstrualcycleR)
   produced `Error: could not find function "ungroup"`. All such calls
   are now qualified (`dplyr::`/`rlang::`), and every exported function
   works with the package loaded on its own.
@@ -47,21 +49,23 @@ First release of **menstrualcycleR**, the companion R package to:
 
 ### Core functionality
 
-- [`pacts_scaling()`](../reference/pacts_scaling.md) computes
-  continuous, phase-aligned cycle-time variables — the recommended
-  `cyclic_time*` measures (which map -1 and +1 to the same hormonal
-  point) plus the `scaled_cycleday*` measures — centered on menses onset
-  or ovulation, with optional ovulation imputation.
-- [`cycle_plot()`](../reference/cycle_plot.md) and
-  [`cycle_plot_individual()`](../reference/cycle_plot_individual.md)
+- [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+  computes continuous, phase-aligned cycle-time variables — the
+  recommended `cyclic_time*` measures (which map -1 and +1 to the same
+  hormonal point) plus the `scaled_cycleday*` measures — centered on
+  menses onset or ovulation, with optional ovulation imputation.
+- [`cycle_plot()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot.md)
+  and
+  [`cycle_plot_individual()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot_individual.md)
   visualize outcomes across the standardized cycle at the group and
   individual level, with rolling-average smoothing.
-- [`cycledata_check()`](../reference/cycledata_check.md) and
-  [`summary_ovulation()`](../reference/summary_ovulation.md) summarize
-  data availability and confirmed-versus-imputed ovulation.
-- [`launch_app()`](../reference/launch_app.md) opens an interactive
-  Shiny app for cycle scaling, data checks, visualization, and C-PASS
-  (PMDD/MRMD/PME) diagnosis.
+- [`cycledata_check()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycledata_check.md)
+  and
+  [`summary_ovulation()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/summary_ovulation.md)
+  summarize data availability and confirmed-versus-imputed ovulation.
+- [`launch_app()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/launch_app.md)
+  opens an interactive Shiny app for cycle scaling, data checks,
+  visualization, and C-PASS (PMDD/MRMD/PME) diagnosis.
 - `cycledata` provides an example daily-diary dataset.
 - Vignette *Getting Started with menstrualcycleR and Phase-Aligned Cycle
   Time Scaling (PACTS)* walks through the full workflow, including GAMM

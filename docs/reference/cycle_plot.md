@@ -104,7 +104,8 @@ cycle_plot_data <- cycle_plot(
 #> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
 #> ℹ Please use `linewidth` instead.
 #> ℹ The deprecated feature was likely used in the menstrualcycleR package.
-#>   Please report the issue to the authors.
+#>   Please report the issue at
+#>   <https://github.com/eisenlohrmoullab/menstrualcycleR/issues>.
 cycle_plot_data$plot
 #> Warning: Removed 1 row containing missing values or values outside the scale range
 #> (`geom_line()`).

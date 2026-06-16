@@ -361,12 +361,12 @@ This function adds standardized cycle time variables to your dataset.
 These functions assess the **completeness and coverage** of your
 dataset:
 
-- [`cycledata_check()`](../reference/cycledata_check.md):  
+- [`cycledata_check()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycledata_check.md):  
   Summarizes non-missing data by cycle phase (follicular, luteal) and
   overall. Also produces **visualizations** by participant and cycle
   phase.
 
-- [`summary_ovulation()`](../reference/summary_ovulation.md):  
+- [`summary_ovulation()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/summary_ovulation.md):  
   Reports ovulation detection status:
 
   - How many cycles had **biomarker-confirmed** ovulation
@@ -379,12 +379,12 @@ dataset:
 
 Use these functions to **plot outcomes across the menstrual cycle**:
 
-- [`cycle_plot()`](../reference/cycle_plot.md):  
+- [`cycle_plot()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot.md):  
   Creates a **sample-level plot** of symptom or outcome trajectories
   across the standardized cycle. Supports centering on either **menses**
   or **ovulation**, with flexible y-axis scaling.
 
-- [`cycle_plot_individual()`](../reference/cycle_plot_individual.md):  
+- [`cycle_plot_individual()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot_individual.md):  
   Provides **participant-level plots** across cycles for selected
   symptoms. Useful for individual inspection or diagnostic review.
 
@@ -474,18 +474,18 @@ confirmed ovulation and menses onset is between 7-18 days.
 observations. In this dataset we went from initially having 619
 observations in `cycle_df` and then having 744 observations in
 `cycle_df_scaled`. When scaling the cycle using
-[`pacts_scaling()`](../reference/pacts_scaling.md), each cycle is
-required to have a complete sequence of calendar days from menses onset
-to the next menses onset. If a participant missed reporting symptoms on
-any day within a cycle, the function inserts placeholder rows with `NA`
-values to ensure continuity. This process allows accurate computation of
-cycle-aligned time variables.
+[`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md),
+each cycle is required to have a complete sequence of calendar days from
+menses onset to the next menses onset. If a participant missed reporting
+symptoms on any day within a cycle, the function inserts placeholder
+rows with `NA` values to ensure continuity. This process allows accurate
+computation of cycle-aligned time variables.
 
 #### Before and After: Filling Missing Dates Within a Cycle
 
 Below is an example showing how
-[`pacts_scaling()`](../reference/pacts_scaling.md) fills in rows for
-missing dates in a real participant’s cycle.
+[`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+fills in rows for missing dates in a real participant’s cycle.
 
 **Original data (`cycle_df`)**
 
@@ -529,9 +529,10 @@ missing dates in a real participant’s cycle.
 | `cycle_df_scaled` | 744          | Additional rows added to fill date gaps |
 
 By ensuring complete daily coverage,
-[`pacts_scaling()`](../reference/pacts_scaling.md) allows downstream
-modeling and visualization tools to interpret menstrual cycle time as a
-continuous, standardized variable across individuals and cycles.
+[`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+allows downstream modeling and visualization tools to interpret
+menstrual cycle time as a continuous, standardized variable across
+individuals and cycles.
 
 ------------------------------------------------------------------------
 
@@ -607,10 +608,10 @@ names(cycle_df_scaled)
 ### Checking Data availability
 
 To examine how much non-missing data is available, apply
-[`cycledata_check()`](../reference/cycledata_check.md), inputting our
-resultant dataset from above (`cycle_df_scaled`) and choosing which
-outcomes you would like to look at. As of now, this function examines
-number of observations with a corresponding value for
+[`cycledata_check()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycledata_check.md),
+inputting our resultant dataset from above (`cycle_df_scaled`) and
+choosing which outcomes you would like to look at. As of now, this
+function examines number of observations with a corresponding value for
 `scaled_cycleday_impute`. Here we are examining only 1 outcome:
 `symptom`. However, if you would like to look at more outcomes at once,
 replace `c("symptom")` with the outcomes of interest:
@@ -678,8 +679,8 @@ ov_summary = summary_ovulation(cycle_df_scaled)
 This function will help you evaluate how many cycles had a confirmed
 ovulation value prior to using `menstrualcycleR` and how many cycles had
 an ovulation day imputed via 15-day backward count via the
-[`pacts_scaling()`](../reference/pacts_scaling.md) function. (see
-[Estimating Ovulation When Biomarkers Are
+[`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+function. (see [Estimating Ovulation When Biomarkers Are
 Unavailable](#estimating-ovulation-when-biomarkers-are-unavailable) and
 [Ovulation Assessment or
 Imputation](#ovulation-assessment-or-imputation)).
@@ -724,12 +725,13 @@ rigor.
 
 #### `cycle_plot()`
 
-The [`cycle_plot()`](../reference/cycle_plot.md) function generates a
-group-level visualization of symptom or outcome data across the
-standardized menstrual cycle. This function supports flexible centering
-(on menses or ovulation), person-centered or raw scaling, and optional
-smoothing via rolling averages. Rolling averages are supported by the
-package `zoo`.
+The
+[`cycle_plot()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot.md)
+function generates a group-level visualization of symptom or outcome
+data across the standardized menstrual cycle. This function supports
+flexible centering (on menses or ovulation), person-centered or raw
+scaling, and optional smoothing via rolling averages. Rolling averages
+are supported by the package `zoo`.
 
 Let’s take a look at the parameters of `cycle_plot`:
 
@@ -751,7 +753,8 @@ cycle_plot(
   relevant scaled cycle time variables (`scaled_cycleday`,
   `scaled_cycleday_ov`, `cyclic_time`, etc.) and the symptom column.
   This function will only work if your dataset has been run through
-  [`pacts_scaling()`](../reference/pacts_scaling.md) first.
+  [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+  first.
 
 - `symptom`:  
   A string specifying the name of the symptom or outcome variable to
@@ -830,14 +833,15 @@ cycle_plot_df_menses <- cycle_plot(
 #> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
 #> ℹ Please use `linewidth` instead.
 #> ℹ The deprecated feature was likely used in the menstrualcycleR package.
-#>   Please report the issue to the authors.
+#>   Please report the issue at
+#>   <https://github.com/eisenlohrmoullab/menstrualcycleR/issues>.
 #> This warning is displayed once every 8 hours.
 #> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
 #> generated.
 ```
 
-[`cycle_plot()`](../reference/cycle_plot.md) returns a list with three
-components:
+[`cycle_plot()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot.md)
+returns a list with three components:
 
 1.  **data**: The original data augmented with person-mean (`.m`) and
     deviation (`.d`) values for the symptom.
@@ -945,7 +949,8 @@ cycle_plot_df_ov$plot
 
 #### `cycle_plot_individual`
 
-The [`cycle_plot_individual()`](../reference/cycle_plot_individual.md)
+The
+[`cycle_plot_individual()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot_individual.md)
 function generates **cycle-specific plots and summaries** for a given
 participant ID. This function is especially useful for quality control,
 or individualized data visualization. It produces one plot per cycle,
@@ -1071,7 +1076,7 @@ zoo::rollapply(
 
 #### `cycle_plot_individual` Output
 
-[`cycle_plot_individual()`](../reference/cycle_plot_individual.md)
+[`cycle_plot_individual()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot_individual.md)
 returns a list with two components accessible for every menses-to-menses
 cycle that exists for an individual:
 

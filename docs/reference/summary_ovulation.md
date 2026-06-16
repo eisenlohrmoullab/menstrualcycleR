@@ -17,8 +17,9 @@ summary_ovulation(data)
   A dataframe containing the input data. Must include columns for scaled
   cycle day variables and symptoms/dependent variables of interest.
   Scaled cycle day variables are added to your dataframe after applying
-  the [`pacts_scaling()`](pacts_scaling.md) function. (See examples
-  below)
+  the
+  [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+  function. (See examples below)
 
 ## Value
 
