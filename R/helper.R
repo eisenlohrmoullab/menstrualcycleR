@@ -71,8 +71,14 @@ process_luteal_phase_base <- function(data, id, date, menses) {
     )
   
   # Calculate lutmax
-  for (i in 1:(nrow(data) - 1)) {
-    if (is.na(data$lutdaycount[i + 1]) && !is.na(data$lutdaycount[i])) {
+  # A luteal run ends either when the next row's lutdaycount is NA or when we
+  # reach the final row of the dataset. The `i == nrow(data)` clause closes the
+  # run for the last participant; without it, the last row was never treated as
+  # a run-end, so the final participant's luteal phase never received a lutmax
+  # and scaled_cycleday came back all-NA (position-dependent bug).
+  for (i in 1:nrow(data)) {
+    if (!is.na(data$lutdaycount[i]) &&
+        (i == nrow(data) || is.na(data$lutdaycount[i + 1]))) {
       data$lutmax[(i - (data$lutdaycount[i])):i] <- as.numeric(data$lutdaycount[i])
     }
   }
@@ -206,8 +212,12 @@ process_follicular_phase_base <- function(data, id, date, menses) {
   )
   
   # Calculate folmax = follicular phase length
-  for (i in 1:(nrow(data) - 1)) {
-    if (is.na(data$foldaycount[i + 1]) && !is.na(data$foldaycount[i])) {
+  # As with lutmax above, a run also ends at the final row of the dataset, so
+  # the last participant's follicular phase is closed via the `i == nrow(data)`
+  # clause rather than being silently dropped.
+  for (i in 1:nrow(data)) {
+    if (!is.na(data$foldaycount[i]) &&
+        (i == nrow(data) || is.na(data$foldaycount[i + 1]))) {
       data$folmax[(i - (data$foldaycount[i])):i] <- as.numeric(data$foldaycount[i])
     }
   }
@@ -577,9 +587,12 @@ process_follicular_phase_impute <- function(data, id, date, menses) {
   )
   
   # Create `folmax_impute` as the highest number `foldaycount_impute` counts up to
-  for (i in 1:(nrow(data) - 1)) {
-    if (is.na(data$foldaycount_impute[i + 1] &&
-              !is.na(data$foldaycount_impute[i]))) {
+  # Same run-end logic as lutmax/folmax: a run closes when the next row is NA or
+  # at the final dataset row. (The previous condition also mis-parenthesised the
+  # `&&` inside `is.na()`; rewritten here to the explicit, correct form.)
+  for (i in 1:nrow(data)) {
+    if (!is.na(data$foldaycount_impute[i]) &&
+        (i == nrow(data) || is.na(data$foldaycount_impute[i + 1]))) {
       data$folmax_impute[(i - (data$foldaycount_impute[i])):i] <- as.numeric(data$foldaycount_impute[i])
     }
   }
