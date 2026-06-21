@@ -69,10 +69,10 @@ when modeling ovulation-centered dynamics - **Menses day = 0** when
 studying perimenstrual processes (e.g., dysmenorrhea)
 
 When modeling menses-centered, the cycle is scaled from -1 to +1, with
-menses = 0, with negative values representing the **luteal phase** and
+menses = 0, negative values representing the **luteal phase** and
 positive values representing the **follicular phase**. When modeling
-ovulation-centered, estimated day of ovulation = 0, and positive values
-represent the **follicular phase** and negative values represent the
+ovulation-centered, estimated day of ovulation = 0, and negative values
+represent the **follicular phase** and positive values represent the
 **luteal phase**. This allows for flexible model fitting while retaining
 a biologically meaningful time structure.
 

@@ -143,11 +143,11 @@ more consistent across individuals and cycles.</li>
 day = 0</strong> when studying perimenstrual processes (e.g.,
 dysmenorrhea)</p>
 <p>When modeling menses-centered, the cycle is scaled from -1 to +1,
-with menses = 0, with negative values representing the <strong>luteal
+with menses = 0, negative values representing the <strong>luteal
 phase</strong> and positive values representing the <strong>follicular
 phase</strong>. When modeling ovulation-centered, estimated day of
-ovulation = 0, and positive values represent the <strong>follicular
-phase</strong> and negative values represent the <strong>luteal
+ovulation = 0, and negative values represent the <strong>follicular
+phase</strong> and positive values represent the <strong>luteal
 phase</strong>. This allows for flexible model fitting while retaining a
 biologically meaningful time structure.</p>
 <hr>
@@ -326,10 +326,10 @@ running:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"eisenlohrmoullab/menstrualcycleR"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://eisenlohrmoullab.github.io/menstrualcycleR">menstrualcycleR</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://osf.io/preprints/osf/hd5xw_v1?view_only=" class="external-link">menstrualcycleR</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; Welcome to the menstrualcycleR package!</span></span>
 <span><span class="co">#&gt; If you use this package, please cite:</span></span>
-<span><span class="co">#&gt; Nagpal, A., Schmalenberger, K. M., Barone, J. C., Mulligan, E., Stumper, A., Knol, L., Failenschmid, J., Kiesner, J., Peters, J. R., &amp; Eisenlohr-Moul, T. A. (2025). Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the `menstrualcycleR` package. Psychoneuroendocrinology, 107584.</span></span></code></pre></div>
+<span><span class="co">#&gt; Nagpal, A., Schmalenberger, K. M., Barone, J., Mulligan, E. M., Stumper, A., Knol, L., … Eisenlohr-Moul, T. A., PhD. (2025, May 6). Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the `menstrualcycleR` package. https://doi.org/10.31219/osf.io/hd5xw_v1</span></span></code></pre></div>
 <p>Note that the <code>menstrualcycleR</code> package depends on several
 other packages (mostly packages from the <a href="https://www.tidyverse.org/" class="external-link"><code>tidyverse</code> suite</a>).</p>
 <p>This vignette also uses <code>tidyverse</code> functions so it is
@@ -1022,8 +1022,7 @@ and Irregular Time Series.”<br><em>Journal of Statistical Software</em>, <em>1
 <span><span class="co">#&gt; Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The deprecated feature was likely used in the <span style="color: #0000BB;">menstrualcycleR</span> package.</span></span>
-<span><span class="co">#&gt;   Please report the issue at</span></span>
-<span><span class="co">#&gt;   <span style="color: #0000BB; font-style: italic;">&lt;https://github.com/eisenlohrmoullab/menstrualcycleR/issues&gt;</span>.</span></span>
+<span><span class="co">#&gt;   Please report the issue to the authors.</span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">generated.</span></span></span></code></pre></div>
