@@ -9,3 +9,6 @@
 ^_pkgdown\.yml$
 ^pkgdown$
 ^doc$
+^_REPRO_daterated_NA\.R$
+^_DRAFT_PR\.md$
+^_READINESS_PLAN\.md$
