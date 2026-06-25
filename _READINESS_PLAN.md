@@ -14,6 +14,51 @@ RENV_CONFIG_AUTOLOADER_ENABLED=FALSE Rscript -e '...'
 
 ---
 
+## (0) START HERE — fresh-chat handoff + deep-dive agenda
+> This issue was split into its own chat for a deeper dive (2026-06-25). **This file is the single
+> source of truth** — read it top to bottom; everything needed is on disk, nothing depends on the
+> originating conversation.
+
+**Current state (all LOCAL, nothing on origin):**
+- Branch `fix/daterated-na-on-filled-rows` @ commit `53f9e69` — the fix + expanded test + NEWS +
+  DESCRIPTION 0.1.2→**0.1.3** + `.Rbuildignore`, all committed. **Not pushed, no PR, no tag.**
+- Artifacts in the repo root: this plan · `_DRAFT_PR.md` (staged PR body) · `_REPRO_daterated_NA.R`
+  (reproduces the bug pre-fix) · `_ADVERSARIAL_RESULTS.json` (full output of the 6-agent adversarial
+  workflow — every test + finding, preserved). Regression test:
+  `tests/testthat/test_daterated_na_on_filled_rows.R` (7 blocks).
+- The fix already survived adversarial hardening: a naive `coalesce(!!date, date)` crashed on
+  character/factor date columns (5 of 6 agents caught it); the shipped fix coerces those via
+  `lubridate::ymd` first. Suite 0-fail; `R CMD check` 0 new WARN/NOTE.
+
+**Gotchas (don't relearn these):**
+- Run R with `RENV_CONFIG_AUTOLOADER_ENABLED=FALSE` (project renv lib is empty).
+- ⚠ The **installed** package is a stale `0.0.0.9000` build; source is now 0.1.3. Consumers won't see
+  the fix until `devtools::install()` from source (see §d).
+- `R CMD check` can't build the vignette here (no Pandoc) — re-run on a Pandoc machine for `--as-cran`.
+- Downstream `pacts-gam-pipeline` is NOT blocked: it has its own consumer-side guard (merged to its
+  `main`); this upstream fix removes the root cause so it no longer relies solely on that guard.
+
+**Deep-dive agenda — threads worth pulling (beyond shipping as-is):**
+1. **Fix placement & design.** Refilling the original date column in `pacts_scaling()` was chosen as
+   non-breaking. Alternatives to weigh: (a) fix at the source in `calculate_mcyclength()` where
+   `tidyr::complete()` leaves the NA; (b) return a single canonical `date` and drop the duplicate
+   original column (cleaner, but a breaking major-version change).
+2. **Type contract.** character/factor date inputs now return **Date** (coerced). Confirm that's the
+   desired contract vs. preserving the input type; document it. POSIXct keeps its type — is that
+   consistent with intent?
+3. **Sweep for sibling bugs.** Audit every `tidyr::complete()`/densify/`fill()` site in `R/` for the
+   same "fabricated rows leave a user column NA" pattern (the impute helpers were checked and don't
+   `complete()`, but do a full pass).
+4. **Pre-existing R CMD check backlog** (4 WARN / 3 NOTE, all pre-existing — see §c): undeclared
+   `purrr`, unused `cpass`/`mgcv`/`shinyjs`, `cycledata.Rd` doc drift, `cycle_plot` usage mismatch,
+   non-portable `docs/` names. Worth a cleanup pass before any CRAN submission.
+5. **Test depth.** 7 regression blocks now; consider property-based / fuzz tests over date types ×
+   shapes × gap patterns.
+6. **Release mechanics** when satisfied: §e has the exact steps (reinstall from source, push branch,
+   open PR from `_DRAFT_PR.md`, tag `v0.1.3`, rebuild pkgdown).
+
+---
+
 ## (a) The bug, root cause, and the one-line idea of the fix
 
 ### Symptom

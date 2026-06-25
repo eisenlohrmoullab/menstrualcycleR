@@ -12,3 +12,4 @@
 ^_REPRO_daterated_NA\.R$
 ^_DRAFT_PR\.md$
 ^_READINESS_PLAN\.md$
+^_ADVERSARIAL_RESULTS\.json$
