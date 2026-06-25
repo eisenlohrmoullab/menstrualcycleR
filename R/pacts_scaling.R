@@ -94,6 +94,21 @@ pacts_scaling <- function(data, id, date, menses, ovtoday, lower_cyclength_bound
   # with `date` directly and keep their own type. The coercion is value-preserving
   # on observed days, so this only supplies the calendar date on fabricated rows
   # where the original was NA -- it never overwrites an observed value.
+  #
+  # The SAME densify leaves the user's original ID column NA on fabricated rows
+  # whenever it is not literally named `id`. complete()/fill() keep the canonical
+  # `id` populated (it is the group key), but a differently-named original id
+  # column (e.g. `record_id`, `subject`) rides along as a passenger and is NA on
+  # those rows -- so a downstream join on id + date would drop them just like the
+  # date case. The canonical `id` is a plain copy of the original (no coercion),
+  # so its type always matches and we coalesce directly -- no cast needed.
+  # NA-fill only, and skipped when the user already passed `id = id`.
+  id_name <- rlang::as_name(id)
+  if (id_name != "id" && id_name %in% names(data)) {
+    data <- data %>%
+      dplyr::mutate(!!id := dplyr::coalesce(!!id, id))
+  }
+
   date_name <- rlang::as_name(date)
   if (date_name != "date" && date_name %in% names(data)) {
     orig <- dplyr::pull(data, !!date)

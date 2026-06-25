@@ -20,6 +20,18 @@
   real `date` or a scaled/cycle value while the original date column is `NA`,
   across `Date`, character, factor, and `POSIXct` date inputs.
 
+* Fixed the same class of bug for the **user's original ID column**. The internal
+  densify keeps the package's canonical `id` populated on fabricated calendar rows
+  (it is the grouping key), but an original id column passed under a different name
+  (e.g. `record_id`, `subject`) was left `NA` on those rows — so a downstream join
+  on **id + date** could still drop imputed-ovulation / scaled rows even after the
+  date fix. `pacts_scaling()` now also refills the original id column from the
+  canonical `id` on fabricated rows (NA-fill only; observed ids are never changed
+  and the column's type is preserved). This was latent in typical use because the
+  package's own examples name the id column `id`; it surfaces for datasets that
+  use any other id column name. A regression test covers character and integer id
+  columns under a non-`id` name.
+
 
 * Fixed a bug in `pacts_scaling()` where the **last participant in a dataset** could receive `NA` for the scaled cycle-time variables across an entire phase (most visibly the luteal phase, i.e. `scaled_cycleday` after `ovtoday == 1`). The internal phase-length loops (`lutmax`, `folmax`, `folmax_impute` in `helper.R`) detected the end of a phase by looking one row ahead and stopped at `nrow(data) - 1`, so the final row of the dataset was never treated as the end of a run. The result was position-dependent: reordering participants so that another came last moved the problem to that participant. The loops now treat the final dataset row as a valid run-end, and a regression test asserts that a participant's scaled output is identical regardless of their position in the dataset. Thanks to Elisabeth Conrad (Freie Universität Berlin) for the clear bug report and reproduction. ([reported via PACTS user correspondence, June 2026])
 

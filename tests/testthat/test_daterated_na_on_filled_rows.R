@@ -122,6 +122,78 @@ test_that("POSIXct original date column is filled and retains its type", {
   expect_true(all(res$date == as.Date(res$daterated), na.rm = TRUE))
 })
 
+# --- Original ID column on fabricated rows (sibling of the date bug) -----------
+# The densify groups by the canonical `id` and completes on the canonical `date`,
+# so BOTH canonical keys stay populated on fabricated rows (id via the group key +
+# fill(), date via complete()). But the user's ORIGINAL id column, when it is not
+# literally named `id` (e.g. `record_id`, `subject`), rides along as a passenger
+# and is left NA on fabricated rows -- exactly like the original date column. A
+# downstream join on id + date then drops those rows even after the date is fixed.
+# The canonical `id` is a plain copy of the original (no coercion), so the refill
+# needs no type cast and preserves the input type. These cases lock that in.
+
+# Same gappy single subject, but with the id column under an arbitrary name.
+make_gappy_named_id <- function(id_col = "record_id", id_val = "S01",
+                                start = "2024-01-01",
+                                onsets = c(1, 29, 57, 85),
+                                drop_days = c(14, 42, 70)) {
+  days  <- seq.Date(as.Date(start), as.Date(start) + max(onsets) - 1, by = "day")
+  dayno <- seq_along(days)
+  d <- data.frame(
+    record_id = id_val,
+    daterated = days,
+    menses    = as.integer(dayno %in% onsets),
+    ovtoday   = 0L,
+    stringsAsFactors = FALSE
+  )
+  names(d)[names(d) == "record_id"] <- id_col
+  d[!(dayno %in% drop_days), , drop = FALSE]
+}
+
+test_that("a differently-named original id column is never NA on fabricated rows", {
+  df  <- make_gappy_named_id(id_col = "record_id", id_val = "S01")
+  res <- suppressMessages(
+    pacts_scaling(df, id = record_id, date = daterated,
+                  menses = menses, ovtoday = ovtoday)
+  )
+  expect_true("record_id" %in% names(res))
+
+  # No row should have a real canonical date/id but a missing original id.
+  expect_equal(sum(!is.na(res$date) & is.na(res$record_id)), 0L)
+  # Character id keeps its type (no coercion), and value is filled, not changed.
+  expect_type(res$record_id, "character")
+  expect_equal(unique(res$record_id), "S01")
+
+  # Scaled / cycle values (incl. imputed-ov rows) never sit on an NA original-id row.
+  value_cols <- intersect(
+    c("scaled_cycleday", "scaled_cycleday_impute", "scaled_cycleday_ov",
+      "scaled_cycleday_imp_ov", "cyclic_time", "cyclic_time_impute",
+      "cyclic_time_ov", "cyclic_time_imp_ov"),
+    names(res)
+  )
+  has_value <- Reduce(`|`, lapply(value_cols, function(cn) !is.na(res[[cn]])))
+  expect_equal(sum(has_value & is.na(res$record_id)), 0L)
+  expect_false(any(is.na(res[res$ovtoday_impute == 1, ]$record_id)))
+})
+
+test_that("an integer original id column is filled and retains its type", {
+  df  <- make_gappy_named_id(id_col = "record_id", id_val = 7L)
+  res <- suppressMessages(
+    pacts_scaling(df, id = record_id, date = daterated,
+                  menses = menses, ovtoday = ovtoday)
+  )
+  expect_equal(sum(!is.na(res$date) & is.na(res$record_id)), 0L)
+  expect_type(res$record_id, "integer")
+  expect_equal(unique(res$record_id), 7L)
+})
+
+test_that("passing an id column literally named `id` is not duplicated or NA-filled wrong", {
+  df <- make_gappy_subject()   # id column is already named `id`
+  res <- scale_quiet(df)
+  expect_equal(sum(names(res) == "id"), 1L)   # no duplicate id column
+  expect_false(any(is.na(res$id)))
+})
+
 test_that("an observed original date is never overwritten by `date` (NA-fill only)", {
   # No gaps -> no fabricated rows -> coalesce must be a strict no-op on the
   # original column (value-preservation invariant).
