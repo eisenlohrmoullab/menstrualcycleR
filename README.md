@@ -1,5 +1,9 @@
 # How to Install and Load `menstrualcycleR`
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/eisenlohrmoullab/menstrualcycleR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/eisenlohrmoullab/menstrualcycleR/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
 To install and load the `menstrualcycleR` package, follow these steps:
 
 1. Install the `remotes` package (if not already installed):

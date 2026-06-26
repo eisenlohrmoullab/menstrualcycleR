@@ -1,6 +1,6 @@
 Package: menstrualcycleR
 Title: Tools for Phase-Aligned Cycle Time Scaling (PACTS) and Menstrual Cycle Analysis
-Version: 0.1.2
+Version: 0.1.3
 Authors@R: 
     c(person(given = "Anisha", family = "Nagpal", email ="anagpa7@uic.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-7111-9322")),
@@ -20,8 +20,9 @@ Remotes: lasy/cpass
 Imports: 
     dplyr, 
     ggplot2,
-    magrittr, 
-    rlang, 
+    magrittr,
+    purrr,
+    rlang,
     tidyr,
     zoo,
     viridis,
@@ -38,10 +39,12 @@ Author:
     Tory Eisenlohr-Moul [aut] (0000-0002-9231-3105)
 Maintainer: Anisha Nagpal <anagpa7@uic.edu>
 Depends: R (>= 3.5.0)
-Suggests: 
+Suggests:
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    tidyverse,
+    marginaleffects
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 LazyData: true

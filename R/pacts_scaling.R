@@ -73,6 +73,53 @@ pacts_scaling <- function(data, id, date, menses, ovtoday, lower_cyclength_bound
   
   data = calculate_mcyclength(data, id, date, menses, ovtoday)
   data = calculate_cycletime(data, id, date, menses, ovtoday, lower_cyclength_bound, upper_cyclength_bound)
-  
+
+  # --- Keep the user's original date column consistent with the internal `date`.
+  # calculate_mcyclength() densifies the calendar with tidyr::complete(date = ...),
+  # which fabricates a row for every missing calendar day. On those fabricated
+  # rows the canonical `date` column is filled, but the user's ORIGINAL date
+  # column (e.g. `daterated`) is left NA -- so a consumer joining results back by
+  # the original date name silently drops imputed-ovulation / scaled rows that
+  # landed on a filled day. `date` is authoritative (always fully populated and
+  # identical to the original where the original is non-NA), so refill the
+  # original column from it. Skipped when the user already passed `date = date`
+  # (the original column IS the canonical one -- nothing to refill).
+  # The internal `date` is always Date class (calculate_mcyclength coerces it via
+  # lubridate::ymd). The user's original column, however, keeps whatever type was
+  # passed in. character / factor date columns are a supported input
+  # (calculate_mcyclength coerces them with lubridate::ymd), but dplyr::coalesce()
+  # refuses to combine <character>/<factor> with <date> and errors. So for those
+  # types, coerce the original to Date (the same coercion the package already
+  # applies internally) before coalescing. Date and POSIXct originals coalesce
+  # with `date` directly and keep their own type. The coercion is value-preserving
+  # on observed days, so this only supplies the calendar date on fabricated rows
+  # where the original was NA -- it never overwrites an observed value.
+  #
+  # The SAME densify leaves the user's original ID column NA on fabricated rows
+  # whenever it is not literally named `id`. complete()/fill() keep the canonical
+  # `id` populated (it is the group key), but a differently-named original id
+  # column (e.g. `record_id`, `subject`) rides along as a passenger and is NA on
+  # those rows -- so a downstream join on id + date would drop them just like the
+  # date case. The canonical `id` is a plain copy of the original (no coercion),
+  # so its type always matches and we coalesce directly -- no cast needed.
+  # NA-fill only, and skipped when the user already passed `id = id`.
+  id_name <- rlang::as_name(id)
+  if (id_name != "id" && id_name %in% names(data)) {
+    data <- data %>%
+      dplyr::mutate(!!id := dplyr::coalesce(!!id, id))
+  }
+
+  date_name <- rlang::as_name(date)
+  if (date_name != "date" && date_name %in% names(data)) {
+    orig <- dplyr::pull(data, !!date)
+    if (is.character(orig) || is.factor(orig)) {
+      data <- data %>%
+        dplyr::mutate(!!date := dplyr::coalesce(lubridate::ymd(!!date), date))
+    } else {
+      data <- data %>%
+        dplyr::mutate(!!date := dplyr::coalesce(!!date, date))
+    }
+  }
+
   return(data)
 }

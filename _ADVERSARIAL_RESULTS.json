@@ -1,0 +1,131 @@
+{
+  "summary": "Adversarially test the menstrualcycleR daterated-NA fix, refine it only if a test breaks it, prep a release (NEWS + version bump 0.1.2->0.1.3), and write an evidence-backed morning readiness plan. ALL LOCAL — no push, no PR, no tag, no release.",
+  "agentCount": 8,
+  "logs": [
+    "Adversarial: 6/6 angles reported; breakage flagged by 5",
+    "Triage verdict: ready | fix_modified=true | suite: FAIL 0 | WARN 0 | SKIP 1 | PASS 15 (devtools::test()); regression test daterated_na_on_filled_rows 9/9 pass"
+  ],
+  "result": {
+    "adversarial": [
+      {
+        "angle": "dateformats — date-column TYPE + NAMING permutations (Date / character / POSIXct / factor; arg named `date` vs `daterated` vs other; base df / tibble / grouped tibble; multi-subject)",
+        "tests_run": 11,
+        "failures": 3,
+        "breakage_found": true,
+        "evidence": "[duplicate field guard — see evidence above]",
+        "summary": "Found a genuine, minimal-repro BREAK. The fix (coalesce(!!date, date)) errors out — \"Can't combine <character>/<factor> and <date>\" — whenever the user's original date column is character or factor, two input types the package explicitly supports (calculate_mcyclength coerces them via lubridate::ymd). Pre-fix code ran on those inputs (with the silent NA bug); post-fix it crashes, so the fix converts silent data loss into a hard error for the exact case it targets. RECOMMENDED FIX: coerce the original column to Date before/inside the coalesce, e.g. mutate(!!date := dplyr::coalesce(as.Date(!!date), date)) (or vctrs-cast both to the common Date type) so character/factor/POSIXct all refill correctly. POSIXct, the `date`-named-arg skip case, and all Date-class / tibble / grouped / multi-subject permutations pass cleanly.",
+        "edge_cases": [
+          "character date column (e.g. '2024-01-01') -> coalesce ERROR: Can't combine <character> and <date>",
+          "factor date column -> coalesce ERROR: Can't combine <factor> and <date>",
+          "character date column under a non-default name (obs_day) -> same ERROR (not name-specific)",
+          "POSIXct date column -> SAFE: coalesce yields correct dates, no tz shift, no overwrite (verify as.Date(orig)==date)",
+          "date arg literally named `date` -> fix correctly SKIPS; single date column, no duplicate, complete",
+          "grouped tibble input + POSIXct + non-default name -> SAFE (incoming grouping does not break the per-row coalesce)",
+          "multi-subject where one subject is fully observed -> observed subject untouched, gappy subject refilled"
+        ]
+      },
+      {
+        "angle": "Degenerate data shapes (single participant, single complete cycle, no menses, all-observed-ovulation, 1/2-row inputs, NA dates, mixed many-participant impute) PLUS non-Date date-column types as a shape variant.",
+        "tests_run": 15,
+        "failures": 2,
+        "breakage_found": true,
+        "evidence": "REGRESSION found: the fix errors when the user's date column is a non-Date type (character or factor), a shape the PRE-FIX code handled fine.\n\nMinimal repro (character date):\n  days <- seq.Date(as.Date(\"2024-01-01\"), as.Date(\"2024-01-29\"), by=\"day\"); dn <- seq_along(days)\n  df <- data.frame(id=\"C\", daterated=as.character(days), menses=as.integer(dn %in% c(1,29)), ovtoday=0L)\n  df <- df[!(dn %in% 14),,drop=FALSE]            # gap forces a fabricated row\n  pacts_scaling(df, id=id, date=daterated, menses=menses, ovtoday=ovtoday)\nError: In argument `daterated = dplyr::coalesce(daterated, date)`. Caused by error in dplyr::coalesce(): Can't combine `..1` <character> and `..2` <date>.\nFactor date column errors identically (<factor> vs <date>).\n\nDirect pre-fix vs with-fix comparison on the SAME character input (/tmp/mcr_adv_char_prefix.R):\n  PRE-FIX pacts_scaling(): SUCCESS, 29 rows, class(daterated)=character\n  WITH-FIX pacts_scaling(): ERROR (coalesce type-mismatch)\n  VERDICT: REGRESSION — pre-fix succeeded, fix now errors.\n\nRoot cause: calculate_mcyclength() coerces only its INTERNAL canonical `date` to Date via lubridate::ymd(), leaving the user's original `daterated` as character/factor. The fix's dplyr::coalesce(!!date, date) then tries to combine a character/factor with a Date and dplyr refuses the type mix. This is an intended input path — the @param date docstring does not require Date, and calculate_mcyclength explicitly branches on `if (!inherits(..., \"Date\")) ... lubridate::ymd(...)`, so non-Date date columns are supported by design. A user reading a CSV (character dates, or factor under stringsAsFactors=TRUE) hits this.\n\nSuggested fix: coalesce on the canonical class, e.g. mutate(!!date := dplyr::coalesce(date, !!date)) won't help (still mixed); instead refill from `date` and let the result be Date — e.g. `dplyr::mutate(!!date := dplyr::if_else(is.na(!!date), date, as.Date(!!date)))` or coerce the original to Date before coalescing.\n\nAll 10 pure data-shape cases (single complete cycle w/ gap on impute-ov day; NO menses; all-observed-ov; 1-row menses=1/0; 2-row adjacent; 2-row 30d-apart with 28 fabricated rows; some-NA-dates input; many-participants-mixed-impute; dense-no-fabrication) PASSED all three invariants: I1 no real-date-but-NA-daterated, I2 no overwrite of observed values (date==daterated where both present, all observed input dates preserved exactly), I3 no scaled/cycle/ovtoday_impute value on an NA-daterated row. Confirmed the fix is load-bearing: pre-fix the single-complete-cycle gappy shape had 1 row with real date + NA daterated AND the imputed ovulation on that NA-daterated row; post-fix 0. POSIXct date column passes (no error; coalesce tolerates POSIXct/Date). Timing on 200 participants x 180 days (36,000 rows) = 12.3s, no pathological slowdown.",
+        "edge_cases": [
+          "character-typed date column -> coalesce() type-mismatch ERROR (regression)",
+          "factor-typed date column -> coalesce() type-mismatch ERROR (regression)",
+          "POSIXct date column -> passes, but result daterated is coerced/mixed POSIXct while date is Date (no NA, OK)",
+          "1-row and 2-row inputs -> no error, invariants hold",
+          "NO menses at all -> no error, no impute, invariants hold",
+          "all-observed-ovulation -> no impute, invariants hold",
+          "input rows with explicit NA dates -> filtered before complete(); invariants hold",
+          "many participants where only some impute -> invariants hold per-participant"
+        ],
+        "summary": "Found a genuine REGRESSION. The candidate fix's `dplyr::coalesce(!!date, date)` in pacts_scaling.R errors whenever the user's original date column is a non-Date type (character or factor) — a supported input shape that calculate_mcyclength() handles by coercing its internal `date` to Date via lubridate::ymd() while leaving the user's original column its original type. coalesce() then refuses to combine <character>/<factor> with <date>. Confirmed by direct comparison: pre-fix pacts_scaling() succeeds on a character daterated column (29 rows), with-fix errors. Minimal repro: a gappy single 28-day cycle with daterated=as.character(dates). All 10 pure data-shape stress cases (single/complete-cycle, no-menses, all-observed-ov, 1/2-row, NA-date, mixed multi-participant) passed I1/I2/I3 invariants with no overwrite of observed values, and the fix was verified load-bearing on the Date-typed path. Recommend coercing the original date column to Date before/within the coalesce (e.g. if_else(is.na(date_orig), date, as.Date(date_orig))) so non-Date inputs keep working."
+      },
+      {
+        "angle": "noclobber — coalesce(!!date, date) must only fill NA, never overwrite an observed date; also stress the no-op / value-preservation invariants",
+        "tests_run": 7,
+        "failures": 1,
+        "breakage_found": true,
+        "evidence": "see evidence field",
+        "summary": "The noclobber property itself is sound for Date-class inputs: the coalesce only fills NA, never overwrites an observed date, and is a value-level no-op on complete calendars (verified across complete, gappy, duplicate-date, multi-id, and a forced-divergence coalesce semantics test; shipped regression test passes). BUT I found a genuine REGRESSION on a supported input shape: when the date column is CHARACTER class (strings, which the package explicitly supports via its lubridate::ymd coercion), the fix's `coalesce(daterated, date)` throws a fatal 'Can't combine <character> and <date>' error. git-stash confirms the same input ran to completion pre-fix. Cause: pacts_scaling passes an enquo'd quosure into calculate_mcyclength which re-enquos it, so only the internal `date` column gets Date-coerced while the original `daterated` stays character; coalesce then can't combine the two types. Recommended fix to the fix: coerce/align the original column's type before coalescing (e.g. cast `date` back to the original class, or coalesce on a type-harmonized vector), or simply guard so character date columns are coerced consistently. POSIXct input also fails, but pre-existing (inside calculate_mcyclength), not attributable to this fix.",
+        "edge_cases": [
+          "character-class date column (e.g. daterated stored as 'YYYY-MM-DD' strings) WITH calendar gaps -> coalesce errors: Can't combine <character> and <date> [REGRESSION, fix's own line]",
+          "POSIXct/timestamp date column -> errors inside calculate_mcyclength complete()/seq.int (pre-existing, not the fix)",
+          "calendar-complete input -> fix is value-level no-op but performs a harmless integer->double Date storage promotion (pre-existing pipeline behavior, also on fix-skipped path)",
+          "duplicate observed id-date rows -> noclobber holds, no error",
+          "multi-id staggered start/end with leading gaps -> every observed (id,date) preserved, date==daterated",
+          "forced divergence daterated(2024) vs date(2099) on observed rows -> coalesce keeps original (first-arg), no clobber"
+        ]
+      },
+      {
+        "angle": "compat",
+        "tests_run": 14,
+        "failures": 1,
+        "breakage_found": true,
+        "evidence": "See evidence field.",
+        "summary": "For the common Date-typed date column the fix is fully backward compatible: full suite 15/15 passes, bundled cycledata round-trips, and a genuine pre/post differential shows ONLY the daterated column changes (18 other cols byte-identical, no observed value overwritten, all NA fabricated-row dates filled, downstream joins no longer drop rows). BUT I found one real regression: when the user passes a CHARACTER date column (a documented-supported input — calculate_mcyclength coerces it via lubridate::ymd), the new coalesce(daterated, date) errors with \"Can't combine <character> and <date>\". Pre-fix this input ran without error; post-fix it throws. Recommended hardening: coerce the original column to the canonical type before coalescing (e.g. coalesce(as.Date(!!date), date) or align ptypes), so character-date callers don't hit a hard error. Working tree left untouched (pre-fix swap fully reverted, byte-identical restore verified; only the intended fix + untracked test/repro/PR files remain).",
+        "edge_cases": [
+          "CHARACTER date column -> POST-fix ERROR (regression): coalesce can't combine <character> daterated with <date> internal; pre-fix ran fine. Minimal repro: 3-row subject with one calendar gap and daterated as character strings.",
+          "POSIXct/datetime date column -> OK (coerced, 0 NA, no error)",
+          "date column literally named `date` -> skip-path: single column, no duplicate, 0 NA",
+          "tibble input -> output stays tbl_df, daterated 0 NA and still Date",
+          "multi-subject mix (one with gaps, one without) -> all 0 NA, date==daterated everywhere",
+          "observed ovtoday==1 row adjacent to a gap -> real daterated preserved, equals date (no coalesce overwrite)",
+          "bundled cycledata has 125 calendar gaps (5/id) but does NOT exhibit NA-daterated pre-fix in the pacts_scaling path; the bug surfaces specifically when fabricated rows carry imputed values (per _REPRO synthetic subject)"
+        ]
+      },
+      {
+        "angle": "gapregression — large calendar gaps + first-cycle imputed ovulation landing on fabricated tidyr::complete() gap days; multi-subject densify; value-column join-safety",
+        "tests_run": 9,
+        "failures": 1,
+        "breakage_found": true,
+        "evidence": "see above",
+        "edge_cases": [
+          "character-typed original date column (read.csv/CSV/SPSS-haven default) -> coalesce ERROR, pacts_scaling returns nothing",
+          "factor-typed original date column -> same coalesce ERROR",
+          "POSIXct-typed original date column -> OK, type preserved, gaps coalesced correctly",
+          "pre-enrollment staff anchor far before diary with first-cycle imputed ovulation on an unobserved gap day -> recovered (Date input)",
+          "multiple subjects with different gap patterns + scattered mid-cycle missing days -> per-subject invariant holds, ids not NA'd by densify+fill",
+          "date == daterated literally (user passes date=date) -> no duplicate column, no error"
+        ],
+        "summary": "For Date-typed inputs the gap fix is solid: it recovers exactly the fabricated-gap rows the bug dropped (30 rows incl. 2 first-cycle imputed-ovulation rows in the anchor scenario), never overwrites `date`, value columns, or observed `daterated` values, and handles multi-subject densify and POSIXct columns. HOWEVER I found a real regression: when the user's original date column is character- or factor-typed (common from CSV/SPSS import), the fix's coalesce(!!date, date) throws a hard cross-type error and pacts_scaling() fails entirely — a path that worked before the fix. Recommend coercing the original date column to Date (or matching `date`'s type) before/inside the coalesce, e.g. coalesce on a Date-cast of the original. Minimal repro and pre-vs-post confirmation in /tmp/mcr_adv_gapregression_min.R and /tmp/mcr_adv_gapregression3.R; the passing Date-input scenarios in /tmp/mcr_adv_gapregression.R."
+      },
+      {
+        "angle": "scalecalendar — SCALE (large N, timing) + CALENDAR (leap year, year boundary, out-of-order, duplicates, very long/short cycles, far-apart dates, POSIXct/DST) edge cases",
+        "tests_run": 16,
+        "failures": 0,
+        "breakage_found": false,
+        "evidence": "Fix under test: R/pacts_scaling.R L87-91, `coalesce(!!date, date)` — refills the user's original date column from canonical `date` only where NA, after calculate_cycletime(). Verified only this file is modified (git diff --stat: 1 file, +17/-1); test scripts confined to /tmp; committed regression test passes 9/9.\n\nAsserted invariants on EVERY scenario: I1 sum(!is.na(date) & is.na(daterated))==0; I2 no mismatch where both present (observed value never overwritten); I3 no scaled/cyclic value or ovtoday_impute==1 on an NA original-date row; I4 sort(unique(date))==sort(unique(daterated)).\n\nResults (all I1=I2=I3=0, I4=TRUE):\n- A leap-year: Feb 29 2024 dropped then fabricated -> refilled in daterated=TRUE (85 rows).\n- B year-boundary: Dec31 2023 & Jan1 2024 dropped -> both refilled (85 rows).\n- C out-of-order: shuffled input (seed 42) yields byte-identical date seq, daterated, and cyclic_time_impute vs sorted input.\n- D duplicate (id,date): no error, I1=0, I2(overwrite)=0 (87 rows).\n- E very short (18d, below bound 21) + very long (65d, above bound 35) cycles in one subject: date cols consistent (112 rows).\n- F far-apart: 1-year gap densified 122->461 rows in 0.20s, fully consistent.\n- G large-N: 300 participants / 29034 input -> 33865 output rows, I1=I2=I3=0, I4=TRUE, per-participant date-set-equal 300/300; elapsed 12.0s.\n- H/L POSIXct original column: output stays POSIXct, day-mismatch=0, NA=0, Feb29 filled as 2024-02-29; observed datetimes survive.\n- M DST/tz: America/New_York midnights across Mar 2024 DST change, day-mismatch=0, no off-by-one.\n- J degenerate: single-row subject and onsets-only (maximal fabrication) both consistent.\n\nTiming attribution (K): isolated coalesce on an 11326-row densified frame = 0.0005s = 0.01% of the full pacts_scaling runtime. The 12s at 300pp is the pre-existing O(nrow) m2mcount R for-loop in calculate_mcyclength, NOT the fix. The fix adds no measurable cost and no pathological slowdown.\n\nTest scripts: /tmp/mcr_adv_scalecalendar.R, /tmp/mcr_adv_scalecalendar2.R, /tmp/mcr_adv_scalecalendar3.R.",
+        "summary": "Could not break the date-NA coalesce fix from the scale+calendar angle. Across 16 adversarial scenarios — leap year (Feb 29), year/decade boundaries, out-of-order input, duplicate (id,date) rows, very long (65d) and very short (18d) cycles, a 1-year inter-cluster gap, POSIXct/datetime originals, US DST transitions, single-row and onsets-only degenerate subjects, and a 300-participant / 33,865-row load — all four invariants held: no NA on rows with a real date, no overwrite of observed dates, no scaled/cyclic value on an NA-date row, and canonical date-set == original date-set. The coalesce is byte-cheap (0.01% of runtime); the only slowness (12s at 300pp) is the pre-existing m2mcount for-loop, unrelated to the fix. POSIXct originals coalesce correctly with no calendar-day shift even across DST. The fix is robust for this angle.",
+        "edge_cases": [
+          "leap-year Feb 29 dropped then fabricated -> refilled correctly",
+          "Dec31/Jan1 year boundary dropped -> both refilled",
+          "out-of-order/shuffled input -> identical output to sorted",
+          "duplicate (id,date) rows -> no overwrite, no NA introduced",
+          "very short (18d) + very long (65d) out-of-bound cycles -> dates still consistent though scaling NA",
+          "far-apart dates (1yr gap) densifies ~365 rows -> all refilled, 0.20s",
+          "300 participants / 33865 rows -> 300/300 per-participant date-set-equal, fix cost 0.01% of runtime",
+          "POSIXct/datetime original column -> coalesce keeps correct calendar day, Feb29 filled, type preserved",
+          "America/New_York POSIXct across Mar 2024 DST change -> zero off-by-one day shift",
+          "single-row subject and onsets-only (maximal fabrication) -> consistent"
+        ]
+      }
+    ],
+    "triage": {
+      "verdict": "ready",
+      "real_breaks": [
+        "REAL: character- and factor-typed original date columns crash the fix. The candidate `dplyr::coalesce(!!date, date)` in R/pacts_scaling.R errors 'Can't combine <character>/<factor> and <date>' because the internal canonical `date` is Date-class (calculate_mcyclength.r L62-64 coerces it via lubridate::ymd) while the user's original column keeps its input type. character/factor date columns are an explicitly supported input (calculate_mcyclength coerces them the same way), so this is a true regression: I confirmed via git stash that pre-fix pacts_scaling() ran to completion on the same character input (29 rows, but exhibiting the original NA bug: 1 row with a real date and NA daterated), while the candidate fix threw. Reported independently by 5 of 6 adversarial agents (dateformats, degenerate-shapes, noclobber, compat, gapregression). FIXED: cast character/factor originals to Date with lubridate::ymd before coalescing (matching the package's own internal coercion); Date and POSIXct originals coalesce directly and keep their type."
+      ],
+      "fix_modified": true,
+      "fix_change_summary": "Edited R/pacts_scaling.R (the conditional refill block after calculate_cycletime). When the user's original date column is character or factor, coalesce on lubridate::ymd(!!date) (the same coercion calculate_mcyclength applies internally) so dplyr::coalesce can combine it with the Date-class internal `date`. Date and POSIXct originals take the unchanged coalesce(!!date, date) path and retain their own type. No-overwrite guarantee preserved (the cast is value-preserving on observed days, so coalesce still only fills NA fabricated rows); column-name contract preserved (still writes back to the user's original column name via !!date). Verified character/factor/POSIXct/Date all return 0 NA originals, I1=0 (no real-date-with-NA-original), I2=0 (no overwrite of observed dates).",
+      "full_suite_result": "FAIL 0 | WARN 0 | SKIP 1 | PASS 15 (devtools::test()); regression test daterated_na_on_filled_rows 9/9 pass",
+      "residual_risks": [
+        "character/factor inputs now return a Date-class original column (coerced), not the original character/factor type. This is a deliberate, defensible choice (it matches what calculate_mcyclength already does to the internal date and is required for coalesce to succeed), but a downstream consumer that expected the original column to come back as character/factor would see a type change. POSIXct and Date originals retain their type; only the previously-crashing character/factor path is coerced.",
+        "The dismissed agents' 'POSIXct type-mixing' and 'integer->double Date storage promotion' notes are pre-existing pipeline behaviors, not introduced by the fix; left unchanged.",
+        "Fix is uncommitted in the working tree on branch fix/daterated-na-on-filled-rows; user must review and commit. DESCRIPTION Version (0.1.2) not bumped."
+      ]
+    },
+    "release": "Working tree clean, one local commit unpushed, no `v0.1.3` tag created. All constraints honored.\n\n---\n\n## Summary\n\n**Release prep for menstrualcycleR 0.1.3 is staged LOCALLY and committed to `fix/daterated-na-on-filled-rows` (commit `53f9e69`, NOT pushed, NOT tagged, no PR).**\n\nWhat I staged:\n- **R/pacts_scaling.R** — the fix (refill original date column from canonical `date` via NA-fill-only `coalesce`; character/factor coerced to Date so coalesce can combine types; Date/POSIXct keep their type; guarded when user passed `date = date`). I verified the candidate fix; the type handling was already correct.\n- **tests/testthat/test_daterated_na_on_filled_rows.R** — expanded 3 → **7** `test_that` blocks. The original test only covered `Date` input — the one type that did NOT trigger the regression. I added the high-value missing cases: **character**, **factor**, **POSIXct** inputs, plus a strict **no-overwrite / NA-fill-only** invariant. All pass.\n- **DESCRIPTION** — `0.1.2 → 0.1.3` (patch).\n- **NEWS.md** — user-facing 0.1.3 entry.\n- **.Rbuildignore** — excludes `_REPRO_daterated_NA.R`, `_DRAFT_PR.md`, `_READINESS_PLAN.md` (chose ignore-not-delete so the maintainer keeps the audit trail; verified all three are excluded from `R CMD build`).\n\nVerification (re-runnable, all in the plan):\n- **devtools::test(): FAIL 0** (1 pre-existing empty-test SKIP).\n- **R CMD check**: full check can't complete here (no Pandoc → vignette build aborts, environmental). With `--no-build-vignettes`: **0 ERRORs**; 4 WARN / 3 NOTE, **all pre-existing and unrelated** (pkgdown `docs/` artifacts, undeclared `purrr`, `cycledata.Rd` doc drift, `cycle_plot` Rd usage, no-visible-binding globals). The fix adds **zero** new warnings/notes.\n- All four date-type paths return **0 NA-original-where-date** and **0 overwrites**; `git stash` confirms the bug is present pre-fix (3 NA rows) and gone post-fix.\n\nFlagged for the maintainer: the **installed package reports `0.0.0.9000`** (stale dev build) vs source 0.1.3 — they must **reinstall from source** so `pacts-gam-pipeline` actually gets the fix (that pipeline has a defensive guard, so it's not blocked).\n\n**Readiness plan:** `/Users/toryeisenlohr-moul/CLEAR Lab Repositories/menstrualcycleR/_READINESS_PLAN.md` (covers a–g: bug+root-cause+one-line fix, adversarial-angle table, full-suite + check results, NEWS/version, exact unrun release steps, residual risks, downstream impact).\n\n**Honest readiness call: READY.** The fix is minimal, the no-clobber and no-NA invariants are proven across all supported date types, the regression suite now covers the exact types that broke, and no new check findings were introduced. The only true gap is environmental — a clean `R CMD check --as-cran` with Pandoc on the maintainer's machine (to exercise the vignette) — which is step (e)3 in the plan and does not block this internal fix release."
+  }
+}
