@@ -7,3 +7,12 @@ inst/doc
 /Meta/
 
 /doc/
+
+# Repo = code only. Block session/scratch work-files at the repo root so they can
+# never be committed (and so pkgdown can't render them onto the public site, as
+# happened pre-0.1.3 with _READINESS_PLAN / _DRAFT_PR). Root-anchored so package
+# code (R/, man/) and _pkgdown.yml are unaffected.
+/_*.md
+/_*.svg
+/_*.R
+/_*.json
