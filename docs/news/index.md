@@ -1,6 +1,46 @@
 # Changelog
 
-## menstrualcycleR 0.1.2
+## menstrualcycleR 0.1.3
+
+- Fixed a bug in
+  [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+  where the **user’s original date column was left `NA` on fabricated
+  calendar rows**. To compute cycle lengths,
+  [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+  internally densifies each participant’s calendar so that every missing
+  day between their first and last observation becomes a row. Those
+  fabricated rows received the package’s internal canonical `date`, but
+  the column you passed in (e.g. `daterated`) was left `NA` on them.
+  When a cycle’s ovulation had to be **imputed** (no biomarker-confirmed
+  ovulation), the imputed-ovulation day — along with its `cyclic_time*`
+  / `scaled_cycleday*` values — could land on exactly such a fabricated
+  row. A downstream analysis that joined the PACTS output back to other
+  data **by the original date column name** would then silently drop
+  those rows, quietly losing imputed-ovulation and scaled cycle-time
+  observations.
+  [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+  now returns a fully populated original date column: on fabricated rows
+  it is filled from the internal calendar date, and observed dates are
+  never overwritten. Character- and factor-typed date columns (a
+  supported input) are coerced to `Date` the same way the rest of the
+  pipeline already coerces them; `Date` and `POSIXct` date columns keep
+  their type. A regression test asserts that no row carries a real
+  `date` or a scaled/cycle value while the original date column is `NA`,
+  across `Date`, character, factor, and `POSIXct` date inputs.
+
+- Fixed the same class of bug for the **user’s original ID column**. The
+  internal densify keeps the package’s canonical `id` populated on
+  fabricated calendar rows (it is the grouping key), but an original id
+  column passed under a different name (e.g. `record_id`, `subject`) was
+  left `NA` on those rows — so a downstream join on **id + date** could
+  still drop imputed-ovulation / scaled rows even after the date fix.
+  [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+  now also refills the original id column from the canonical `id` on
+  fabricated rows (NA-fill only; observed ids are never changed and the
+  column’s type is preserved). This was latent in typical use because
+  the package’s own examples name the id column `id`; it surfaces for
+  datasets that use any other id column name. A regression test covers
+  character and integer id columns under a non-`id` name.
 
 - Fixed a bug in
   [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
@@ -18,6 +58,13 @@
   Thanks to Elisabeth Conrad (Freie Universität Berlin) for the clear
   bug report and reproduction. (\[reported via PACTS user
   correspondence, June 2026\])
+
+- Packaging hygiene: declared `purrr` in `Imports` (used in `helper.R`
+  but previously undeclared), and added `tidyverse` and
+  `marginaleffects` to `Suggests` so the overview vignette builds in a
+  clean environment. Continuous integration (GitHub Actions
+  `R-CMD-check`) now runs the full `R CMD check` — including the
+  vignette — on every push and pull request.
 
 - [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
   and
