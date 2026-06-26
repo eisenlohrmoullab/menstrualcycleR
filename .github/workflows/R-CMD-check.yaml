@@ -1,0 +1,55 @@
+# Automated safety net for menstrualcycleR.
+#
+# What it does: on every push to `main` and every pull request, GitHub spins up
+# a clean machine, installs the package and its dependencies, and runs the full
+# `R CMD check` -- which also runs the entire testthat suite, all examples, and
+# builds the vignette. If a change breaks the build, the tests, an example, or
+# the docs, this turns red and GitHub notifies you BEFORE it can reach `main`.
+# You don't have to remember to run anything; the machine checks every change.
+#
+# Two deliberate starter choices (see the chat where this was set up):
+#   1. Single platform (Ubuntu, current R) to start, for reliable green runs.
+#      Add more OS / R versions to a matrix later once passing is routine.
+#   2. error-on: "error" -- fail only on genuine ERRORS, not on the package's
+#      KNOWN pre-existing WARNINGs/NOTEs (undeclared `purrr`, Rd doc drift, etc.;
+#      tracked in _READINESS_PLAN.md). Tighten to "warning" after that backlog
+#      is cleared so style regressions get caught too.
+#
+# Derived from the r-lib/actions "check-standard" example:
+# https://github.com/r-lib/actions/tree/v2/examples
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+name: R-CMD-check
+
+permissions: read-all
+
+jobs:
+  R-CMD-check:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          error-on: '"error"'
+          upload-snapshots: true

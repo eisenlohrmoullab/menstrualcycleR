@@ -13,3 +13,5 @@
 ^_DRAFT_PR\.md$
 ^_READINESS_PLAN\.md$
 ^_ADVERSARIAL_RESULTS\.json$
+^_WORKFLOW_MAP\.svg$
+^\.github$
