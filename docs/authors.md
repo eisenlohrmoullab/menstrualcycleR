@@ -2,10 +2,9 @@
 
 ## Authors
 
-- **Anisha Nagpal**. Author, maintainer.
-  [](https://orcid.org/0000-0001-7111-9322)
+- **Anisha Nagpal**. Author. [](https://orcid.org/0000-0001-7111-9322)
 
-- **Tory Eisenlohr-Moul**. Author.
+- **Tory Eisenlohr-Moul**. Author, maintainer.
   [](https://orcid.org/0000-0002-9231-3105)
 
 ## Citation

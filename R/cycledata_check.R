@@ -4,7 +4,7 @@
 #' cycle phases (luteal and follicular) and overall availability. It also generates visualizations to aid in data 
 #' quality assessment. 
 #'
-#' @keywords menstrual cycle, data quality, symptoms, cycle phase
+#' @keywords menstrual cycle data quality symptoms cycle phase
 #'
 #' @param data A data frame containing the input data. 
 #'   - Must include columns for scaled cycle day variables and the symptom or dependent variables of interest. 

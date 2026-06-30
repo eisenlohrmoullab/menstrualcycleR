@@ -17,7 +17,7 @@ A data frame with 619 rows and 5 variables:
 
   Participant ID
 
-- date:
+- daterated:
 
   Date of symptom observation
 

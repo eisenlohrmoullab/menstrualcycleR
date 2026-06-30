@@ -34,7 +34,8 @@
 #'   \item \code{ovtoday_impute}: A binary column indicating imputed ovulation days (value `1`) for cycles without confirmed ovulation, estimated as 15 days before menses onset.
 #' }
 #'
-#' @keywords menstrual cycle, ovulation, cycle phase, scaling, time-varying covariate
+#' @keywords menstrual cycle ovulation cycle phase scaling time-varying covariate
+#' @importFrom rlang :=
 #' @export
 #'
 #' @examples 

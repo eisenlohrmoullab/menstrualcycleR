@@ -11,7 +11,7 @@
 #' @param include_impute A boolean indicating whether to use imputed cycle time values based on NC cycle length norms. Default is TRUE.
 #' @param y_scale A string specifying the y-axis scale. Options are "person-centered", "person-centered_roll", or "means". Default is "person-centered_roll".
 #' @param rollingavg A numeric indicating how many days of a rolling average to use, the default is 5
-#' @param alignval From the zoo package, using rollapply: alignment of rolling avg. Can be "center", "left", "right"
+#' @param align_val From the zoo package, using rollapply: alignment of rolling avg. Can be "center", "left", "right"
 #' @param se A boolean indicating whether to include a standard error ribbon. Default is False 
 #'
 #' @return A list containing the following elements:
@@ -118,20 +118,20 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
     dat_summary <- data %>%
       dplyr::group_by(cycleday_5perc) %>%
       dplyr::summarise(mean_dev = mean(!!dplyr::sym(paste0(symptom, ".d")), na.rm = TRUE),
-      se = if (se) sd(!!dplyr::sym(paste0(symptom, ".d")), na.rm = TRUE) / sqrt(sum(!is.na(!!dplyr::sym(paste0(symptom, ".d"))))) else NA_real_,
+      se = if (se) stats::sd(!!dplyr::sym(paste0(symptom, ".d")), na.rm = TRUE) / sqrt(sum(!is.na(!!dplyr::sym(paste0(symptom, ".d"))))) else NA_real_,
                        .groups = "drop"
       )
   } else if (y_scale == "person-centered_roll") {
     dat_summary <- data %>%
       dplyr::group_by(cycleday_5perc) %>%
       dplyr::summarise(mean_dev_roll = mean(!!dplyr::sym(paste0(symptom, ".d.roll")), na.rm = TRUE), 
-      se = if (se) sd(!!dplyr::sym(paste0(symptom, ".d.roll")), na.rm = TRUE) / sqrt(sum(!is.na(!!dplyr::sym(paste0(symptom, ".d.roll"))))) else NA_real_,
+      se = if (se) stats::sd(!!dplyr::sym(paste0(symptom, ".d.roll")), na.rm = TRUE) / sqrt(sum(!is.na(!!dplyr::sym(paste0(symptom, ".d.roll"))))) else NA_real_,
                        .groups = "drop") 
   } else if (y_scale == "means") {
     dat_summary <- data %>%
       dplyr::group_by(cycleday_5perc) %>%
       dplyr::summarise(mean_sx = mean(!!dplyr::sym(paste0(symptom, ".m")), na.rm = TRUE),
-      se = if (se) sd(!!dplyr::sym(paste0(symptom, ".m")), na.rm = TRUE) / sqrt(sum(!is.na(!!dplyr::sym(paste0(symptom, ".m"))))) else NA_real_,
+      se = if (se) stats::sd(!!dplyr::sym(paste0(symptom, ".m")), na.rm = TRUE) / sqrt(sum(!is.na(!!dplyr::sym(paste0(symptom, ".m"))))) else NA_real_,
                        .groups = "drop")
   }
   

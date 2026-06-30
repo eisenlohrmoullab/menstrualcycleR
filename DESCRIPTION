@@ -1,21 +1,21 @@
 Package: menstrualcycleR
 Title: Tools for Phase-Aligned Cycle Time Scaling (PACTS) and Menstrual Cycle Analysis
-Version: 0.1.4
-Authors@R: 
-    c(person(given = "Anisha", family = "Nagpal", email ="anagpa7@uic.edu", role = c("aut", "cre"),
+Version: 0.1.5
+Authors@R:
+    c(person(given = "Anisha", family = "Nagpal", email ="anagpa7@uic.edu", role = "aut",
            comment = c(ORCID = "0000-0001-7111-9322")),
-    person(given = "Tory", family = "Eisenlohr-Moul", email = "temo@uic.edu", role = "aut",
+    person(given = "Tory", family = "Eisenlohr-Moul", email = "temo@uchicago.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-9231-3105")))
 Description: The menstrualcycleR package provides tools for Phase-Aligned Cycle Time Scaling (PACTS),
     enabling precise and dynamic analysis of menstrual cycle data by standardizing events across
     cycles onto a continuous timeline while accounting for variability in ovulation timing and
     cycle lengths. 
-URL: https://eisenlohrmoullab.github.io/menstrualcycleR, https://github.com/eisenlohrmoullab/menstrualcycleR
+URL: https://eisenlohrmoullab.github.io/menstrualcycleR/, https://github.com/eisenlohrmoullab/menstrualcycleR
 BugReports: https://github.com/eisenlohrmoullab/menstrualcycleR/issues
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Remotes: lasy/cpass
 Imports: 
     dplyr, 
@@ -33,11 +33,6 @@ Imports:
     mgcv,
     cpass 
 NeedsCompilation: no
-Packaged: 2024-12-30 17:43:37 UTC; anishan
-Author: 
-    Anisha Nagpal [aut, cre] (0000-0001-7111-9322),
-    Tory Eisenlohr-Moul [aut] (0000-0002-9231-3105)
-Maintainer: Anisha Nagpal <anagpa7@uic.edu>
 Depends: R (>= 3.5.0)
 Suggests:
     knitr,

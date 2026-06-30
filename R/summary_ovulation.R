@@ -18,7 +18,7 @@
 #' - Nagpal et al. (2025). *Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the `menstrualcycleR` package*. https://doi.org/10.31219/osf.io/hd5xw_v1  
 #' - Schmalenberger et al. (2021). *How to study the menstrual cycle: Practical tools and recommendations*. *Psychoneuroendocrinology, 123*, 104895. https://doi.org/10.1016/j.psyneuen.2020.104895
 #'
-#' @keywords menstrual cycle, ovulation, biomarkers, imputation
+#' @keywords menstrual cycle ovulation biomarkers imputation
 #'
 #' @param data A dataframe containing the input data. Must include columns for scaled cycle day variables and symptoms/dependent variables of interest.
 #' Scaled cycle day variables are added to your dataframe after applying the `pacts_scaling()` function. (See examples below)

@@ -81,7 +81,7 @@ cycle_plot_individual <- function(data, id, symptoms, centering = "menses",
       return(num)
     }
     
-    df$forwardcount <- ave(df$menses, df$id, FUN = forwardCount)
+    df$forwardcount <- stats::ave(df$menses, df$id, FUN = forwardCount)
     
     df <- df %>%
       dplyr::mutate(

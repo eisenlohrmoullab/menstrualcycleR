@@ -29,9 +29,9 @@ Scaled cycle day variables are added to your dataframe after applying the calcul
 
 \item{rollingavg}{A numeric indicating how many days of a rolling average to use, the default is 5}
 
-\item{se}{A boolean indicating whether to include a standard error ribbon. Default is False}
+\item{align_val}{From the zoo package, using rollapply: alignment of rolling avg. Can be "center", "left", "right"}
 
-\item{alignval}{From the zoo package, using rollapply: alignment of rolling avg. Can be "center", "left", "right"}
+\item{se}{A boolean indicating whether to include a standard error ribbon. Default is False}
 }
 \value{
 A list containing the following elements:

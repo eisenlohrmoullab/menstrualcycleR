@@ -9,6 +9,10 @@
 ^CLAUDE\.md$
 ^_pkgdown\.yml$
 ^pkgdown$
+^docs$
+^rsconnect$
+^inst/shiny/rsconnect/
+^_WORKLOG\.txt$
 ^doc$
 ^_REPRO_daterated_NA\.R$
 ^_DRAFT_PR\.md$

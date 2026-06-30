@@ -456,7 +456,7 @@ checkdata$overall
 
 Overall, 574 observations with non-NA or non-missing values for `symptom` were scaled because they existed in menses-to-menses cycles between 21 and 35 days and associated luteal phases (for cycles that had a reported value for `ovtoday`) were between 7-18 days. We can also visualize non-missing symptom data across the cycle: 
 
-```{r cycledata_check_plot ,fig.width=7, fig.height=6}
+```{r cycledata_check_plot,fig.width=7, fig.height=6}
 checkdata$data_symptom_plots
 ```
 

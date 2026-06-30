@@ -11,7 +11,7 @@ To install and load the `menstrualcycleR` package, follow these steps:
 
 3.  Load the package
 
-[`library(menstrualcycleR)`](https://eisenlohrmoullab.github.io/menstrualcycleR)
+[`library(menstrualcycleR)`](https://eisenlohrmoullab.github.io/menstrualcycleR/)
 
 To utilize the shinyapp, visit:
 <https://menstrualcycledata.shinyapps.io/shiny/>

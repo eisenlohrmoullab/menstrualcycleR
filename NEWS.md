@@ -1,3 +1,19 @@
+# menstrualcycleR 0.1.5
+
+* Maintainer changed to Tory Eisenlohr-Moul.
+* Documentation fixes: the `cycledata` help page now documents the `daterated`
+  column (it previously said `date`, which the dataset does not contain), and
+  `cycle_plot()`'s `align_val` argument is now documented under its correct name
+  (was `alignval`).
+* Build/packaging hygiene: the pkgdown site (`docs/`) and shinyapps deployment
+  records (`rsconnect/`, `inst/shiny/rsconnect/`) are no longer bundled into the
+  package tarball; removed a stray `R/.Rapp.history`; tidied a vignette chunk
+  label that produced a non-portable figure filename. No effect on installed
+  functionality.
+* Internal: namespace-qualified `stats::sd()`/`stats::ave()`, imported `rlang`'s
+  `:=`, and registered remaining non-standard-evaluation column names, clearing
+  the "no visible binding for global variable" check notes. No user-facing change.
+
 # menstrualcycleR 0.1.4
 
 * Documentation/metadata only — no code changes. Removed a dead OSF preprint
@@ -57,7 +73,7 @@
 
 First release of **menstrualcycleR**, the companion R package to:
 
-> Nagpal, A., Schmalenberger, K. M., Barone, J. C., Mulligan, E., Stumper, A., Knol, L., Failenschmid, J., Kiesner, J., Peters, J. R., & Eisenlohr-Moul, T. A. (2025). Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the menstrualcycleR package. *Psychoneuroendocrinology*, 107584. <https://www.sciencedirect.com/science/article/pii/S0306453025003075>
+> Nagpal, A., Schmalenberger, K. M., Barone, J. C., Mulligan, E., Stumper, A., Knol, L., Failenschmid, J., Kiesner, J., Peters, J. R., & Eisenlohr-Moul, T. A. (2025). Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the menstrualcycleR package. *Psychoneuroendocrinology*, 107584. <https://doi.org/10.1016/j.psyneuen.2025.107584>
 
 ## Core functionality
 

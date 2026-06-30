@@ -1,5 +1,25 @@
 # Changelog
 
+## menstrualcycleR 0.1.5
+
+- Maintainer changed to Tory Eisenlohr-Moul.
+- Documentation fixes: the `cycledata` help page now documents the
+  `daterated` column (it previously said `date`, which the dataset does
+  not contain), and
+  [`cycle_plot()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot.md)’s
+  `align_val` argument is now documented under its correct name (was
+  `alignval`).
+- Build/packaging hygiene: the pkgdown site (`docs/`) and shinyapps
+  deployment records (`rsconnect/`, `inst/shiny/rsconnect/`) are no
+  longer bundled into the package tarball; removed a stray
+  `R/.Rapp.history`; tidied a vignette chunk label that produced a
+  non-portable figure filename. No effect on installed functionality.
+- Internal: namespace-qualified
+  [`stats::sd()`](https://rdrr.io/r/stats/sd.html)/[`stats::ave()`](https://rdrr.io/r/stats/ave.html),
+  imported `rlang`’s `:=`, and registered remaining
+  non-standard-evaluation column names, clearing the “no visible binding
+  for global variable” check notes. No user-facing change.
+
 ## menstrualcycleR 0.1.4
 
 - Documentation/metadata only — no code changes. Removed a dead OSF
@@ -86,7 +106,7 @@
   [`first()`](https://dplyr.tidyverse.org/reference/nth.html)) and to
   [`rlang::sym()`](https://rlang.r-lib.org/reference/sym.html) were not
   namespace-qualified, so a bare
-  [`library(menstrualcycleR)`](https://eisenlohrmoullab.github.io/menstrualcycleR)
+  [`library(menstrualcycleR)`](https://eisenlohrmoullab.github.io/menstrualcycleR/)
   produced `Error: could not find function "ungroup"`. All such calls
   are now qualified (`dplyr::`/`rlang::`), and every exported function
   works with the package loaded on its own.
@@ -100,8 +120,7 @@ First release of **menstrualcycleR**, the companion R package to:
 > Eisenlohr-Moul, T. A. (2025). Studying the Menstrual Cycle as a
 > Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling
 > (PACTS) with the menstrualcycleR package. *Psychoneuroendocrinology*,
-> 107584.
-> <https://www.sciencedirect.com/science/article/pii/S0306453025003075>
+> 107584. <https://doi.org/10.1016/j.psyneuen.2025.107584>
 
 ### Core functionality
 

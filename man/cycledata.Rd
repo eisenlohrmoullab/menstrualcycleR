@@ -8,7 +8,7 @@
 A data frame with 619 rows and 5 variables:
 \describe{
 \item{id}{Participant ID}
-\item{date}{Date of symptom observation}
+\item{daterated}{Date of symptom observation}
 \item{symptom}{Daily rating of symptom outcome of interest}
 \item{menses}{\code{1} indicating first day of menstruation, menses onset}
 \item{ovtoday}{\code{1} indicating estimated day of ovulation in study, based on biomarkers of ovulation.}

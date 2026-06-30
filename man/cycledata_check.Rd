@@ -64,9 +64,8 @@ print(data_available_info$overall)
 print(data_available_info$data_symptom_plots$symptom)
 }
 \keyword{cycle}
-\keyword{cycle,}
 \keyword{data}
 \keyword{menstrual}
 \keyword{phase}
-\keyword{quality,}
-\keyword{symptoms,}
+\keyword{quality}
+\keyword{symptoms}

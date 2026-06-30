@@ -81,9 +81,8 @@ print(data_with_scaling)
 }
 \keyword{covariate}
 \keyword{cycle}
-\keyword{cycle,}
 \keyword{menstrual}
-\keyword{ovulation,}
-\keyword{phase,}
-\keyword{scaling,}
+\keyword{ovulation}
+\keyword{phase}
+\keyword{scaling}
 \keyword{time-varying}

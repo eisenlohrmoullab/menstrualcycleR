@@ -55,15 +55,15 @@ cycle_plot(
   A numeric indicating how many days of a rolling average to use, the
   default is 5
 
+- align_val:
+
+  From the zoo package, using rollapply: alignment of rolling avg. Can
+  be "center", "left", "right"
+
 - se:
 
   A boolean indicating whether to include a standard error ribbon.
   Default is False
-
-- alignval:
-
-  From the zoo package, using rollapply: alignment of rolling avg. Can
-  be "center", "left", "right"
 
 ## Value
 

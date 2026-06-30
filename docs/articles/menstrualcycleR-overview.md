@@ -216,7 +216,7 @@ remotes::install_github("eisenlohrmoullab/menstrualcycleR")
 library(menstrualcycleR)
 #> Welcome to the menstrualcycleR package!
 #> If you use this package, please cite:
-#> Nagpal, A., Schmalenberger, K. M., Barone, J. C., Mulligan, E., Stumper, A., Knol, L., Failenschmid, J., Kiesner, J., Peters, J. R., & Eisenlohr-Moul, T. A. (2025). Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the `menstrualcycleR` package. Psychoneuroendocrinology, 107584.
+#> Nagpal, A., Schmalenberger, K. M., Barone, J. C., Mulligan, E., Stumper, A., Knol, L., Failenschmid, J., Kiesner, J., Peters, J. R., & Eisenlohr-Moul, T. A. (2025). Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the `menstrualcycleR` package. Psychoneuroendocrinology, 107584. https://doi.org/10.1016/j.psyneuen.2025.107584
 ```
 
 Note that the `menstrualcycleR` package depends on several other
@@ -668,7 +668,7 @@ checkdata$data_symptom_plots
 #> $symptom
 ```
 
-![](menstrualcycleR-overview_files/figure-html/cycledata_check_plot%20-1.png)
+![](menstrualcycleR-overview_files/figure-html/cycledata_check_plot-1.png)
 
 ### Checking Ovulation Data Availability
 

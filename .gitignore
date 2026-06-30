@@ -16,3 +16,13 @@ inst/doc
 /_*.svg
 /_*.R
 /_*.json
+
+# shinyapps.io deploy bookkeeping (auto-generated on deploy; app/bundle IDs only,
+# no secrets). Should not be version-controlled or shipped in the package tarball.
+/rsconnect/
+inst/shiny/rsconnect/
+
+# R CMD build / check artifacts
+*.Rcheck/
+..Rcheck/
+*.tar.gz
