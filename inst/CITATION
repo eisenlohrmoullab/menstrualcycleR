@@ -15,5 +15,6 @@ bibentry(
   ),
   journal  = "Psychoneuroendocrinology",
   year     = "2025",
-  pages    = "107584"
+  pages    = "107584",
+  doi      = "10.1016/j.psyneuen.2025.107584"
 )

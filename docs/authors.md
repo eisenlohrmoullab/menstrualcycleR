@@ -18,6 +18,7 @@ Failenschmid J, Kiesner J, Peters J, Eisenlohr-Moul T (2025). “Studying
 the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned
 Cycle Time Scaling (PACTS) with the menstrualcycleR package.”
 *Psychoneuroendocrinology*, 107584.
+[doi:10.1016/j.psyneuen.2025.107584](https://doi.org/10.1016/j.psyneuen.2025.107584).
 
     @Article{,
       title = {Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the menstrualcycleR package},
@@ -25,4 +26,5 @@ Cycle Time Scaling (PACTS) with the menstrualcycleR package.”
       journal = {Psychoneuroendocrinology},
       year = {2025},
       pages = {107584},
+      doi = {10.1016/j.psyneuen.2025.107584},
     }

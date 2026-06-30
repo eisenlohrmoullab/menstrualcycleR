@@ -1,5 +1,14 @@
 # Changelog
 
+## menstrualcycleR 0.1.4
+
+- Documentation/metadata only — no code changes. Removed a dead OSF
+  preprint link from the `URL:` field of `DESCRIPTION` and added a “How
+  to cite” section to the README pointing to the published paper (Nagpal
+  et al., 2025, *Psychoneuroendocrinology*). The canonical citation
+  remains available via `citation("menstrualcycleR")` (see
+  `inst/CITATION`).
+
 ## menstrualcycleR 0.1.3
 
 - Fixed a bug in

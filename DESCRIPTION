@@ -1,6 +1,6 @@
 Package: menstrualcycleR
 Title: Tools for Phase-Aligned Cycle Time Scaling (PACTS) and Menstrual Cycle Analysis
-Version: 0.1.3
+Version: 0.1.4
 Authors@R: 
     c(person(given = "Anisha", family = "Nagpal", email ="anagpa7@uic.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-7111-9322")),
@@ -10,7 +10,7 @@ Description: The menstrualcycleR package provides tools for Phase-Aligned Cycle 
     enabling precise and dynamic analysis of menstrual cycle data by standardizing events across
     cycles onto a continuous timeline while accounting for variability in ovulation timing and
     cycle lengths. 
-URL: https://eisenlohrmoullab.github.io/menstrualcycleR, https://github.com/eisenlohrmoullab/menstrualcycleR, https://osf.io/preprints/osf/hd5xw_v1?view_only=
+URL: https://eisenlohrmoullab.github.io/menstrualcycleR, https://github.com/eisenlohrmoullab/menstrualcycleR
 BugReports: https://github.com/eisenlohrmoullab/menstrualcycleR/issues
 License: GPL (>= 3)
 Encoding: UTF-8

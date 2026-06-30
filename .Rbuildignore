@@ -6,6 +6,7 @@
 ^\.gitignore$            
 ^\.DS_Store$             
 ^Meta$
+^CLAUDE\.md$
 ^_pkgdown\.yml$
 ^pkgdown$
 ^doc$
