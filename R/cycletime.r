@@ -56,7 +56,7 @@
 
 
 
-calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35) {
+calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35, impute_ovulation = TRUE) {
   `%>%` <- magrittr::`%>%`
   # Check if input data is a data frame
   if (!is.data.frame(data)) {
@@ -97,7 +97,15 @@ calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength
   # Apply the processing functions in sequence
   data <- process_luteal_phase_base(data, id, date, menses)
   data <- process_follicular_phase_base(data, id, date, menses)
-  data <- calculate_ovtoday_impute(data, id, date, menses)
+  # Ovulation imputation: either derive it mechanically (default), or RESPECT a caller-supplied
+  # `ovtoday_impute` and skip re-imputing (so an upstream anchor-prep step's placed imputed
+  # ovulations are used verbatim). Downstream impute helpers key only on `ovtoday_impute`.
+  if (isTRUE(impute_ovulation)) {
+    data <- calculate_ovtoday_impute(data, id, date, menses)
+  } else {
+    if (!"ovtoday_impute" %in% names(data)) data$ovtoday_impute <- 0L
+    data <- data %>% dplyr::mutate(ovtoday_impute = dplyr::coalesce(as.integer(ovtoday_impute), 0L))
+  }
   data <- process_luteal_phase_impute(data, id, date, menses)
   data <- process_follicular_phase_impute(data, id, date, menses)
   data <- create_scaled_cycleday(data, id, date, menses)

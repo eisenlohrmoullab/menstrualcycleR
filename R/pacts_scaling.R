@@ -24,6 +24,12 @@
 #' }
 #' @param lower_cyclength_bound Numeric lower bound of cycle lengths to include in scaling. Default is 21.
 #' @param upper_cyclength_bound Numeric upper bound of cycle lengths to include in scaling. Default is 35.
+#' @param impute_ovulation Logical; whether to impute ovulation for cycles without a confirmed `ovtoday`.
+#'   Default `TRUE` (the original behavior): ovulation is imputed at day -15 and written to `ovtoday_impute`.
+#'   Set `FALSE` to RESPECT a pre-placed `ovtoday_impute` column supplied in `data` — the mechanical
+#'   imputation is skipped and the caller's imputed-ovulation anchors are used as-is (missing values
+#'   treated as 0). Use this when an upstream anchor-prep step has already placed/curated the imputed
+#'   ovulations and re-imputing here would overwrite them.
 #'
 #' @return The original data frame with the following additional columns:
 #' \itemize{
@@ -57,7 +63,7 @@
 #' print(data_with_scaling)
 #' 
 
-pacts_scaling <- function(data, id, date, menses, ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35) {
+pacts_scaling <- function(data, id, date, menses, ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35, impute_ovulation = TRUE) {
   `%>%` <- magrittr::`%>%`
   id <- rlang::enquo(id)
   date <- rlang::enquo(date)
@@ -73,7 +79,7 @@ pacts_scaling <- function(data, id, date, menses, ovtoday, lower_cyclength_bound
     )
   
   data = calculate_mcyclength(data, id, date, menses, ovtoday)
-  data = calculate_cycletime(data, id, date, menses, ovtoday, lower_cyclength_bound, upper_cyclength_bound)
+  data = calculate_cycletime(data, id, date, menses, ovtoday, lower_cyclength_bound, upper_cyclength_bound, impute_ovulation)
 
   # --- Keep the user's original date column consistent with the internal `date`.
   # calculate_mcyclength() densifies the calendar with tidyr::complete(date = ...),
