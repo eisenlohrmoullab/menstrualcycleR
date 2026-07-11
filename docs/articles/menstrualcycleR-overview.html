@@ -1481,7 +1481,7 @@ results.</p>
 <span>  <span class="va">symptom_log</span> <span class="op">~</span> <span class="co"># outcome: log-transformed symptom score</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">cyclic_time_impute</span>, bs <span class="op">=</span> <span class="st">"cc"</span><span class="op">)</span> <span class="op">+</span> <span class="co"># fixed effect: population-average smooth of cycle time ("cc" = cyclic cubic spline)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">id</span>, bs <span class="op">=</span> <span class="st">'re'</span><span class="op">)</span> <span class="op">+</span> <span class="co"># random intercept: per-person differences in average symptom level</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">cyclic_time_impute</span>, <span class="va">id</span>, bs<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"re"</span>, <span class="st">"cc"</span><span class="op">)</span><span class="op">)</span>, <span class="co"># random slopes: per-person deviations in the cycle trajectory</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">cyclic_time_impute</span>, <span class="va">id</span>, bs <span class="op">=</span> <span class="st">"re"</span><span class="op">)</span>, <span class="co"># random slope: per-person linear tilt on the cycle trajectory</span></span>
 <span>  knots<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cyclic_time_impute <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span>, <span class="co"># tie -1 and +1 to the same hormonal timepoint (cyclic boundary)</span></span>
 <span>  data <span class="op">=</span> <span class="va">datSX</span>, <span class="co"># data: complete cases only (listwise deletion)</span></span>
 <span>  method <span class="op">=</span> <span class="st">'REML'</span> <span class="co"># estimate smoothing parameters via REML</span></span>
@@ -1500,11 +1500,20 @@ the cycle.</p></li>
 A <strong>random intercept</strong> for each participant. This accounts
 for <strong>individual differences in average symptom
 level</strong>.</p></li>
-<li><p><strong><code>s(cyclic_time_impute, id, bs = 're')</code></strong><br>
-A <strong>random slope</strong>: models how each participant’s cycle
-trajectory may deviate from the population-level pattern. This allows
-<strong>person-specific nonlinear trends</strong> across the
-cycle.</p></li>
+<li><p><strong><code>s(cyclic_time_impute, id, bs = 're')</code></strong>
+A <strong>random slope</strong>: allows each participant’s trajectory to
+be tilted (steeper, flatter, or reversed) <strong>linearly</strong>
+relative to the population-level smooth. Because the basis is
+<code>"re"</code> on both margins, this term is linear in
+<code>cyclic_time_impute</code> per person — it shifts the slope of the
+line, not the shape of the curve. It does <strong>not</strong> give each
+participant their own nonlinear cyclic trajectory; every participant
+shares the same population-level curve shape
+(<code>s(cyclic_time_impute, bs = "cc")</code>) and only its intercept
+and linear slope vary by person. (A true per-person nonlinear cyclic
+trajectory would require a factor-smooth interaction,
+e.g. <code>s(cyclic_time_impute, id, bs = "fs", xt = list(bs = "cc"))</code>,
+which is a substantially larger model not used here.)</p></li>
 <li><p><strong><code>data = datSX</code></strong><br>
 The dataset used for model fitting. It should contain only complete
 cases for all model variables.</p></li>
@@ -1541,8 +1550,8 @@ appropriate for continuous, unbounded outcome variables.</li>
 <h4 id="model-formula">
 <strong>Model Formula</strong><a class="anchor" aria-label="anchor" href="#model-formula"></a>
 </h4>
-<pre><code><span><span class="va">symptom_log</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">cyclic_time_impute</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">id</span>, bs <span class="op">=</span> <span class="st">"re"</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>              <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">cyclic_time_impute</span>, <span class="va">id</span>, bs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"re"</span>, <span class="st">"cc"</span><span class="op">)</span> <span class="op">)</span></span></code></pre>
+<pre><code><span><span class="va">symptom_log</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">cyclic_time_impute</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">id</span>, bs <span class="op">=</span> <span class="st">"re"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>              <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">cyclic_time_impute</span>, <span class="va">id</span>, bs <span class="op">=</span> <span class="st">"re"</span><span class="op">)</span></span></code></pre>
 <ul>
 <li>This model includes:
 <ul>
@@ -1550,8 +1559,9 @@ appropriate for continuous, unbounded outcome variables.</li>
 trends</strong>.</li>
 <li>A <strong>random intercept smooth function</strong> for each
 participant.</li>
-<li>A <strong>random slope smooth function</strong> capturing
-<strong>individual-specific trajectories</strong> across the cycle.</li>
+<li>A <strong>random slope</strong> giving each participant a linear
+tilt relative to the population-level cyclic curve (not a separate
+nonlinear shape per person).</li>
 </ul>
 </li>
 </ul>
@@ -1602,14 +1612,16 @@ meaningful variation in symptom baseline levels.</li>
 </ul>
 </li>
 <li>
-<strong><code>s(cyclic_time_impute, id, bs = "re")</code></strong>:<br>
-Captures <strong>individual-specific deviations</strong> from the
-average symptom trajectory across the cycle.
+<strong><code>s(cyclic_time_impute, id, bs = "re")</code></strong>:
+Captures each participant’s <strong>linear tilt</strong> (steeper,
+flatter, or reversed) relative to the population-level curve — not a
+separate nonlinear shape per person.
 <ul>
 <li>The effect is <strong>statistically significant</strong>
-(<code>p = 8.36e-05</code>), indicating nonlinear
-<strong>heterogeneity</strong> in how individuals experience symptom
-changes across time.</li>
+(<code>p = 8.36e-05</code>), indicating meaningful
+<strong>heterogeneity</strong> in the linear slope of symptom change
+across individuals, on top of the shared population-level nonlinear
+curve.</li>
 </ul>
 </li>
 </ul>
@@ -1647,10 +1659,12 @@ deletion.</p></li>
 <hr>
 <blockquote>
 <p>These results suggest that on average, <code>symptom</code> varies
-significantly across the cycle in a nonlinear way, and that individuals
-also show <strong>unique, person-specific patterns</strong> of
-<code>symptom</code> change over time – i.e. there are significant
-individual differences in nonlinear trends across the cycle.</p>
+significantly across the cycle in a nonlinear way (shared
+population-level curve), and that individuals also differ significantly
+in their <strong>linear slope</strong> relative to that curve –
+i.e. some participants’ symptom trajectories tilt more steeply up or
+down across the cycle than others, on top of the same underlying
+nonlinear shape.</p>
 </blockquote>
 <hr>
 </div>

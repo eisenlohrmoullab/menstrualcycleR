@@ -1310,7 +1310,7 @@ gamm1 <- mgcv::gam(
   symptom_log ~ # outcome: log-transformed symptom score
     s(cyclic_time_impute, bs = "cc") + # fixed effect: population-average smooth of cycle time ("cc" = cyclic cubic spline)
     s(id, bs = 're') + # random intercept: per-person differences in average symptom level
-    s(cyclic_time_impute, id, bs=c("re", "cc")), # random slopes: per-person deviations in the cycle trajectory
+    s(cyclic_time_impute, id, bs = "re"), # random slope: per-person linear tilt on the cycle trajectory
   knots= list(cyclic_time_impute = c(-1,1)), # tie -1 and +1 to the same hormonal timepoint (cyclic boundary)
   data = datSX, # data: complete cases only (listwise deletion)
   method = 'REML' # estimate smoothing parameters via REML
@@ -1332,10 +1332,19 @@ This model includes:
   A **random intercept** for each participant. This accounts for
   **individual differences in average symptom level**.
 
-- **`s(cyclic_time_impute, id, bs = 're')`**  
-  A **random slope**: models how each participant’s cycle trajectory may
-  deviate from the population-level pattern. This allows
-  **person-specific nonlinear trends** across the cycle.
+- **`s(cyclic_time_impute, id, bs = 're')`**
+  A **random slope**: allows each participant’s trajectory to be tilted
+  (steeper, flatter, or reversed) **linearly** relative to the
+  population-level smooth. Because the basis is `"re"` on both margins,
+  this term is linear in `cyclic_time_impute` per person — it shifts the
+  slope of the line, not the shape of the curve. It does **not** give
+  each participant their own nonlinear cyclic trajectory; every
+  participant shares the same population-level curve shape
+  (`s(cyclic_time_impute, bs = "cc")`) and only its intercept and linear
+  slope vary by person. (A true per-person nonlinear cyclic trajectory
+  would require a factor-smooth interaction,
+  e.g. `s(cyclic_time_impute, id, bs = "fs", xt = list(bs = "cc"))`,
+  which is a substantially larger model not used here.)
 
 - **`data = datSX`**  
   The dataset used for model fitting. It should contain only complete
@@ -1372,14 +1381,15 @@ This returns several important components:
 
 #### **Model Formula**
 
-    symptom_log ~ s(cyclic_time_impute) + s(id, bs = "re") + 
-                  s(cyclic_time_impute, id, bs = c("re", "cc") )
+    symptom_log ~ s(cyclic_time_impute) + s(id, bs = "re") +
+                  s(cyclic_time_impute, id, bs = "re")
 
 - This model includes:
   - A smooth term for **population-level cyclic trends**.
   - A **random intercept smooth function** for each participant.
-  - A **random slope smooth function** capturing **individual-specific
-    trajectories** across the cycle.
+  - A **random slope** giving each participant a linear tilt relative to
+    the population-level cyclic curve (not a separate nonlinear shape
+    per person).
 
 ------------------------------------------------------------------------
 
@@ -1416,12 +1426,14 @@ effects:
   across individuals.
   - The significant p-value (`p = 0.001`) indicates meaningful variation
     in symptom baseline levels.
-- **`s(cyclic_time_impute, id, bs = "re")`**:  
-  Captures **individual-specific deviations** from the average symptom
-  trajectory across the cycle.
+- **`s(cyclic_time_impute, id, bs = "re")`**:
+  Captures each participant’s **linear tilt** (steeper, flatter, or
+  reversed) relative to the population-level curve — not a separate
+  nonlinear shape per person.
   - The effect is **statistically significant** (`p = 8.36e-05`),
-    indicating nonlinear **heterogeneity** in how individuals experience
-    symptom changes across time.
+    indicating meaningful **heterogeneity** in the linear slope of
+    symptom change across individuals, on top of the shared
+    population-level nonlinear curve.
 
 ------------------------------------------------------------------------
 
@@ -1456,10 +1468,11 @@ effects:
 ------------------------------------------------------------------------
 
 > These results suggest that on average, `symptom` varies significantly
-> across the cycle in a nonlinear way, and that individuals also show
-> **unique, person-specific patterns** of `symptom` change over time –
-> i.e. there are significant individual differences in nonlinear trends
-> across the cycle.
+> across the cycle in a nonlinear way (shared population-level curve),
+> and that individuals also differ significantly in their **linear
+> slope** relative to that curve – i.e. some participants’ symptom
+> trajectories tilt more steeply up or down across the cycle than
+> others, on top of the same underlying nonlinear shape.
 
 ------------------------------------------------------------------------
 
