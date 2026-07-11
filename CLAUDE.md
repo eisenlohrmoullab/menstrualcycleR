@@ -13,6 +13,16 @@ This is **stage 03 of the menstrualcycleR pipeline** (PACTS scaling / the packag
 Upstream: `mcycr-02-anchor-prep` (final anchor selection). Downstream: `mcycr-04-horm-est-build`,
 `mcycr-05-*` (pacts-gam-pipeline).
 
+## Docs site & the Bibliography link
+
+The pkgdown site is the tracked `docs/` folder (GitHub Pages serves **main → /docs**; no CI, so
+rebuild `docs/` locally and commit to republish). The navbar **Bibliography** item and a line in
+`README.md` both link to <https://menstrualcycler.base44.app> — a **lab-owned base44 app**
+(auto-generated annotated bibliography of papers citing `menstrualcycleR` / PACTS). To move or
+retire it, edit the `biblio` component in `_pkgdown.yml` **and** the README line, then rebuild.
+Always **rebuild with every `CLAUDE*.md` hidden** — pkgdown renders any root `*.md` onto the
+public site.
+
 ## API contract
 
 The package API is a **published contract**: additive-only changes, version-bumped on every

@@ -19,6 +19,10 @@ To utilize the shinyapp, visit:
 For a tutorial on using `menstrualcycleR` visit:
 <https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.html>
 
+To browse an auto-generated, annotated bibliography of papers that cite,
+apply, or extend `menstrualcycleR` and PACTS, visit:
+<https://menstrualcycler.base44.app>
+
 For a history of changes by version, see the changelog:
 <https://eisenlohrmoullab.github.io/menstrualcycleR/news/index.html>
 

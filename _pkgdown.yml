@@ -2,3 +2,13 @@ url: https://eisenlohrmoullab.github.io/menstrualcycleR
 template:
   bootstrap: 5
 
+navbar:
+  structure:
+    left:  [reference, articles, biblio, news]
+    right: [search, github]
+  components:
+    biblio:
+      text: Bibliography
+      href: https://menstrualcycler.base44.app
+      aria-label: PACTS annotated bibliography
+
