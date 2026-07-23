@@ -61,6 +61,10 @@ check_docs_clean <- function(docs_dir = "docs") {
     raw <- readBin(f, what = "raw", n = sz)
     if (any(raw == as.raw(0L))) next            # NUL byte => binary asset, skip
     txt <- tryCatch(rawToChar(raw), error = function(e) "")
+    ## Allowlist: docs/pacts-explainer.html carries an intentional author byline
+    ## ("...PhD with Claude Code"). Strip that EXACT string before scanning so the byline
+    ## is not mistaken for a CLAUDE*.md leak -- any OTHER "claude" in the file still trips.
+    txt <- gsub("Created by Tory Eisenlohr-Moul, PhD with Claude Code", "", txt, fixed = TRUE)
     if (grepl("claude", txt, ignore.case = TRUE)) hits <- c(hits, f)
   }
   if (length(hits)) {

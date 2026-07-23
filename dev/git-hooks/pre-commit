@@ -23,10 +23,15 @@ offenders=$(
       | while IFS= read -r -d '' f; do
           printf '%s' "$f" | grep -qi 'claude' && printf '%s\n' "$f"
         done
-    # content-based: staged docs/ files whose INDEXED content contains claude
+    # content-based: staged docs/ files whose INDEXED content contains claude.
+    # Allowlist the intentional author byline in docs/pacts-explainer.html
+    # ("...PhD with Claude Code") by stripping that exact line before scanning; any
+    # OTHER "claude" (a real CLAUDE*.md leak) still trips.
     git diff --cached --name-only --diff-filter=ACM -z -- docs/ \
       | while IFS= read -r -d '' f; do
-          git show ":$f" 2>/dev/null | grep -Iqi 'claude' && printf '%s\n' "$f"
+          git show ":$f" 2>/dev/null \
+            | grep -vF 'Created by Tory Eisenlohr-Moul, PhD with Claude Code' \
+            | grep -Iqi 'claude' && printf '%s\n' "$f"
         done
   } | sort -u
 )
