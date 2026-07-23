@@ -4,9 +4,13 @@ template:
 
 navbar:
   structure:
-    left:  [reference, articles, biblio, news]
+    left:  [reference, articles, explainer, biblio, news]
     right: [search, github]
   components:
+    explainer:
+      text: Visual explainer
+      href: pacts-explainer.html
+      aria-label: PACTS visual explainer
     biblio:
       text: Bibliography
       href: https://menstrualcycler.base44.app

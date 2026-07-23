@@ -1,5 +1,11 @@
 # Getting Started with menstrualcycleR and Phase-Aligned Cycle Time Scaling (PACTS)
 
+> **New to PACTS?** For a visual, figure-driven walkthrough of *why*
+> forward/backward/combined cycle-day counting misaligns hormones across
+> cycles — and how PACTS fixes it, including the four PACTS variables
+> and the cyclic property — see the [**PACTS visual
+> explainer**](https://eisenlohrmoullab.github.io/menstrualcycleR/pacts-explainer.html).
+
 ## What is PACTS, Scaled Cycle Time, and `menstrualcycleR`?
 
 ### Understanding the Challenge

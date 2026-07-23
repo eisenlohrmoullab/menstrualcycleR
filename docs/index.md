@@ -19,6 +19,10 @@ To utilize the shinyapp, visit:
 For a tutorial on using `menstrualcycleR` visit:
 <https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.html>
 
+For a visual explainer of how PACTS works — why cycle-day counting
+misaligns hormones and how PACTS realigns them — visit:
+<https://eisenlohrmoullab.github.io/menstrualcycleR/pacts-explainer.html>
+
 To browse an auto-generated, annotated bibliography of papers that cite,
 apply, or extend `menstrualcycleR` and PACTS, visit:
 <https://menstrualcycler.base44.app>
