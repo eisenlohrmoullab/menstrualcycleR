@@ -1,0 +1,51 @@
+#!/bin/sh
+#
+# pre-commit guard: refuse to commit any staged file under docs/ that references "claude".
+#
+# The pkgdown site auto-renders root CLAUDE*.md files (CLAUDE.md and the private, gitignored
+# CLAUDE.local.md) into docs/ -- as docs/CLAUDE*.html AND inside search.json / llms.txt /
+# sitemap.xml -- and docs/ is published to GitHub Pages. This catches that leak even when a
+# human rebuilds the site in RStudio / GitHub Desktop (which won't use dev/build_docs.R's
+# hide-wrapper). Belt-and-suspenders with dev/build_docs.R's own post-build leak check.
+#
+# This hook is TRACKED at dev/git-hooks/pre-commit. Install it into .git/hooks (once per clone)
+# with dev/install-hooks.sh. Edit the tracked copy, then re-run the installer to sync.
+#
+# Scope is docs/ ONLY, so the legitimate root CLAUDE.md / CLAUDE.local.md are never blocked.
+# To bypass intentionally: git commit --no-verify.
+
+# Offending staged files: path under docs/ whose NAME contains "claude", OR whose staged
+# (indexed) text content contains "claude" (case-insensitive; -I skips binary like PNGs).
+offenders=$(
+  {
+    # path-based: staged docs/ files whose NAME contains claude
+    git diff --cached --name-only --diff-filter=ACM -z -- docs/ \
+      | while IFS= read -r -d '' f; do
+          printf '%s' "$f" | grep -qi 'claude' && printf '%s\n' "$f"
+        done
+    # content-based: staged docs/ files whose INDEXED content contains claude
+    git diff --cached --name-only --diff-filter=ACM -z -- docs/ \
+      | while IFS= read -r -d '' f; do
+          git show ":$f" 2>/dev/null | grep -Iqi 'claude' && printf '%s\n' "$f"
+        done
+  } | sort -u
+)
+
+if [ -n "$offenders" ]; then
+  echo "" >&2
+  echo "COMMIT BLOCKED: staged docs/ contains 'claude' -- likely a CLAUDE*.md pkgdown leak." >&2
+  echo "" >&2
+  echo "Offending staged file(s):" >&2
+  printf '  %s\n' $offenders >&2
+  echo "" >&2
+  echo "Fix: rebuild the site with CLAUDE*.md hidden, then re-stage docs/. From the repo root:" >&2
+  echo "  Rscript --vanilla dev/build_docs.R" >&2
+  echo "  (it hides CLAUDE*.md, rebuilds, and fails if any leak lands in docs/)" >&2
+  echo "Then verify clean:  grep -rIil claude docs/   # must print nothing" >&2
+  echo "" >&2
+  echo "To bypass intentionally (NOT recommended): git commit --no-verify" >&2
+  echo "" >&2
+  exit 1
+fi
+
+exit 0

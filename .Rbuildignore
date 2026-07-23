@@ -20,3 +20,4 @@
 ^_ADVERSARIAL_RESULTS\.json$
 ^_WORKFLOW_MAP\.svg$
 ^\.github$
+^dev$

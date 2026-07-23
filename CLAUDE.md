@@ -20,8 +20,22 @@ rebuild `docs/` locally and commit to republish). The navbar **Bibliography** it
 `README.md` both link to <https://menstrualcycler.base44.app> — a **lab-owned base44 app**
 (auto-generated annotated bibliography of papers citing `menstrualcycleR` / PACTS). To move or
 retire it, edit the `biblio` component in `_pkgdown.yml` **and** the README line, then rebuild.
-Always **rebuild with every `CLAUDE*.md` hidden** — pkgdown renders any root `*.md` onto the
-public site.
+
+**Rebuild the site with `dev/build_docs.R` — do not call `pkgdown::build_site()` directly.**
+pkgdown renders **every** root `*.md` (incl. `CLAUDE.md` and the private `CLAUDE.local.md`) onto
+the public site, so a raw build leaks them into `docs/`. `dev/build_docs.R` hides all `CLAUDE*.md`
+for the build, rebuilds, then **errors if any `docs/` file still references "claude"** — so the
+machine, not you, catches a leak:
+
+```
+Rscript --vanilla dev/build_docs.R            # hide → build_site → leak-check (from the repo root)
+Rscript --vanilla dev/build_docs.R --selftest # prove the leak scanner works, no build
+```
+
+Backstop: `dev/git-hooks/pre-commit` blocks committing any `docs/` file that references "claude"
+even if the site was rebuilt in RStudio/GitHub Desktop. It's tracked but not auto-installed —
+run `sh dev/install-hooks.sh` **once per clone** (it's machine-local, so re-run it after re-cloning
+or on another lab machine).
 
 ## API contract
 
