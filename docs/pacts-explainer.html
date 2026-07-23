@@ -502,7 +502,7 @@
     <div class="section-num">06 · FOUR PACTS VARIABLES</div>
     <h2>Pick the variable that matches your model</h2>
     <p class="lede">
-      Two centerings (menses vs ovulation) × two parameterizations (<code>cyclic_time</code> vs <code>scaled_cycleday</code>). <strong>Only the <code>cyclic_time</code> variants are cyclic</strong>: they force −1 and +1 to encode the same hormonal event so the function wraps continuously across the boundary, the requirement for cyclic cubic regression splines (<code>bs = "cc"</code> in <code>mgcv</code>). The <code>scaled_cycleday</code> variants are linear: they treat −1 and +1 as adjacent calendar days that happen to sit at opposite ends of the axis, with a real discontinuity between them. Curves below follow Nagpal et al. (2025), Fig. 2.
+      Two centerings (menses vs ovulation) × two parameterizations (<code>cyclic_time</code> vs <code>scaled_cycleday</code>). <strong>Only the <code>cyclic_time</code> variants are cyclic</strong>: they force −1 and +1 to encode the same hormonal event so the function wraps continuously across the boundary, the requirement for cyclic cubic regression splines (<code>bs = "cc"</code> in <code>mgcv</code>). The <code>scaled_cycleday</code> variants are linear: they treat −1 and +1 as adjacent calendar days that happen to sit at opposite ends of the axis, with a real discontinuity between them. Curves below use the BioCycle normative serum reference (215 women).
     </p>
 
     <div class="two-col" style="margin-top: 14px;">
@@ -518,10 +518,10 @@
           <rect x="177" y="30" width="6" height="105" fill="var(--menses)" opacity="0.9"/>
 
           <!-- E2 (E1G): peak at ovulation (both endpoints), mid-luteal secondary bump, perimenstrual drop, gentle rise through early/mid follicular into sharp late-follicular rise -->
-          <path d="M 20 44 C 42 74, 62 90, 84 90 C 104 90, 116 76, 132 78 C 150 82, 165 127, 180 128 C 236 128, 300 62, 340 44"
+          <path d="M 20 63.5 L 24 68.5 L 28 73.4 L 32 77.9 L 36 81.8 L 40 85.2 L 44 88.1 L 48 90.2 L 52 91.7 L 56 92.3 L 60 92.1 L 64 91.0 L 68 89.4 L 72 87.4 L 76 85.0 L 80 82.7 L 84 80.4 L 88 78.3 L 92 76.8 L 96 75.7 L 100 75.2 L 104 75.2 L 108 75.6 L 112 76.5 L 116 77.8 L 120 79.5 L 124 81.5 L 128 83.8 L 132 86.3 L 136 89.2 L 140 92.2 L 144 95.3 L 148 98.6 L 152 101.9 L 156 105.2 L 160 108.4 L 164 111.5 L 168 114.6 L 172 117.4 L 176 119.9 L 180 122.2 L 184 124.2 L 188 125.8 L 192 127.1 L 196 127.9 L 200 128.1 L 204 128.0 L 208 127.4 L 212 126.6 L 216 125.8 L 220 125.1 L 224 124.7 L 228 124.5 L 232 124.4 L 236 124.2 L 240 123.8 L 244 122.8 L 248 121.1 L 252 118.7 L 256 115.8 L 260 112.7 L 264 109.6 L 268 106.8 L 272 104.5 L 276 102.6 L 280 100.6 L 284 98.2 L 288 94.7 L 292 89.8 L 296 83.1 L 300 75.1 L 304 66.7 L 308 58.6 L 312 51.9 L 316 47.5 L 320 45.7 L 324 46.5 L 328 49.2 L 332 53.3 L 336 58.4 L 340 63.5"
                 fill="none" stroke="var(--e2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
           <!-- P4 (PDG): smooth rounded mid-luteal peak using cubic beziers with horizontal tangents, sharp perimenstrual drop, flat-low through follicular -->
-          <path d="M 20 130 L 40 130 C 65 130, 85 50, 100 50 C 115 50, 135 100, 150 122 Q 165 132 178 132 L 340 130"
+          <path d="M 20 108.8 L 24 106.5 L 28 103.6 L 32 100.2 L 36 96.4 L 40 92.3 L 44 88.1 L 48 83.7 L 52 79.3 L 56 75.0 L 60 70.9 L 64 67.0 L 68 63.5 L 72 60.2 L 76 57.3 L 80 54.8 L 84 52.8 L 88 51.2 L 92 50.1 L 96 49.6 L 100 49.5 L 104 50.0 L 108 51.0 L 112 52.3 L 116 54.2 L 120 56.4 L 124 59.0 L 128 62.0 L 132 65.3 L 136 68.9 L 140 72.7 L 144 76.7 L 148 80.7 L 152 84.7 L 156 88.7 L 160 92.4 L 164 95.9 L 168 99.1 L 172 101.9 L 176 104.4 L 180 106.5 L 184 108.3 L 188 109.8 L 192 111.0 L 196 111.9 L 200 112.7 L 204 113.1 L 208 113.5 L 212 113.6 L 216 113.7 L 220 113.8 L 224 113.8 L 228 113.9 L 232 114.0 L 236 114.1 L 240 114.2 L 244 114.3 L 248 114.4 L 252 114.4 L 256 114.4 L 260 114.3 L 264 114.3 L 268 114.3 L 272 114.3 L 276 114.3 L 280 114.3 L 284 114.2 L 288 114.2 L 292 114.1 L 296 113.9 L 300 113.7 L 304 113.5 L 308 113.2 L 312 113.0 L 316 112.9 L 320 112.8 L 324 112.6 L 328 112.2 L 332 111.6 L 336 110.4 L 340 108.8"
                 fill="none" stroke="var(--p4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5,3"/>
 
           <text x="20" y="148" class="axis-text" text-anchor="middle">−1</text>
@@ -556,10 +556,10 @@
           <rect x="177" y="30" width="6" height="105" fill="var(--ovulation)" opacity="0.7"/>
 
           <!-- E2: low at both menses endpoints, smooth gentle rise through follicular into sharp late-follicular rise to peak at ovulation (center), drop with mid-luteal secondary bump, sharp drop at perimenstrual -->
-          <path d="M 20 128 C 66 128, 150 50, 180 46 C 210 50, 216 90, 236 90 C 256 90, 268 76, 284 78 C 302 82, 316 127, 340 128"
+          <path d="M 20 122.2 L 24 124.2 L 28 125.8 L 32 127.1 L 36 127.9 L 40 128.1 L 44 128.0 L 48 127.4 L 52 126.6 L 56 125.8 L 60 125.1 L 64 124.7 L 68 124.5 L 72 124.4 L 76 124.2 L 80 123.8 L 84 122.8 L 88 121.1 L 92 118.7 L 96 115.8 L 100 112.7 L 104 109.6 L 108 106.8 L 112 104.5 L 116 102.6 L 120 100.6 L 124 98.2 L 128 94.7 L 132 89.8 L 136 83.1 L 140 75.1 L 144 66.7 L 148 58.6 L 152 51.9 L 156 47.5 L 160 45.7 L 164 46.5 L 168 49.2 L 172 53.3 L 176 58.4 L 180 63.5 L 184 68.5 L 188 73.4 L 192 77.9 L 196 81.8 L 200 85.2 L 204 88.1 L 208 90.2 L 212 91.7 L 216 92.3 L 220 92.1 L 224 91.0 L 228 89.4 L 232 87.4 L 236 85.0 L 240 82.7 L 244 80.4 L 248 78.3 L 252 76.8 L 256 75.7 L 260 75.2 L 264 75.2 L 268 75.6 L 272 76.5 L 276 77.8 L 280 79.5 L 284 81.5 L 288 83.8 L 292 86.3 L 296 89.2 L 300 92.2 L 304 95.3 L 308 98.6 L 312 101.9 L 316 105.2 L 320 108.4 L 324 111.5 L 328 114.6 L 332 117.4 L 336 119.9 L 340 122.2"
                 fill="none" stroke="var(--e2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
           <!-- P4: low through follicular, low at ovulation, smooth rounded mid-luteal peak (cubic, horizontal tangents), sharp perimenstrual drop -->
-          <path d="M 20 130 L 200 130 C 230 130, 245 50, 260 50 C 280 50, 305 125, 320 130 L 340 130"
+          <path d="M 20 106.5 L 24 108.3 L 28 109.8 L 32 111.0 L 36 111.9 L 40 112.7 L 44 113.1 L 48 113.5 L 52 113.6 L 56 113.7 L 60 113.8 L 64 113.8 L 68 113.9 L 72 114.0 L 76 114.1 L 80 114.2 L 84 114.3 L 88 114.4 L 92 114.4 L 96 114.4 L 100 114.3 L 104 114.3 L 108 114.3 L 112 114.3 L 116 114.3 L 120 114.3 L 124 114.2 L 128 114.2 L 132 114.1 L 136 113.9 L 140 113.7 L 144 113.5 L 148 113.2 L 152 113.0 L 156 112.9 L 160 112.8 L 164 112.6 L 168 112.2 L 172 111.6 L 176 110.4 L 180 108.8 L 184 106.5 L 188 103.6 L 192 100.2 L 196 96.4 L 200 92.3 L 204 88.1 L 208 83.7 L 212 79.3 L 216 75.0 L 220 70.9 L 224 67.0 L 228 63.5 L 232 60.2 L 236 57.3 L 240 54.8 L 244 52.8 L 248 51.2 L 252 50.1 L 256 49.6 L 260 49.5 L 264 50.0 L 268 51.0 L 272 52.3 L 276 54.2 L 280 56.4 L 284 59.0 L 288 62.0 L 292 65.3 L 296 68.9 L 300 72.7 L 304 76.7 L 308 80.7 L 312 84.7 L 316 88.7 L 320 92.4 L 324 95.9 L 328 99.1 L 332 101.9 L 336 104.4 L 340 106.5"
                 fill="none" stroke="var(--p4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5,3"/>
 
           <text x="20" y="148" class="axis-text" text-anchor="middle">−1</text>
@@ -594,17 +594,13 @@
           <rect x="177" y="30" width="6" height="105" fill="var(--menses)" opacity="0.9"/>
 
           <!-- E2: x=-1 is day AFTER ovulation (just past peak), x=+1 is day OF ovulation (peak). Both high but different. Gentle rise through early/mid follicular into sharp late-follicular rise. -->
-          <path d="M 20 60 C 44 78, 64 90, 84 90 C 104 90, 116 76, 132 78 C 150 82, 165 127, 180 128 C 236 128, 300 62, 340 44"
+          <path d="M 20 63.5 L 24 68.5 L 28 73.4 L 32 77.9 L 36 81.8 L 40 85.2 L 44 88.1 L 48 90.2 L 52 91.7 L 56 92.3 L 60 92.1 L 64 91.0 L 68 89.4 L 72 87.4 L 76 85.0 L 80 82.7 L 84 80.4 L 88 78.3 L 92 76.8 L 96 75.7 L 100 75.2 L 104 75.2 L 108 75.6 L 112 76.5 L 116 77.8 L 120 79.5 L 124 81.5 L 128 83.8 L 132 86.3 L 136 89.2 L 140 92.2 L 144 95.3 L 148 98.6 L 152 101.9 L 156 105.2 L 160 108.4 L 164 111.5 L 168 114.6 L 172 117.4 L 176 119.9 L 180 122.2 L 184 124.2 L 188 125.8 L 192 127.1 L 196 127.9 L 200 128.1 L 204 128.0 L 208 127.4 L 212 126.6 L 216 125.8 L 220 125.1 L 224 124.7 L 228 124.5 L 232 124.4 L 236 124.2 L 240 123.8 L 244 122.8 L 248 121.1 L 252 118.7 L 256 115.8 L 260 112.7 L 264 109.6 L 268 106.8 L 272 104.5 L 276 102.6 L 280 100.6 L 284 98.2 L 288 94.7 L 292 89.8 L 296 83.1 L 300 75.1 L 304 66.7 L 308 58.6 L 312 51.9 L 316 47.5 L 320 45.7 L 324 46.5 L 328 49.2 L 332 53.3 L 336 58.4 L 340 63.5"
                 fill="none" stroke="var(--e2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
           <!-- P4: x=-1 is day after ov (just starting to rise from low), x=+1 is day OF ov (still low). Smooth rounded mid-luteal peak. -->
-          <path d="M 20 122 C 50 122, 80 50, 100 50 C 115 50, 135 100, 150 122 Q 165 132 178 132 L 340 130"
+          <path d="M 20 108.8 L 24 106.5 L 28 103.6 L 32 100.2 L 36 96.4 L 40 92.3 L 44 88.1 L 48 83.7 L 52 79.3 L 56 75.0 L 60 70.9 L 64 67.0 L 68 63.5 L 72 60.2 L 76 57.3 L 80 54.8 L 84 52.8 L 88 51.2 L 92 50.1 L 96 49.6 L 100 49.5 L 104 50.0 L 108 51.0 L 112 52.3 L 116 54.2 L 120 56.4 L 124 59.0 L 128 62.0 L 132 65.3 L 136 68.9 L 140 72.7 L 144 76.7 L 148 80.7 L 152 84.7 L 156 88.7 L 160 92.4 L 164 95.9 L 168 99.1 L 172 101.9 L 176 104.4 L 180 106.5 L 184 108.3 L 188 109.8 L 192 111.0 L 196 111.9 L 200 112.7 L 204 113.1 L 208 113.5 L 212 113.6 L 216 113.7 L 220 113.8 L 224 113.8 L 228 113.9 L 232 114.0 L 236 114.1 L 240 114.2 L 244 114.3 L 248 114.4 L 252 114.4 L 256 114.4 L 260 114.3 L 264 114.3 L 268 114.3 L 272 114.3 L 276 114.3 L 280 114.3 L 284 114.2 L 288 114.2 L 292 114.1 L 296 113.9 L 300 113.7 L 304 113.5 L 308 113.2 L 312 113.0 L 316 112.9 L 320 112.8 L 324 112.6 L 328 112.2 L 332 111.6 L 336 110.4 L 340 108.8"
                 fill="none" stroke="var(--p4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5,3"/>
 
           <!-- Endpoint marker dots to highlight asymmetry -->
-          <circle cx="20" cy="60" r="2.5" fill="var(--e2)"/>
-          <circle cx="340" cy="44" r="2.5" fill="var(--e2)"/>
-          <circle cx="20" cy="122" r="2" fill="var(--p4)"/>
-          <circle cx="340" cy="130" r="2" fill="var(--p4)"/>
 
           <text x="20" y="148" class="axis-text" text-anchor="middle">−1</text>
           <text x="180" y="148" class="axis-text" text-anchor="middle">0</text>
@@ -616,7 +612,7 @@
           <text x="100" y="22" class="axis-text" text-anchor="middle" font-weight="600">LUTEAL</text>
           <text x="260" y="22" class="axis-text" text-anchor="middle" font-weight="600">FOLLICULAR</text>
 
-          <text x="180" y="175" class="axis-text" text-anchor="middle" font-style="italic" fill="var(--warn)">y(−1) ≠ y(+1), adjacent days: post-ov vs at-ov</text>
+          <text x="180" y="175" class="axis-text" text-anchor="middle" font-style="italic" fill="var(--warn)">linear: −1 and +1 are adjacent days, not one wrapped point</text>
         </svg>
         <div class="graph-legend">
           <span class="lg-item"><span class="sw line" style="color:var(--e2); border-top-style:solid; border-top-width:2.5px;"></span>E2</span>
@@ -638,17 +634,13 @@
           <rect x="177" y="30" width="6" height="105" fill="var(--ovulation)" opacity="0.7"/>
 
           <!-- E2: x=-1 is day of menses (low), x=+1 is day before menses (still elevated from luteal, hasn't fully dropped). Smooth gentle rise through follicular. -->
-          <path d="M 20 128 C 66 128, 150 50, 180 46 C 210 50, 216 90, 236 90 C 256 90, 268 76, 284 78 C 302 82, 316 108, 340 106"
+          <path d="M 20 122.2 L 24 124.2 L 28 125.8 L 32 127.1 L 36 127.9 L 40 128.1 L 44 128.0 L 48 127.4 L 52 126.6 L 56 125.8 L 60 125.1 L 64 124.7 L 68 124.5 L 72 124.4 L 76 124.2 L 80 123.8 L 84 122.8 L 88 121.1 L 92 118.7 L 96 115.8 L 100 112.7 L 104 109.6 L 108 106.8 L 112 104.5 L 116 102.6 L 120 100.6 L 124 98.2 L 128 94.7 L 132 89.8 L 136 83.1 L 140 75.1 L 144 66.7 L 148 58.6 L 152 51.9 L 156 47.5 L 160 45.7 L 164 46.5 L 168 49.2 L 172 53.3 L 176 58.4 L 180 63.5 L 184 68.5 L 188 73.4 L 192 77.9 L 196 81.8 L 200 85.2 L 204 88.1 L 208 90.2 L 212 91.7 L 216 92.3 L 220 92.1 L 224 91.0 L 228 89.4 L 232 87.4 L 236 85.0 L 240 82.7 L 244 80.4 L 248 78.3 L 252 76.8 L 256 75.7 L 260 75.2 L 264 75.2 L 268 75.6 L 272 76.5 L 276 77.8 L 280 79.5 L 284 81.5 L 288 83.8 L 292 86.3 L 296 89.2 L 300 92.2 L 304 95.3 L 308 98.6 L 312 101.9 L 316 105.2 L 320 108.4 L 324 111.5 L 328 114.6 L 332 117.4 L 336 119.9 L 340 122.2"
                 fill="none" stroke="var(--e2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
           <!-- P4: x=-1 low (at menses), x=+1 still elevated (day before menses, dropping fast but not yet at baseline). Smooth rounded mid-luteal peak. -->
-          <path d="M 20 130 L 200 130 C 230 130, 245 50, 260 50 C 280 50, 305 105, 340 105"
+          <path d="M 20 106.5 L 24 108.3 L 28 109.8 L 32 111.0 L 36 111.9 L 40 112.7 L 44 113.1 L 48 113.5 L 52 113.6 L 56 113.7 L 60 113.8 L 64 113.8 L 68 113.9 L 72 114.0 L 76 114.1 L 80 114.2 L 84 114.3 L 88 114.4 L 92 114.4 L 96 114.4 L 100 114.3 L 104 114.3 L 108 114.3 L 112 114.3 L 116 114.3 L 120 114.3 L 124 114.2 L 128 114.2 L 132 114.1 L 136 113.9 L 140 113.7 L 144 113.5 L 148 113.2 L 152 113.0 L 156 112.9 L 160 112.8 L 164 112.6 L 168 112.2 L 172 111.6 L 176 110.4 L 180 108.8 L 184 106.5 L 188 103.6 L 192 100.2 L 196 96.4 L 200 92.3 L 204 88.1 L 208 83.7 L 212 79.3 L 216 75.0 L 220 70.9 L 224 67.0 L 228 63.5 L 232 60.2 L 236 57.3 L 240 54.8 L 244 52.8 L 248 51.2 L 252 50.1 L 256 49.6 L 260 49.5 L 264 50.0 L 268 51.0 L 272 52.3 L 276 54.2 L 280 56.4 L 284 59.0 L 288 62.0 L 292 65.3 L 296 68.9 L 300 72.7 L 304 76.7 L 308 80.7 L 312 84.7 L 316 88.7 L 320 92.4 L 324 95.9 L 328 99.1 L 332 101.9 L 336 104.4 L 340 106.5"
                 fill="none" stroke="var(--p4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5,3"/>
 
           <!-- Endpoint marker dots -->
-          <circle cx="20" cy="128" r="2.5" fill="var(--e2)"/>
-          <circle cx="340" cy="106" r="2.5" fill="var(--e2)"/>
-          <circle cx="20" cy="130" r="2" fill="var(--p4)"/>
-          <circle cx="340" cy="105" r="2" fill="var(--p4)"/>
 
           <text x="20" y="148" class="axis-text" text-anchor="middle">−1</text>
           <text x="180" y="148" class="axis-text" text-anchor="middle">0</text>
@@ -660,7 +652,7 @@
           <text x="100" y="22" class="axis-text" text-anchor="middle" font-weight="600">FOLLICULAR</text>
           <text x="260" y="22" class="axis-text" text-anchor="middle" font-weight="600">LUTEAL</text>
 
-          <text x="180" y="175" class="axis-text" text-anchor="middle" font-style="italic" fill="var(--warn)">y(−1) ≠ y(+1), adjacent days: at-menses vs pre-menses</text>
+          <text x="180" y="175" class="axis-text" text-anchor="middle" font-style="italic" fill="var(--warn)">linear: −1 and +1 are adjacent days, not one wrapped point</text>
         </svg>
         <div class="graph-legend">
           <span class="lg-item"><span class="sw line" style="color:var(--e2); border-top-style:solid; border-top-width:2.5px;"></span>E2</span>
@@ -790,46 +782,46 @@
     <div class="caption">Values from Nagpal et al. (2025), Tables S1–S10.</div>
 
     <div class="figure" style="margin-top:20px;">
-      <svg viewBox="0 0 780 350" xmlns="http://www.w3.org/2000/svg">
-    <text x="26" y="42" font-size="13" font-weight="700" fill="var(--ink)">A</text>
-    <rect x="136" y="30" width="50" height="120" fill="#56B4E9" fill-opacity="0.16"/>
-    <rect x="261" y="30" width="176" height="120" fill="#56B4E9" fill-opacity="0.16"/>
-    <rect x="57" y="30" width="6" height="120" fill="#c8c8c8"/>
-    <rect x="397" y="30" width="6" height="120" fill="#c8c8c8"/>
-    <text x="60" y="26" text-anchor="middle" font-size="9" fill="var(--subtle)">Menses</text>
-    <text x="400" y="26" text-anchor="middle" font-size="9" fill="var(--subtle)">Ovulation</text>
-    <line x1="60" y1="105" x2="740" y2="105" stroke="#e4e4e4" stroke-width="0.75" stroke-dasharray="3,3"/>
-    <path d="M 60.0 118.5 L 85.2 124.1 L 110.4 126.2 L 135.6 123.7 L 160.7 120.6 L 185.9 118.1 L 211.1 111.8 L 236.3 106.1 L 261.5 96.2 L 286.7 86.2 L 311.9 74.0 L 337.0 65.8 L 362.2 56.8 L 387.4 39.6 L 412.6 40.9 L 437.8 62.6 L 463.0 74.7 L 488.1 84.9 L 513.3 84.4 L 538.5 85.0 L 563.7 84.2 L 588.9 79.3 L 614.1 77.8 L 639.3 76.9 L 664.4 83.8 L 689.6 81.2 L 714.8 94.8 L 740.0 106.7 L 740.0 131.3 L 714.8 122.5 L 689.6 112.0 L 664.4 114.6 L 639.3 112.3 L 614.1 109.7 L 588.9 107.7 L 563.7 109.3 L 538.5 112.2 L 513.3 118.5 L 488.1 118.7 L 463.0 114.7 L 437.8 109.4 L 412.6 94.5 L 387.4 96.0 L 362.2 120.7 L 337.0 121.0 L 311.9 124.7 L 286.7 131.9 L 261.5 131.2 L 236.3 128.9 L 211.1 134.6 L 185.9 135.8 L 160.7 136.9 L 135.6 138.3 L 110.4 138.7 L 85.2 139.0 L 60.0 135.4 Z" fill="#8a8a8a" fill-opacity="0.30"/>
-    <path d="M 60.0 126.9 L 85.2 131.6 L 110.4 132.4 L 135.6 131.0 L 160.7 128.8 L 185.9 127.0 L 211.1 123.2 L 236.3 117.5 L 261.5 113.8 L 286.7 109.0 L 311.9 99.3 L 337.0 93.4 L 362.2 88.7 L 387.4 67.8 L 412.6 67.7 L 437.8 86.0 L 463.0 94.7 L 488.1 101.8 L 513.3 101.4 L 538.5 98.6 L 563.7 96.8 L 588.9 93.5 L 614.1 93.7 L 639.3 94.6 L 664.4 99.2 L 689.6 96.6 L 714.8 108.7 L 740.0 119.0" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="230" y="14" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--muted)">FOLLICULAR</text>
-    <text x="570" y="14" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--muted)">LUTEAL</text>
-    <line x1="60" y1="150" x2="740" y2="150" stroke="#bbb" stroke-width="0.75"/>
-    <text x="60" y="163" text-anchor="middle" class="axis-text">1</text>
-    <text x="211" y="163" text-anchor="middle" class="axis-text">7</text>
-    <text x="387" y="163" text-anchor="middle" class="axis-text">14</text>
-    <text x="564" y="163" text-anchor="middle" class="axis-text">21</text>
-    <text x="740" y="163" text-anchor="middle" class="axis-text">28</text>
-    <text x="400" y="177" text-anchor="middle" class="axis-text" font-style="italic">Cycle day (menses count)</text>
-    <text x="30" y="90" text-anchor="middle" class="axis-text" transform="rotate(-90 30 90)">Mean E1G (person z)</text>
-    <text x="26" y="217" font-size="13" font-weight="700" fill="var(--ink)">B</text>
-    <rect x="57" y="205" width="6" height="120" fill="#c8c8c8"/>
-    <rect x="397" y="205" width="6" height="120" fill="#c8c8c8"/>
-    <text x="60" y="201" text-anchor="middle" font-size="9" fill="var(--subtle)">Menses</text>
-    <text x="400" y="201" text-anchor="middle" font-size="9" fill="var(--subtle)">Ovulation</text>
-    <line x1="60" y1="280" x2="740" y2="280" stroke="#e4e4e4" stroke-width="0.75" stroke-dasharray="3,3"/>
-    <path d="M 60.0 294.0 L 84.1 298.6 L 108.6 299.3 L 132.8 300.7 L 157.2 299.9 L 181.4 297.1 L 205.9 288.2 L 230.0 284.8 L 254.1 286.1 L 278.6 282.6 L 302.8 269.4 L 327.2 251.3 L 351.4 234.2 L 375.9 221.8 L 400.0 208.8 L 424.1 230.7 L 448.6 252.4 L 472.8 258.3 L 497.2 259.7 L 521.4 256.7 L 545.9 261.5 L 570.0 257.5 L 594.1 253.1 L 618.6 253.7 L 642.8 255.1 L 667.2 258.9 L 691.4 259.0 L 715.9 268.6 L 740.0 280.4 L 740.0 306.9 L 715.9 297.9 L 691.4 289.3 L 667.2 288.0 L 642.8 289.6 L 618.6 286.5 L 594.1 282.2 L 570.0 286.3 L 545.9 286.3 L 521.4 288.3 L 497.2 295.6 L 472.8 292.3 L 448.6 289.9 L 424.1 281.8 L 400.0 261.5 L 375.9 267.9 L 351.4 279.6 L 327.2 289.9 L 302.8 297.5 L 278.6 303.4 L 254.1 305.7 L 230.0 304.6 L 205.9 307.6 L 181.4 308.5 L 157.2 312.2 L 132.8 312.4 L 108.6 315.7 L 84.1 314.4 L 60.0 311.7 Z" fill="#8a8a8a" fill-opacity="0.30"/>
-    <path d="M 60.0 302.9 L 84.1 306.4 L 108.6 307.5 L 132.8 306.6 L 157.2 306.0 L 181.4 302.8 L 205.9 297.9 L 230.0 294.7 L 254.1 295.9 L 278.6 293.0 L 302.8 283.4 L 327.2 270.6 L 351.4 256.9 L 375.9 244.8 L 400.0 235.2 L 424.1 256.2 L 448.6 271.1 L 472.8 275.3 L 497.2 277.7 L 521.4 272.5 L 545.9 273.9 L 570.0 271.9 L 594.1 267.6 L 618.6 270.1 L 642.8 272.4 L 667.2 273.4 L 691.4 274.1 L 715.9 283.2 L 740.0 293.7" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="230" y="189" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--muted)">FOLLICULAR</text>
-    <text x="570" y="189" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--muted)">LUTEAL</text>
-    <line x1="60" y1="325" x2="740" y2="325" stroke="#bbb" stroke-width="0.75"/>
-    <text x="60" y="338" text-anchor="middle" class="axis-text">Menses</text>
-    <text x="230" y="338" text-anchor="middle" class="axis-text">50%F</text>
-    <text x="400" y="338" text-anchor="middle" class="axis-text">Ov</text>
-    <text x="570" y="338" text-anchor="middle" class="axis-text">50%L</text>
-    <text x="740" y="338" text-anchor="middle" class="axis-text">100%L</text>
-    <text x="400" y="352" text-anchor="middle" class="axis-text" font-style="italic">Percentage of phase elapsed (PACTS)</text>
-    <text x="30" y="265" text-anchor="middle" class="axis-text" transform="rotate(-90 30 265)">Mean E1G (person z)</text>
-  </svg>
+      <div style="max-width:520px; margin:0 auto;"><svg style="min-width:0" viewBox="0 0 670 590" xmlns="http://www.w3.org/2000/svg">
+    <text x="70" y="52" font-size="14" font-weight="700" fill="var(--ink)">A</text>
+    <rect x="160" y="60" width="33" height="210" fill="#56B4E9" fill-opacity="0.16"/>
+    <rect x="243" y="60" width="117" height="210" fill="#56B4E9" fill-opacity="0.16"/>
+    <rect x="107" y="60" width="6" height="210" fill="#c8c8c8"/>
+    <rect x="332" y="60" width="6" height="210" fill="#c8c8c8"/>
+    <text x="110" y="55" text-anchor="middle" font-size="10" fill="var(--subtle)">Menses</text>
+    <text x="335" y="55" text-anchor="middle" font-size="10" fill="var(--subtle)">Ovulation</text>
+    <line x1="110" y1="175" x2="560" y2="175" stroke="#e4e4e4" stroke-width="0.75" stroke-dasharray="3,3"/>
+    <path d="M 110.0 197.6 L 126.7 207.1 L 143.3 210.5 L 160.0 206.3 L 176.7 201.2 L 193.3 197.1 L 210.0 186.3 L 226.7 176.8 L 243.3 160.3 L 260.0 143.3 L 276.7 122.8 L 293.3 109.1 L 310.0 93.9 L 326.7 65.2 L 343.3 67.3 L 360.0 103.8 L 376.7 124.0 L 393.3 141.2 L 410.0 140.3 L 426.7 141.4 L 443.3 140.1 L 460.0 131.8 L 476.7 129.3 L 493.3 127.8 L 510.0 139.3 L 526.7 135.0 L 543.3 157.9 L 560.0 177.9 L 560.0 219.3 L 543.3 204.4 L 526.7 186.8 L 510.0 191.2 L 493.3 187.3 L 476.7 182.9 L 460.0 179.6 L 443.3 182.2 L 426.7 187.2 L 410.0 197.6 L 393.3 198.0 L 376.7 191.3 L 360.0 182.3 L 343.3 157.4 L 326.7 159.9 L 310.0 201.4 L 293.3 201.9 L 276.7 208.1 L 260.0 220.3 L 243.3 219.1 L 226.7 215.2 L 210.0 224.6 L 193.3 226.8 L 176.7 228.6 L 160.0 230.9 L 143.3 231.5 L 126.7 232.2 L 110.0 226.0 Z" fill="#8a8a8a" fill-opacity="0.30"/>
+    <path d="M 110.0 211.8 L 126.7 219.6 L 143.3 221.0 L 160.0 218.6 L 176.7 214.9 L 193.3 211.9 L 210.0 205.5 L 226.7 196.0 L 243.3 189.7 L 260.0 181.8 L 276.7 165.5 L 293.3 155.5 L 310.0 147.7 L 326.7 112.5 L 343.3 112.3 L 360.0 143.1 L 376.7 157.7 L 393.3 169.6 L 410.0 169.0 L 426.7 164.3 L 443.3 161.2 L 460.0 155.7 L 476.7 156.1 L 493.3 157.6 L 510.0 165.3 L 526.7 160.9 L 543.3 181.1 L 560.0 198.6" fill="none" stroke="#222" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="222" y="41" text-anchor="middle" font-size="10" font-weight="700" fill="var(--muted)">FOLLICULAR</text>
+    <text x="448" y="41" text-anchor="middle" font-size="10" font-weight="700" fill="var(--muted)">LUTEAL</text>
+    <line x1="110" y1="270" x2="560" y2="270" stroke="#bbb" stroke-width="0.75"/>
+    <text x="110" y="285" text-anchor="middle" class="axis-text">1</text>
+    <text x="210" y="285" text-anchor="middle" class="axis-text">7</text>
+    <text x="327" y="285" text-anchor="middle" class="axis-text">14</text>
+    <text x="443" y="285" text-anchor="middle" class="axis-text">21</text>
+    <text x="560" y="285" text-anchor="middle" class="axis-text">28</text>
+    <text x="335" y="300" text-anchor="middle" class="axis-text" font-style="italic">Cycle day (menses count)</text>
+    <text x="68" y="165" text-anchor="middle" class="axis-text" transform="rotate(-90 68 165)">Mean E1G (person z)</text>
+    <text x="70" y="382" font-size="14" font-weight="700" fill="var(--ink)">B</text>
+    <rect x="107" y="385" width="6" height="170" fill="#c8c8c8"/>
+    <rect x="332" y="385" width="6" height="170" fill="#c8c8c8"/>
+    <text x="110" y="380" text-anchor="middle" font-size="10" fill="var(--subtle)">Menses</text>
+    <text x="335" y="380" text-anchor="middle" font-size="10" fill="var(--subtle)">Ovulation</text>
+    <line x1="110" y1="500" x2="560" y2="500" stroke="#e4e4e4" stroke-width="0.75" stroke-dasharray="3,3"/>
+    <path d="M 110.0 523.6 L 126.0 531.2 L 142.2 532.5 L 158.1 534.8 L 174.4 533.3 L 190.3 528.7 L 206.5 513.7 L 222.5 508.1 L 238.5 510.3 L 254.7 504.4 L 270.6 482.2 L 286.9 451.9 L 302.8 423.1 L 319.0 402.3 L 335.0 380.5 L 351.0 417.2 L 367.2 453.6 L 383.1 463.6 L 399.4 465.9 L 415.3 460.9 L 431.5 468.9 L 447.5 462.2 L 463.5 454.7 L 479.7 455.8 L 495.6 458.2 L 511.9 464.5 L 527.8 464.7 L 544.0 480.8 L 560.0 500.8 L 560.0 545.2 L 544.0 530.1 L 527.8 515.6 L 511.9 513.4 L 495.6 516.1 L 479.7 510.9 L 463.5 503.8 L 447.5 510.5 L 431.5 510.6 L 415.3 513.9 L 399.4 526.2 L 383.1 520.6 L 367.2 516.6 L 351.0 503.0 L 335.0 468.9 L 319.0 479.6 L 302.8 499.4 L 286.9 516.7 L 270.6 529.4 L 254.7 539.3 L 238.5 543.2 L 222.5 541.4 L 206.5 546.4 L 190.3 547.8 L 174.4 554.1 L 158.1 554.4 L 142.2 560.0 L 126.0 557.7 L 110.0 553.2 Z" fill="#8a8a8a" fill-opacity="0.30"/>
+    <path d="M 110.0 538.4 L 126.0 544.4 L 142.2 546.2 L 158.1 544.6 L 174.4 543.7 L 190.3 538.3 L 206.5 530.1 L 222.5 524.7 L 238.5 526.8 L 254.7 521.8 L 270.6 505.8 L 286.9 484.3 L 302.8 461.2 L 319.0 440.9 L 335.0 424.7 L 351.0 460.1 L 367.2 485.1 L 383.1 492.1 L 399.4 496.1 L 415.3 487.4 L 431.5 489.8 L 447.5 486.4 L 463.5 479.3 L 479.7 483.3 L 495.6 487.1 L 511.9 489.0 L 527.8 490.1 L 544.0 505.5 L 560.0 523.0" fill="none" stroke="#222" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="222" y="366" text-anchor="middle" font-size="10" font-weight="700" fill="var(--muted)">FOLLICULAR</text>
+    <text x="448" y="366" text-anchor="middle" font-size="10" font-weight="700" fill="var(--muted)">LUTEAL</text>
+    <line x1="110" y1="555" x2="560" y2="555" stroke="#bbb" stroke-width="0.75"/>
+    <text x="110" y="570" text-anchor="middle" class="axis-text">Menses</text>
+    <text x="222" y="570" text-anchor="middle" class="axis-text">50%F</text>
+    <text x="335" y="570" text-anchor="middle" class="axis-text">Ov</text>
+    <text x="448" y="570" text-anchor="middle" class="axis-text">50%L</text>
+    <text x="560" y="570" text-anchor="middle" class="axis-text">100%L</text>
+    <text x="335" y="585" text-anchor="middle" class="axis-text" font-style="italic">Percentage of phase elapsed (PACTS)</text>
+    <text x="68" y="470" text-anchor="middle" class="axis-text" transform="rotate(-90 68 470)">Mean E1G (person z)</text>
+  </svg></div>
       <div class="graph-legend">
         <span class="lg-item"><span class="sw line" style="color:#222; border-top-style:solid; border-top-width:2px;"></span>Mean E1G (estradiol)</span>
         <span class="lg-item"><span class="sw" style="background:#8a8a8a; opacity:0.30"></span>±1 SD (within-time-point spread)</span>
@@ -837,6 +829,7 @@
       </div>
     </div>
     <div class="caption">Real BEARS urinary E1G (estradiol), person-standardized. Counting days forward/backward from menses (A) lets ovulation float to a variable position, so the ovulatory rise smears and the within-time-point spread balloons (blue); PACTS scaling (B) pins menses and ovulation, sharpening the mean E1G peak and shrinking the spread. Same data, both panels; only the time axis differs. After Nagpal et al. (2025), Fig. 3.</div>
+
 
   </div>
 
