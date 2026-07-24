@@ -1,3 +1,24 @@
+# menstrualcycleR 0.1.6
+
+* New opt-in argument `impute_next_menses` in `pacts_scaling()` (default `FALSE`).
+  When `TRUE`, a next-menses onset is imputed *forward* from a biomarker-confirmed
+  ovulation that has no recorded closing menses, placed at `ovulation +
+  next_menses_luteal_days` (default 14 days, the population-average luteal length,
+  i.e. the "LH+15" / last-follicular-day convention). That cycle then becomes
+  scalable instead of being dropped for a missing anchor. Imputed onsets are
+  flagged in a new `menses_impute` column so imputed and observed onsets stay
+  distinguishable.
+* Two companion arguments tune the rule: `next_menses_luteal_days` (default 14)
+  and `next_menses_max_window` (default 20; skip imputation for an ovulation if an
+  observed menses already closes the cycle within that many days).
+* This complements the existing ovulation imputation, which imputes ovulation
+  *backward* from an observed menses (menses minus 15). The package can now close a
+  cycle from either direction when one anchor is missing.
+* The default (`FALSE`) leaves all previous behavior byte for byte identical; only
+  callers who opt in see any change. Only the general rule is applied. Study or
+  protocol specific gating (for example blocking imputation across treatment phases
+  or documented off-study breaks) remains the caller's responsibility.
+
 # menstrualcycleR 0.1.5
 
 * Maintainer changed to Tory Eisenlohr-Moul.
