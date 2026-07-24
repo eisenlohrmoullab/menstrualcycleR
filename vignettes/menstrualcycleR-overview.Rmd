@@ -81,6 +81,12 @@ This backward-counting method is preferable to mid-cycle assumptions, which ofte
 
 Functions in `menstrualcycleR` automatically flag imputed ovulation using a binary column (`ovtoday_impute`) so that users can report and model uncertainty.
 
+#### Optional: imputing the next menses from a confirmed ovulation
+
+The imputation above works in one direction: given an observed **menses onset**, it estimates the **ovulation** 15 days earlier. The reverse case also happens: a cycle has a **biomarker-confirmed ovulation** but the **next menses onset was never recorded** (the participant stopped surveying, or the closing period was missed). By default such a cycle cannot be scaled, because there is no anchor to close it.
+
+Setting `impute_next_menses = TRUE` in `pacts_scaling()` opts in to closing that cycle by imputing a menses onset **forward** from the confirmed ovulation, placed at `ovulation + next_menses_luteal_days` (default 14 days, so ovulation + 14 = the last follicular day, i.e. the "LH+15" convention). Imputation is skipped when an observed menses already closes the cycle within `next_menses_max_window` days (default 20), so a recorded period is never overridden. Imputed onsets are flagged in a new `menses_impute` column, exactly as imputed ovulations are flagged in `ovtoday_impute`, so the two can be reported separately. This option is **off by default**, so existing analyses are unchanged; only the general rule is applied, and any study-specific gating (for example, not imputing across a treatment phase or a documented off-study break) is left to the caller.
+
 ---
 
 ### Purpose and Use Cases
@@ -262,6 +268,9 @@ This function adds standardized cycle time variables to your dataset.
 - `ovtoday_impute`:  
   A binary indicator identifying **imputed ovulation days** (value = 1), estimated as 15 days before the next menses onset.
 
+- `menses_impute`:
+  Present only when `impute_next_menses = TRUE`. A binary indicator identifying **imputed menses onsets** (value = 1) placed forward from a confirmed ovulation (at ovulation + 14 days by default), distinguishing them from observed onsets.
+
 ---
 
 #### 2. Data Checking Functions
@@ -409,7 +418,10 @@ names(cycle_df_scaled)
 
 - `ovtoday_impute`:  
   A binary indicator identifying **imputed ovulation days** (value = 1), estimated as 15 days before the next menses onset.
-  
+
+- `menses_impute`:
+  Present only when `impute_next_menses = TRUE`. A binary indicator identifying **imputed menses onsets** (value = 1) placed forward from a confirmed ovulation (ovulation + 14 days by default).
+
 - `mcyclength`: 
   Indicates the length of a menses-to-menses cycle an observation belongs to. 
   

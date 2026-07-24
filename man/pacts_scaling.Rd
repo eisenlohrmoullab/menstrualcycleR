@@ -11,7 +11,10 @@ pacts_scaling(
   menses,
   ovtoday,
   lower_cyclength_bound = 21,
-  upper_cyclength_bound = 35
+  upper_cyclength_bound = 35,
+  impute_next_menses = FALSE,
+  next_menses_luteal_days = 14,
+  next_menses_max_window = 20
 )
 }
 \arguments{
@@ -33,6 +36,12 @@ pacts_scaling(
 \item{lower_cyclength_bound}{Numeric lower bound of cycle lengths to include in scaling. Default is 21.}
 
 \item{upper_cyclength_bound}{Numeric upper bound of cycle lengths to include in scaling. Default is 35.}
+
+\item{impute_next_menses}{Logical; default \code{FALSE}. When \code{TRUE}, opt in to imputing a \emph{next-menses onset} from a biomarker-confirmed ovulation that has no recorded closing menses, so that cycle becomes scalable instead of being dropped for a missing anchor. This is the mirror image of the built-in ovulation imputation (which imputes ovulation \emph{backward} from an observed menses at menses minus 15): here a menses onset is imputed \emph{forward} from a confirmed ovulation, at \code{ovulation + next_menses_luteal_days}. Leaving \code{FALSE} keeps all previous behavior byte-for-byte identical. Only the general rule is applied; any study-specific gating (for example, blocking imputation across treatment phases or documented off-study breaks, or trust-ordered de-duplication of anchors) is the caller's responsibility to apply on top.}
+
+\item{next_menses_luteal_days}{Numeric; days after a confirmed ovulation at which to place the imputed next-menses onset when \code{impute_next_menses = TRUE}. Default \code{14} (the population-average luteal length; ovulation + 14 is the last follicular day, i.e. the "LH+15" convention).}
+
+\item{next_menses_max_window}{Numeric; when \code{impute_next_menses = TRUE}, skip imputation for a confirmed ovulation if an observed menses onset already falls within this many days after it. Default \code{20}.}
 }
 \value{
 The original data frame with the following additional columns:
@@ -42,6 +51,7 @@ The original data frame with the following additional columns:
 \item \code{scaled_cycleday_ov}: A cycle time variable centered on ovulation day (\code{ovtoday == 1} → 0), ranging from -1 (start of follicular phase) to +1 (end of luteal phase). Only includes cycles with confirmed ovulation.
 \item \code{scaled_cycleday_imp_ov}: Same as above, but uses imputed ovulation (\code{ovtoday_impute == 1}) for cycles lacking biomarker confirmation. Centered on either confirmed or imputed ovulation.
 \item \code{ovtoday_impute}: A binary column indicating imputed ovulation days (value \code{1}) for cycles without confirmed ovulation, estimated as 15 days before menses onset.
+\item \code{menses_impute}: Present only when \code{impute_next_menses = TRUE}. A binary column marking menses onsets that were \emph{imputed forward} from a confirmed ovulation (value \code{1}) versus observed onsets (\code{0}). Report the imputed-versus-observed onset rate for transparency, just as you would for imputed ovulation.
 }
 }
 \description{
