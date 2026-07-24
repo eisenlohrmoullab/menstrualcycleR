@@ -48,8 +48,8 @@ impute_next_menses_onsets <- function(data, id, date, menses, ovtoday,
   is_mens <- !is.na(data[[mn]]) & data[[mn]] == 1
   if (!any(is_ov)) { data$menses_impute <- 0L; return(data) }
 
-  ov  <- tibble::tibble(id = data[[idn]][is_ov],   ov_date = d_date[is_ov])
-  men <- tibble::tibble(id = data[[idn]][is_mens], m_date  = d_date[is_mens])
+  ov  <- data.frame(id = data[[idn]][is_ov],   ov_date = d_date[is_ov],   stringsAsFactors = FALSE)
+  men <- data.frame(id = data[[idn]][is_mens], m_date  = d_date[is_mens], stringsAsFactors = FALSE)
 
   # candidate onset = ov + luteal_days; drop it if an observed menses closes the
   # cycle within (ov, ov + max_window]
