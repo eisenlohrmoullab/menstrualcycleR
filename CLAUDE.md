@@ -75,3 +75,9 @@ Decisions + rationale: `pacts-gam-pipeline/PIPELINE_MAP.md`
 ## Key analysis variable
 
 Analyze `cyclic_time` / `cyclic_time_impute`. `scaled_cycleday*` is **deprecated** (legacy reference only).
+
+Before modifying any model specification, smoothing basis, covariate set,
+variance-partitioning method, or figure convention, read
+~/CLEAR Lab Repositories/clear-lab-methods/METHODS_CANON.md.
+Do not re-derive LOCKED decisions. Do not resolve OPEN items silently.
+Log any new decision in the canon's decision log.
