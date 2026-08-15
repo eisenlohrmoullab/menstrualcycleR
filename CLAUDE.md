@@ -70,7 +70,7 @@ Same name across GitHub / Box / Notion / Slack.
 | 06 · Merge | mcycr-06-merge | https://app.notion.com/p/38c62cf9b393813b97e4f29834813d3a |
 
 Full pipeline map: https://app.notion.com/p/38c62cf9b39381a29053c653ea82e4f1
-Decisions + rationale: `pacts-gam-pipeline/PIPELINE_MAP.md`
+Decisions + rationale: `pacts-gam-pipeline/dev/PIPELINE_MAP.md`
 
 ## Key analysis variable
 
@@ -78,6 +78,13 @@ Analyze `cyclic_time` / `cyclic_time_impute`. `scaled_cycleday*` is **deprecated
 
 Before modifying any model specification, smoothing basis, covariate set,
 variance-partitioning method, or figure convention, read
-~/CLEAR Lab Repositories/clear-lab-methods/METHODS_CANON.md.
-Do not re-derive LOCKED decisions. Do not resolve OPEN items silently.
-Log any new decision in the canon's decision log.
+~/CLEAR Lab Repositories/clear-lab-methods/METHODS_REFERENCE.md.
+It records what the lab currently does and why, with worked examples. It is not a set of
+rules you must follow: if your outcome or design calls for something else, do that, and
+write down what you did and why.
+The "Known traps" entries are different in kind. Each one records a specific mistake that
+already produced a wrong number without anything erroring, so read the check it names
+before you decide to skip it.
+Anything you decide that generalises beyond this repo belongs in METHODS_REFERENCE.md, in
+its lookup tables and not only in its log. Take the next free ID from the session-start
+health check.
