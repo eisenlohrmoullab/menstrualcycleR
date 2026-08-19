@@ -4,7 +4,14 @@
 \alias{process_luteal_phase_base}
 \title{Process Data (Internal)}
 \usage{
-process_luteal_phase_base(data, id, date, menses)
+process_luteal_phase_base(
+  data,
+  id,
+  date,
+  menses,
+  luteal_phase_min_days = 7,
+  luteal_phase_max_days = 18
+)
 }
 \arguments{
 \item{data}{A data frame containing cycle data.}

@@ -21,8 +21,19 @@ impute_next_menses_onsets(
 
 \item{luteal_days}{Days after ovulation to place the imputed onset. Default 14.}
 
-\item{max_window}{Skip imputation for an ovulation if an observed menses onset
-falls within this many days after it. Default 20.}
+\item{max_window}{Not currently used to gate the impute decision -- kept for
+argument-signature stability; a non-default value has no effect on the
+result. Through 0.1.6, imputation fired whenever no OBSERVED menses onset
+fell within \code{max_window} days after a confirmed ovulation (default 20).
+That was a real bug, not a documented tradeoff: a genuine luteal phase
+just outside the window (confirmed on this package's own \code{cycledata}
+example, id 8: a real 22-day luteal phase) got a fabricated onset
+synthesized at day 14 anyway, which OVERWROTE that participant's actually
+observed \code{menses == 0} day to \code{1} -- corrupting real data, not just adding
+an imputed row. As of 0.1.7 a real closing menses at ANY distance always
+prevents imputation; only a confirmed ovulation with NO recorded closing
+menses anywhere in that person's remaining data is treated as open. See
+\code{NEWS.md} for the full history.}
 }
 \value{
 \code{data} with imputed menses onsets added (existing rows updated, or new
@@ -31,14 +42,19 @@ rows appended for onset dates outside the observed range) and a
 }
 \description{
 Implements the GENERAL next-menses imputation rule: for each
-biomarker-confirmed ovulation (\code{ovtoday == 1}) that is not already closed by
-an observed menses onset within \code{max_window} days, synthesize a menses onset
+biomarker-confirmed ovulation (\code{ovtoday == 1}) that has NO observed menses
+onset recorded anywhere after it for that person, synthesize a menses onset
 at \code{ovulation + luteal_days} (the population-average luteal length, so
 ovulation + 14 = the "LH+15"/last-follicular-day rule). This lets a confirmed
-ovulation whose next menses was never recorded still contribute a scalable
-cycle, rather than being dropped for lack of a closing anchor.
+ovulation whose next menses was never recorded at all still contribute a
+scalable cycle, rather than being dropped for lack of a closing anchor.
 }
 \details{
+A real, observed closing menses -- at ANY distance from the ovulation, not
+just a nearby one -- always wins and is never overridden or duplicated by an
+imputed onset (see the \code{max_window} entry below for why this search is
+deliberately unbounded as of 0.1.7).
+
 Study-specific gating (e.g. blocking imputation across treatment phases or
 documented off-study breaks, trust-ordered de-duplication of anchors) is
 deliberately NOT done here; it is the caller's responsibility to apply on top.

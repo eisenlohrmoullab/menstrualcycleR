@@ -12,7 +12,9 @@
 #' 
 #' 
 
-process_luteal_phase_base <- function(data, id, date, menses) {
+process_luteal_phase_base <- function(data, id, date, menses,
+                                       luteal_phase_min_days = 7,
+                                       luteal_phase_max_days = 18) {
   `%>%` <- magrittr::`%>%`
   
   # Quote column names for tidy evaluation
@@ -86,38 +88,81 @@ process_luteal_phase_base <- function(data, id, date, menses) {
   # Calculate lutperc and lutperc1
   data <- data %>%
     dplyr::mutate(
-      lutperc = ifelse(lutmax <= 18 & lutmax >= 7, lutdaycount / lutmax, NA),
+      lutperc = ifelse(lutmax <= luteal_phase_max_days & lutmax >= luteal_phase_min_days, lutdaycount / lutmax, NA),
       lutperc1 = lutperc - 1
     )
-  
-  # Calculate cyclic time luteal phase part 
+
+  # Calculate cyclic time luteal phase part
   data$cyclic_lut1 = data$lutdaycount1/(data$lutmax+1)
-  
+
   data = data %>%
     dplyr::mutate(
       cyclic_lut = dplyr::case_when(
-        lutmax <= 18 &
-          lutmax >= 7 ~ (-1 * (1 - cyclic_lut1)),
+        lutmax <= luteal_phase_max_days &
+          lutmax >= luteal_phase_min_days ~ (-1 * (1 - cyclic_lut1)),
         TRUE ~ NA
       )
     )
-  
-  # Calculate ovulation-centered luteal phase part of cyclic time 
-  data = data %>% 
-    dplyr::mutate(cyclic_lut_ov = dplyr::case_when(!is.na(cyclic_lut) ~ 1 + cyclic_lut, 
+
+  # Uncapped luteal cyclic-time -- same math as cyclic_lut above, minus the
+  # luteal_phase_max_days upper cap, gated instead on the cycle staying within
+  # the caller's own [lower_cyclength_bound, upper_cyclength_bound]. Feeds
+  # ONLY cyclic_time_impute's last-resort fallback in create_scaled_cycleday();
+  # cyclic_lut / cyclic_time (the confirmed-only, strict columns) are computed
+  # above and never read this. See create_scaled_cycleday() for why the
+  # fallback is needed: a confirmed ovulation whose luteal run exceeds
+  # luteal_phase_max_days gets no coverage from cyclic_lut, and none from the
+  # imputed-ovulation path either, because calculate_ovtoday_impute()
+  # correctly suppresses imputed ovulation once a confirmed one already
+  # exists in the cycle. A caller who wants MORE luteal coverage in
+  # cyclic_time itself should widen luteal_phase_max_days directly rather
+  # than lean on this fallback -- this exists for whatever still runs past
+  # even a caller-chosen phase bound, up to the overall cycle-length bound.
+  #
+  # Requires cycle_incomplete != 1, matching every other mcyclength-gated
+  # column in this file (follength_impute, lutperc_impute, lutperc_imp_ov,
+  # percfol_impute below) -- mcyclength on an incomplete/still-open trailing
+  # cycle is just "however many days were observed so far"
+  # (calculate_mcyclength.r), not a true closed cycle length, so it can land
+  # inside the caller's bounds by coincidence of when data collection ended.
+  # Without this gate, a right-censored confirmed-ovulation cycle could get
+  # fabricated cyclic_time_impute coverage for days that were never actually
+  # closed by a real next menses.
+  data = data %>%
+    dplyr::mutate(
+      cyclic_lut_uncapped = dplyr::case_when(
+        lutmax >= luteal_phase_min_days &
+          cycle_incomplete != 1 &
+          mcyclength >= lower_cyclength_bound &
+          mcyclength <= upper_cyclength_bound ~ (-1 * (1 - cyclic_lut1)),
+        TRUE ~ NA
+      )
+    )
+
+  # Calculate ovulation-centered luteal phase part of cyclic time
+  data = data %>%
+    dplyr::mutate(cyclic_lut_ov = dplyr::case_when(!is.na(cyclic_lut) ~ 1 + cyclic_lut,
                                                    TRUE ~ NA))
-  
-  # Luteal phase length variable 
+
+  # Ovulation-centered counterpart of cyclic_lut_uncapped -- same derivation
+  # as cyclic_lut_ov above, applied to the uncapped value. Feeds only
+  # cyclic_time_imp_ov's extended-phase fallback in create_scaled_cycleday();
+  # cyclic_lut_ov / cyclic_time_ov are computed above and never read this.
+  data = data %>%
+    dplyr::mutate(cyclic_lut_ov_uncapped = dplyr::case_when(!is.na(cyclic_lut_uncapped) ~ 1 + cyclic_lut_uncapped,
+                                                            TRUE ~ NA))
+
+  # Luteal phase length variable
   data = data %>%
     dplyr::mutate(
       luteal_length = dplyr::case_when(
-        lutmax <= 18 &
-          lutmax >= 7 ~ lutmax,
+        lutmax <= luteal_phase_max_days &
+          lutmax >= luteal_phase_min_days ~ lutmax,
         TRUE ~ NA
       )
     )
-  
-  #NOTE: we only scale luteal phases if the length is <= 18 days and >= 7 days. This judgement is based on norms from Bull et al., 2019 in    21 to 35 day cycles. Scaling is NOT based on mcyclength (menses-to-menses cycle length), because then of someone only had a luteal phase    in study, bookended by ovulation and menses, it would not get scaled. Or if they had 1 luteal phase and then a full menses-to-menses cycle   the luteal phase would not get scaled. 
+
+  #NOTE: we only scale luteal phases if the length is <= luteal_phase_max_days and >= luteal_phase_min_days (defaults 18 and 7). This judgement is based on norms from Bull et al., 2019 in 21 to 35 day cycles; both bounds are caller-adjustable (see pacts_scaling()'s "Internal phase-length caps" section). Scaling is NOT based on mcyclength (menses-to-menses cycle length), because then of someone only had a luteal phase    in study, bookended by ovulation and menses, it would not get scaled. Or if they had 1 luteal phase and then a full menses-to-menses cycle   the luteal phase would not get scaled.
   
   data = data %>%
     dplyr::mutate(luteal_length = dplyr::case_when(is.na(lutdaycount1) ~ NA, TRUE ~ luteal_length))
@@ -132,8 +177,8 @@ process_luteal_phase_base <- function(data, id, date, menses) {
         TRUE ~ lutdaycount_ov
       ),
       next_id = dplyr::lead(!!id),  # Capture the ID of the next row
-      valid_group = any(lutdaycount_ov == lutmax & id == next_id), 
-      lutperc_ov = ifelse(lutmax <= 18 & lutmax >= 7 & valid_group, lutdaycount_ov / lutmax, NA),
+      valid_group = any(lutdaycount_ov == lutmax & id == next_id),
+      lutperc_ov = ifelse(lutmax <= luteal_phase_max_days & lutmax >= luteal_phase_min_days & valid_group, lutdaycount_ov / lutmax, NA),
       lutperc_ov = ifelse(lutdaycount_ov == 0, 0, lutperc_ov)
     ) %>% 
     dplyr::ungroup() %>%
@@ -143,7 +188,9 @@ process_luteal_phase_base <- function(data, id, date, menses) {
 }
 
 
-process_follicular_phase_base <- function(data, id, date, menses) {
+process_follicular_phase_base <- function(data, id, date, menses,
+                                           follicular_phase_min_days = 8,
+                                           follicular_phase_max_days = 25) {
   `%>%` <- magrittr::`%>%`
   
   # Early validation for required columns
@@ -226,9 +273,9 @@ process_follicular_phase_base <- function(data, id, date, menses) {
   data <- data %>%
     dplyr::mutate(follength = folmax + 1)
   
-  # Calculate folperc (only when follicular length is between 8 and 25)
-  #NOTE: we only scale follicular phases if the length is <= 25 days and >= 8 days. This judgement is based on norms from Bull et al., 2019 in 21 to 35 day cycles. Scaling is NOT based on mcyclength (menses-to-menses cycle length), because then if someone only had a follicular phase in study, bookended by menses and ovulation, it would not get scaled. Or if they had a full menses-to-menses cycle and then a follicualr phase (bookend by menses and ovulation), the follicular phase would not get scaled. 
-  
+  # Calculate folperc (only when follicular length is within [follicular_phase_min_days, follicular_phase_max_days])
+  #NOTE: we only scale follicular phases if the length is <= follicular_phase_max_days and >= follicular_phase_min_days (defaults 25 and 8). This judgement is based on norms from Bull et al., 2019 in 21 to 35 day cycles; both bounds are caller-adjustable (see pacts_scaling()'s "Internal phase-length caps" section). Scaling is NOT based on mcyclength (menses-to-menses cycle length), because then if someone only had a follicular phase in study, bookended by menses and ovulation, it would not get scaled. Or if they had a full menses-to-menses cycle and then a follicualr phase (bookend by menses and ovulation), the follicular phase would not get scaled.
+
   data <- data %>%
     dplyr::arrange(!!id, cyclenum,!!date) %>%  # Ensure correct order
     dplyr::group_by(!!id, cyclenum) %>%
@@ -236,8 +283,21 @@ process_follicular_phase_base <- function(data, id, date, menses) {
       next_id = dplyr::lead(!!id),  # Capture the ID of the next row
       valid_group = any(foldaycount == folmax & !!id == next_id),  # Check if the condition is met for the group
       folperc = ifelse(
-        follength >= 8 & follength <= 25 & valid_group, 
-        foldaycount / folmax, 
+        follength >= follicular_phase_min_days & follength <= follicular_phase_max_days & valid_group,
+        foldaycount / folmax,
+        NA_real_
+      ),
+      # Uncapped follicular fraction -- same run, minus the follicular_phase_max_days
+      # upper cap, gated instead on the cycle staying within the caller's own
+      # [lower_cyclength_bound, upper_cyclength_bound]. Mirrors
+      # cyclic_lut_uncapped above (see its comment for why cycle_incomplete
+      # != 1 is required too); feeds only cyclic_time_impute's fallback. A
+      # caller who wants more follicular coverage in cyclic_time itself
+      # should widen follicular_phase_max_days directly.
+      folperc_uncapped = ifelse(
+        follength >= follicular_phase_min_days & valid_group & cycle_incomplete != 1 &
+          mcyclength >= lower_cyclength_bound & mcyclength <= upper_cyclength_bound,
+        foldaycount / folmax,
         NA_real_
       )
     ) %>%
@@ -259,15 +319,23 @@ process_follicular_phase_base <- function(data, id, date, menses) {
   
   data = data %>%
     dplyr::mutate(
-      cyclic_fol = folperc
+      cyclic_fol = folperc,
+      cyclic_fol_uncapped = folperc_uncapped
     )
-  
-  
-  # Calculate ovulation-centered follicular phase part of cyclic time 
-  data = data %>% 
-    dplyr::mutate(cyclic_fol_ov = dplyr::case_when(!is.na(cyclic_fol) & !is.na(percfol_ov) ~ -1*(1 - cyclic_fol), 
+
+
+  # Calculate ovulation-centered follicular phase part of cyclic time
+  data = data %>%
+    dplyr::mutate(cyclic_fol_ov = dplyr::case_when(!is.na(cyclic_fol) & !is.na(percfol_ov) ~ -1*(1 - cyclic_fol),
                                                    TRUE ~ NA))
-  
+
+  # Ovulation-centered counterpart of cyclic_fol_uncapped -- mirrors
+  # cyclic_lut_ov_uncapped in process_luteal_phase_base(). Feeds only
+  # cyclic_time_imp_ov's extended-phase fallback.
+  data = data %>%
+    dplyr::mutate(cyclic_fol_ov_uncapped = dplyr::case_when(!is.na(cyclic_fol_uncapped) ~ -1*(1 - cyclic_fol_uncapped),
+                                                             TRUE ~ NA))
+
   return(data)
 }
 
@@ -721,10 +789,40 @@ create_scaled_cycleday <- function(data, id, date, menses) {
                                                  TRUE ~ cyclic_lut))
   
   # Create cyclic_time_impute
+  #
+  # A confirmed ovulation whose luteal OR follicular phase individually exceeds
+  # the package's internal cap (18d luteal / 25d follicular -- see
+  # process_luteal_phase_base() / process_follicular_phase_base()) leaves
+  # cyclic_time NA for that phase. The imputed-ovulation fallback
+  # (cyclic_time_imp1) is ALSO NA in that case, because
+  # calculate_ovtoday_impute() correctly suppresses imputed ovulation whenever
+  # a confirmed ovulation already exists in the same cycle (to avoid
+  # double-anchoring) -- which leaves no fallback at all for those days.
+  #
+  # cyclic_time_uncapped closes exactly that gap: the same phase math as
+  # cyclic_lut / cyclic_fol, without the internal cap, gated on the cycle
+  # still falling within the caller's own [lower_cyclength_bound,
+  # upper_cyclength_bound] (see cyclic_lut_uncapped / folperc_uncapped). It is
+  # used ONLY as the last-resort fallback here -- cyclic_time itself (the
+  # confirmed-only, strict column) is computed above and never reads this.
+  # cyclic_time_impute_extended_phase marks exactly which rows were filled
+  # this way, so a downstream analyst can identify or exclude them.
+  #
+  # Excludes ovtoday==1 / ovtoday_impute==1 rows: calculate_cycletime()'s
+  # final post-processing (below, after this function returns) unconditionally
+  # overwrites cyclic_time_impute to 1 at the ovulation anchor itself,
+  # regardless of which tier supplied a value here. Flagging those rows
+  # "extended_phase" would be misleading -- their final value never actually
+  # depends on the fallback, since the anchor override always wins there.
   data = data %>%
     dplyr::mutate(
       cyclic_time_imp1 = dplyr::case_when(is.na(cyclic_lut_imp) ~ cyclic_fol_imp, TRUE ~ cyclic_lut_imp),
-      cyclic_time_impute = dplyr::case_when(is.na(cyclic_time) ~ cyclic_time_imp1, TRUE ~ cyclic_time)
+      cyclic_time_uncapped = dplyr::coalesce(cyclic_lut_uncapped, cyclic_fol_uncapped),
+      cyclic_time_impute_extended_phase = as.integer(
+        is.na(cyclic_time) & is.na(cyclic_time_imp1) & !is.na(cyclic_time_uncapped) &
+          !(!is.na(ovtoday) & ovtoday == 1) & !(!is.na(ovtoday_impute) & ovtoday_impute == 1)
+      ),
+      cyclic_time_impute = dplyr::coalesce(cyclic_time, cyclic_time_imp1, cyclic_time_uncapped)
     )
   
   # Create ovulation-centered cyclic_time_ov
@@ -733,13 +831,27 @@ create_scaled_cycleday <- function(data, id, date, menses) {
                                                     TRUE ~ cyclic_lut_ov))
   
   # Created ovulation-centered cyclic_time_imp_ov
-  data = data %>% 
-    dplyr::mutate(cyclic_time_imp_ov1 = dplyr::case_when(is.na(cyclic_lut_imp_ov) ~ cyclic_fol_imp_ov, 
-                                                         TRUE ~ cyclic_lut_imp_ov))
-  
-  data = data %>% 
-    dplyr::mutate(cyclic_time_imp_ov = dplyr::case_when(is.na(cyclic_time_ov) ~ cyclic_time_imp_ov1, 
-                                                        TRUE ~ cyclic_time_ov))
+  #
+  # Same three-tier fallback as cyclic_time_impute above, mirrored for the
+  # ovulation-centered variable: cyclic_time_ov (confirmed, strict) ->
+  # cyclic_time_imp_ov1 (imputed-ovulation path) -> cyclic_time_ov_uncapped
+  # (same phase math without the internal cap, gated on the caller's overall
+  # cycle-length bound). cyclic_time_ov itself is never touched.
+  # cyclic_time_imp_ov_extended_phase excludes the ovulation-anchor day for
+  # the same reason cyclic_time_impute_extended_phase does: calculate_cycletime()'s
+  # post-processing unconditionally pins cyclic_time_imp_ov to 0 at
+  # ovtoday==1/ovtoday_impute==1, regardless of which tier supplied a value here.
+  data = data %>%
+    dplyr::mutate(
+      cyclic_time_imp_ov1 = dplyr::case_when(is.na(cyclic_lut_imp_ov) ~ cyclic_fol_imp_ov,
+                                             TRUE ~ cyclic_lut_imp_ov),
+      cyclic_time_ov_uncapped = dplyr::coalesce(cyclic_lut_ov_uncapped, cyclic_fol_ov_uncapped),
+      cyclic_time_imp_ov_extended_phase = as.integer(
+        is.na(cyclic_time_ov) & is.na(cyclic_time_imp_ov1) & !is.na(cyclic_time_ov_uncapped) &
+          !(!is.na(ovtoday) & ovtoday == 1) & !(!is.na(ovtoday_impute) & ovtoday_impute == 1)
+      ),
+      cyclic_time_imp_ov = dplyr::coalesce(cyclic_time_ov, cyclic_time_imp_ov1, cyclic_time_ov_uncapped)
+    )
   
   data <- data %>%
     dplyr::arrange(!!date, .by_group = TRUE) %>%

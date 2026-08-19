@@ -1,5 +1,182 @@
 # Changelog
 
+## menstrualcycleR 0.1.7
+
+- **New:** the 18-day luteal and 25-day follicular phase-length caps
+  described below are now caller-adjustable arguments to
+  [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+  – `luteal_phase_min_days` / `luteal_phase_max_days` (default `7` /
+  `18`) and `follicular_phase_min_days` / `follicular_phase_max_days`
+  (default `8` / `25`) – independent of
+  `lower_cyclength_bound`/`upper_cyclength_bound`, which bound the whole
+  cycle, not either phase. Through 0.1.6 these were hardcoded literals,
+  not arguments at all. Defaults reproduce prior behavior exactly
+  (verified: `pacts_scaling(...)` with no new arguments passed is
+  byte-for-byte identical to passing all four explicitly at their
+  defaults). A study population with genuinely longer or shorter
+  luteal/follicular phases than the Bull et al. (2019) norms these
+  defaults encode can now widen the relevant bound directly and get that
+  coverage in `cyclic_time` itself, rather than relying only on the
+  narrower `cyclic_time_impute`-only fallback described next (which
+  still applies for whatever runs past even a caller-widened phase
+  bound). `luteal_length` respects the same configurable bounds. Full
+  detail, including the six-argument interaction, in
+  [`?pacts_scaling`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md),
+  section “Internal phase-length caps.”
+- **Fixed:** `cyclic_time_impute` now has a third fallback tier for a
+  confirmed ovulation whose luteal phase (ovulation to next menses)
+  exceeds 18 days, or whose follicular phase (menses to ovulation)
+  exceeds 25 days – fixed internal limits, independent of the
+  `lower_cyclength_bound`/`upper_cyclength_bound` arguments a caller
+  passes. Previously, those days had NO fallback at all: `cyclic_time`
+  correctly excludes them (unchanged), but the imputed-ovulation path
+  was also silently NA, because `calculate_ovtoday_impute()`
+  deliberately suppresses imputed ovulation whenever a confirmed
+  ovulation already exists in the cycle (correct, to avoid
+  double-anchoring) – leaving the whole capped phase with no coverage in
+  *either* column. A cycle can therefore sit entirely inside a caller’s
+  accepted overall length (for example `[20,43]`) and still lose a large
+  stretch of `cyclic_time_impute` to this internal cap alone; a cycle
+  whose two phases are each individually in-range under the internal
+  limits (luteal \<=18, follicular \<=25) already sums to 43 days by
+  construction (18+25=43) – coincidentally the CLEAR lab’s own chosen
+  upper bound – which is why this was most visible on longer cycles.
+  `cyclic_time_impute` now falls back, for exactly the days a capped
+  phase would otherwise leave uncovered, to the same phase fraction
+  computed *without* the internal cap, still gated on the overall cycle
+  falling within the caller’s own bounds – so this never scales a cycle
+  *longer* than what the caller already accepts. It does **not** bound
+  how far over the original 18/25-day phase norms a single phase can run
+  within that overall length (a caller with a wide overall bound,
+  e.g. the CLEAR lab’s `[20,43]`, can still see a single phase scaled
+  well past the Bull et al. 2019 norms the original cap encoded – this
+  fallback trades phase-length plausibility for coverage, deliberately,
+  and that tradeoff is now named in
+  [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)’s
+  roxygen rather than implied). `cyclic_time` itself (the
+  confirmed-only, strict column) is completely untouched – byte for byte
+  identical to 0.1.6 for every existing caller. A new column,
+  `cyclic_time_impute_extended_phase` (`0`/`1`), flags exactly which
+  rows were filled this way (correctly excluding the ovulation-anchor
+  day itself, whose value is always pinned by an unrelated, pre-existing
+  override regardless of this fallback), so it can be reported alongside
+  the existing imputed-ovulation rate, or excluded by an analyst who
+  wants the narrower pre-0.1.7 coverage.
+- **Fixed** (found in adversarial review of the above, same day): the
+  new fallback originally omitted the `cycle_incomplete != 1` guard that
+  every other `mcyclength`-gated column in the package already uses.
+  Without it, a still-open trailing cycle (data collection ended before
+  a closing menses was ever observed) could get fabricated
+  `cyclic_time_impute` coverage whenever its observed-so-far span
+  happened to land inside the caller’s bounds by coincidence of when the
+  study ended. Now gated identically to every sibling column.
+- **Correction (2026-08-19, later same day):** an earlier version of
+  this entry said the follicular cap “was never documented anywhere
+  outside a code comment.” That was wrong – checked without reading the
+  whole repo first. Both caps ARE disclosed, together, with the
+  load-bearing “fixed vs. adjustable” distinction, in
+  `docs/pacts-explainer.html` (linked from `README.md` as “a visual
+  explainer of how PACTS works”; added by Tory Eisenlohr-Moul,
+  2026-07-23, commit `a0b0a39`): *“menstrualcycleR scales cycles 21-35
+  days, with luteal phases 7-18 days and follicular phases 8-25 days
+  (Bull et al., 2019 norms from \>600,000 cycles). The cycle-length
+  bounds are user-adjustable (lower_cyclength_bound /
+  upper_cyclength_bound); the phase-length windows are fixed in the
+  package.”* That is a complete, accurate disclosure, in a real,
+  currently-linked page – just not in the peer-reviewed paper, and not
+  in the separate “Getting Started” vignette (which discloses only the
+  luteal cap, repeatedly, but never the follicular one). Corrected
+  picture, checked exhaustively (main paper text, twice; the official
+  published supplement, obtained and read in full – zero mentions of
+  either cap in either; the Getting Started vignette, 40 of 48 pages;
+  the visual explainer, in full; README, the repo’s internal operator
+  notes, and all `man/*.Rd` pages):
+  - Peer-reviewed paper (Nagpal et al. 2025) + its official supplement:
+    **silent on both caps.** Describes only the single adjustable
+    overall-length gate.
+  - “Getting Started” vignette: **discloses the luteal cap only**,
+    repeatedly.
+  - `pacts-explainer.html`: **discloses both caps**, with the
+    fixed/adjustable distinction spelled out, a year after the caps were
+    introduced into the code. Also confirmed by full git-history
+    archaeology: the exact 7/18 (luteal) and 8/25 (follicular) day
+    thresholds have been in the codebase since the package’s first
+    commit (2025-01-05), but only started gating the PACTS
+    `cyclic_time`/`cyclic_lut` output on 2025-07-26 (commit `5cff707`) –
+    two days after `cyclic_time` was first written, replacing what had
+    briefly been an adjustable
+    `lower_cyclength_bound`/`upper_cyclength_bound` gate instead. That
+    replacement predates every tagged release (v0.1.0 was 2026-06-05),
+    so every released version of this package has always had this
+    behavior; the two-day window where `cyclic_time` used only the
+    adjustable bound never shipped. The internal caps are now also
+    described in
+    [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)’s
+    roxygen (“Internal phase-length caps” section), so they’re
+    discoverable from R itself
+    ([`?pacts_scaling`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)),
+    not only from a separate HTML page.
+- **Fixed:** `cyclic_time_imp_ov` (the ovulation-centered sibling of
+  `cyclic_time_impute`) had the identical missing-coverage gap and,
+  until now, did not receive the fallback described above. It now gets
+  the same three-tier fallback – confirmed (`cyclic_time_ov`) -\>
+  imputed-ovulation (`cyclic_time_imp_ov1`) -\> uncapped phase math,
+  gated on the caller’s overall cycle-length bound – mirrored
+  column-for-column, including the companion
+  `cyclic_time_imp_ov_extended_phase` flag and the same
+  `cycle_incomplete` and ovulation-anchor exclusions. `cyclic_time_ov`
+  itself is completely untouched, same guarantee as `cyclic_time`.
+- **Fixed:** the existing (0.1.6) `impute_next_menses` feature could
+  inject a phantom menses onset into a cycle whose real closing menses
+  fell just outside its default 20-day search window, corrupting
+  already-observed data (confirmed on the shipped `cycledata` example,
+  participant id 8: a real 22-day luteal phase got a fabricated onset at
+  day 14, flipping an actually -observed `menses == 0` day to `1`). The
+  candidate-onset search
+  ([`impute_next_menses_onsets()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/impute_next_menses_onsets.md))
+  is now unbounded – it always checks for *any* later observed menses
+  before treating an ovulation as unclosed, rather than only within
+  `next_menses_max_window` days. `next_menses_max_window` is now unused
+  (kept as an argument for signature stability; see
+  [`?pacts_scaling`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)).
+  One consequence worth naming: with the bug fixed, the shipped
+  `cycledata` example now shows **zero** imputed onsets under default
+  settings – every cycle in that example dataset that previously
+  appeared to need imputation turns out to have a real closing menses
+  just beyond the old, buggy window. That confirms the bug was the
+  entire source of imputation activity on that example, not a partial
+  contributor to it.
+- Found via a person-by-person review of CLEAR-1/2/3 cycle data
+  (2026-08-19); see
+  `pacts-gam-pipeline/cycle_data_prep/CYCLE_METHODS_DECISIONS.md` for
+  the full methods-decision record.
+
+## menstrualcycleR 0.1.6
+
+- New opt-in argument `impute_next_menses` in
+  [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+  (default `FALSE`). When `TRUE`, a next-menses onset is imputed
+  *forward* from a biomarker-confirmed ovulation that has no recorded
+  closing menses, placed at `ovulation + next_menses_luteal_days`
+  (default 14 days, the population-average luteal length, i.e. the
+  “LH+15” / last-follicular-day convention). That cycle then becomes
+  scalable instead of being dropped for a missing anchor. Imputed onsets
+  are flagged in a new `menses_impute` column so imputed and observed
+  onsets stay distinguishable.
+- Two companion arguments tune the rule: `next_menses_luteal_days`
+  (default 14) and `next_menses_max_window` (default 20; skip imputation
+  for an ovulation if an observed menses already closes the cycle within
+  that many days).
+- This complements the existing ovulation imputation, which imputes
+  ovulation *backward* from an observed menses (menses minus 15). The
+  package can now close a cycle from either direction when one anchor is
+  missing.
+- The default (`FALSE`) leaves all previous behavior byte for byte
+  identical; only callers who opt in see any change. Only the general
+  rule is applied. Study or protocol specific gating (for example
+  blocking imputation across treatment phases or documented off-study
+  breaks) remains the caller’s responsibility.
+
 ## menstrualcycleR 0.1.5
 
 - Maintainer changed to Tory Eisenlohr-Moul.

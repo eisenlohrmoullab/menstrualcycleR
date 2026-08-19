@@ -25,7 +25,7 @@ misclassification, and inconsistent findings across studies.
 
 **Phase-Aligned Cycle Time Scaling (PACTS)** is a method that
 standardizes menstrual cycle time as a continuous variable aligned to
-**hormonally meaningful anchors**:  
+**hormonally meaningful anchors**:\
 - **Menses onset** - **Ovulation**
 
 Rather than dividing the cycle into arbitrary phases or counting forward
@@ -100,6 +100,31 @@ Functions in `menstrualcycleR` automatically flag imputed ovulation
 using a binary column (`ovtoday_impute`) so that users can report and
 model uncertainty.
 
+#### Optional: imputing the next menses from a confirmed ovulation
+
+The imputation above works in one direction: given an observed **menses
+onset**, it estimates the **ovulation** 15 days earlier. The reverse
+case also happens: a cycle has a **biomarker-confirmed ovulation** but
+the **next menses onset was never recorded** (the participant stopped
+surveying, or the closing period was missed). By default such a cycle
+cannot be scaled, because there is no anchor to close it.
+
+Setting `impute_next_menses = TRUE` in
+[`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+opts in to closing that cycle by imputing a menses onset **forward**
+from the confirmed ovulation, placed at
+`ovulation + next_menses_luteal_days` (default 14 days, so ovulation +
+14 = the last follicular day, i.e. the “LH+15” convention). Imputation
+is skipped when an observed menses already closes the cycle within
+`next_menses_max_window` days (default 20), so a recorded period is
+never overridden. Imputed onsets are flagged in a new `menses_impute`
+column, exactly as imputed ovulations are flagged in `ovtoday_impute`,
+so the two can be reported separately. This option is **off by
+default**, so existing analyses are unchanged; only the general rule is
+applied, and any study-specific gating (for example, not imputing across
+a treatment phase or a documented off-study break) is left to the
+caller.
+
 ------------------------------------------------------------------------
 
 ### Purpose and Use Cases
@@ -127,7 +152,7 @@ ensure their dataset meets several key criteria:
 Accurate identification of menstrual cycle boundaries is essential. At a
 minimum, the dataset must include:
 
-- **Self-reported menses onset dates** throughout the study period  
+- **Self-reported menses onset dates** throughout the study period\
 - **The next menses onset date following study completion**, to ensure
   full-cycle alignment
 
@@ -171,13 +196,30 @@ outside this range are excluded because they often show:
 - Greater variability in timing
 - Increased likelihood of anovulation
 
-This range can be modified by the user, especially in cases where
-ovulation is confirmed for all cycles and the study population includes
-naturally shorter or longer cycles.
+This range can be modified by the user (`lower_cyclength_bound` /
+`upper_cyclength_bound`), especially in cases where ovulation is
+confirmed for all cycles and the study population includes naturally
+shorter or longer cycles.
 
-Additionally, `menstrualcycleR` will only scale luteal phases if the
-length is **between 7 and 18 days**. This judgement is based on norms
-from over 600,000 ovulatory cycles reported in Bull et al., (2019).
+Additionally, for a **confirmed** ovulation, `menstrualcycleR` will only
+scale the **luteal phase** (ovulation to next menses) if its length is
+**between 7 and 18 days** (`luteal_phase_min_days` /
+`luteal_phase_max_days`), and only scale the **follicular phase**
+(menses to ovulation) if its length is **between 8 and 25 days**
+(`follicular_phase_min_days` / `follicular_phase_max_days`). Both
+judgements are based on norms from over 600,000 ovulatory cycles
+reported in Bull et al., (2019).
+
+As of v0.1.7, **all four of these phase-length bounds are
+user-adjustable**, independently of the overall cycle-length bounds
+above – widen them directly if your study population has genuinely
+longer or shorter phases than the Bull et al. norms assume, rather than
+accepting a truncated `cyclic_time` for those cycles.
+`cyclic_time_impute` additionally has a further, narrower fallback for
+confirmed-ovulation phases that still run past even a widened bound
+(flagged in `cyclic_time_impute_extended_phase`) – see
+`?pacts_scaling()`, section “Internal phase-length caps,” for the full
+detail on all six length arguments and how they interact.
 
 ------------------------------------------------------------------------
 
@@ -205,20 +247,24 @@ To install it from GitHub, install and load the package `remotes` by
 running:
 
 ``` r
+
 install.packages("remotes")
 ```
 
 ``` r
+
 library(remotes)
 ```
 
 then install and load the `menstrualcycleR` package by running:
 
 ``` r
+
 remotes::install_github("eisenlohrmoullab/menstrualcycleR")
 ```
 
 ``` r
+
 library(menstrualcycleR)
 #> Welcome to the menstrualcycleR package!
 #> If you use this package, please cite:
@@ -233,10 +279,12 @@ This vignette also uses `tidyverse` functions so it is recommended to
 install and load the `tidyverse` suite by running:
 
 ``` r
+
 install.packages("tidyverse")
 ```
 
 ``` r
+
 library(tidyverse)
 #> ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
 #> ✔ dplyr     1.1.4     ✔ readr     2.1.5
@@ -253,6 +301,7 @@ library(tidyverse)
 Alternatively, individual packages can be loaded independently:
 
 ``` r
+
 library(dplyr)
 library(ggplot2)
 library(purrr)
@@ -268,11 +317,13 @@ nonlinear multilevel analyses using the `mgcv` and `marginaleffects`
 packages. You can install and load these packages by running:
 
 ``` r
+
 install.packages("mgcv")
 install.packages("marginaleffects")
 ```
 
 ``` r
+
 library(mgcv)
 #> Loading required package: nlme
 #> 
@@ -299,34 +350,34 @@ functions:
 
 This function adds standardized cycle time variables to your dataset.
 
-- `scaled_cycleday`:  
+- `scaled_cycleday`:\
   A continuous cycle time variable centered on **menses onset**
   (`menses == 1 → 0`), ranging from –1 (start of luteal phase) to +1
   (ovulation). This maps -1 and +1 as adjacent days. This is what the
   supplementary analyses of Nagpal et al. (2025) include. Includes
   **only biomarker-confirmed** ovulation cycles.
 
-- `scaled_cycleday_impute`:  
+- `scaled_cycleday_impute`:\
   Same as above, but also includes cycles with **imputed ovulation**
   (assigned to day –15 before next menses). Increases dataset coverage,
   but with lower precision. This maps -1 and +1 as adjacent days. This
   is what the supplementary analyses of Nagpal et al. (2025) include.
 
-- `scaled_cycleday_ov`:  
+- `scaled_cycleday_ov`:\
   A cycle time variable centered on **ovulation** (`ovtoday == 1 → 0`),
   ranging from –1 (start of follicular phase) to +1 (end of luteal
   phase). Biomarker-confirmed ovulation only. This maps -1 and +1 as
   adjacent days. This is what the supplementary analyses of Nagpal et
   al. (2025) include.
 
-- `scaled_cycleday_imp_ov`:  
+- `scaled_cycleday_imp_ov`:\
   Same as above, but includes **imputed ovulation**
   (`ovtoday_impute == 1`) for cycles lacking confirmation. Centered on
   either confirmed or imputed ovulation. This maps -1 and +1 as adjacent
   days. This is what the supplementary analyses of Nagpal et al. (2025)
   include.
 
-- `cyclic_time`:  
+- `cyclic_time`:\
   A continuous cycle time variable centered on **menses onset**
   (`menses == 1 → 0`), ranging from –1 (start of luteal phase) to +1
   (ovulation). Includes **only biomarker-confirmed** ovulation cycles.
@@ -335,30 +386,35 @@ This function adds standardized cycle time variables to your dataset.
   include. Other iterations of cycle time (`scaled_cycleday`) are being
   phased out.
 
-- `cyclic_time_impute`:  
+- `cyclic_time_impute`:\
   Same as above, but also includes cycles with **imputed ovulation**
   (assigned to day –15 before next menses). Increases dataset coverage,
   but with lower precision. This ensures that -1 and +1 are hormonally
   equivalent, rather than adjacent. This is what the main analyses of
   Nagpal et al. (2025) include.
 
-- `cyclic_time_ov`:  
+- `cyclic_time_ov`:\
   A cycle time variable centered on **ovulation** (`ovtoday == 1 → 0`),
   ranging from –1 (start of follicular phase) to +1 (end of luteal
   phase). Biomarker-confirmed ovulation only. This ensures that -1 and
   +1 are hormonally equivalent, rather than adjacent. This is what the
   main analyses of Nagpal et al. (2025) include.
 
-- `cyclic_time_imp_ov`:  
+- `cyclic_time_imp_ov`:\
   Same as above, but includes **imputed ovulation**
   (`ovtoday_impute == 1`) for cycles lacking confirmation. Centered on
   either confirmed or imputed ovulation. This ensures that -1 and +1 are
   hormonally equivalent, rather than adjacent. This is what the main
   analyses of Nagpal et al. (2025) include.
 
-- `ovtoday_impute`:  
+- `ovtoday_impute`:\
   A binary indicator identifying **imputed ovulation days** (value = 1),
   estimated as 15 days before the next menses onset.
+
+- `menses_impute`: Present only when `impute_next_menses = TRUE`. A
+  binary indicator identifying **imputed menses onsets** (value = 1)
+  placed forward from a confirmed ovulation (at ovulation + 14 days by
+  default), distinguishing them from observed onsets.
 
 ------------------------------------------------------------------------
 
@@ -367,12 +423,12 @@ This function adds standardized cycle time variables to your dataset.
 These functions assess the **completeness and coverage** of your
 dataset:
 
-- [`cycledata_check()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycledata_check.md):  
+- [`cycledata_check()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycledata_check.md):\
   Summarizes non-missing data by cycle phase (follicular, luteal) and
   overall. Also produces **visualizations** by participant and cycle
   phase.
 
-- [`summary_ovulation()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/summary_ovulation.md):  
+- [`summary_ovulation()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/summary_ovulation.md):\
   Reports ovulation detection status:
 
   - How many cycles had **biomarker-confirmed** ovulation
@@ -385,12 +441,12 @@ dataset:
 
 Use these functions to **plot outcomes across the menstrual cycle**:
 
-- [`cycle_plot()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot.md):  
+- [`cycle_plot()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot.md):\
   Creates a **sample-level plot** of symptom or outcome trajectories
   across the standardized cycle. Supports centering on either **menses**
   or **ovulation**, with flexible y-axis scaling.
 
-- [`cycle_plot_individual()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot_individual.md):  
+- [`cycle_plot_individual()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot_individual.md):\
   Provides **participant-level plots** across cycles for selected
   symptoms. Useful for individual inspection or diagnostic review.
 
@@ -415,22 +471,22 @@ from menses onset.
 
 > C-PASS is implemented via the [`cpass`](https://lasy.github.io/cpass/)
 > R package. Please cite this package if you utilize the CPASS tool in
-> the shiny app:  
+> the shiny app:\
 > Symul L, Eisenlohr-Moul T (2025). *cpass: PMDD and MRMD Diagnoses
 > Following The Carolina Premenstrual Assessment Scoring System
 > (C-PASS)*. R package version 0.1.0.
 
-> For more on C-PASS as a diagnostic tool, see:  
+> For more on C-PASS as a diagnostic tool, see:\
 > Eisenlohr-Moul, T. A., Girdler, S. S., Schmalenberger, K. M., Dawson,
-> D. N., Surana, P., Johnson, J. L., & Rubinow, D. R. (2017).  
+> D. N., Surana, P., Johnson, J. L., & Rubinow, D. R. (2017).\
 > *Toward the Reliable Diagnosis of DSM-5 Premenstrual Dysphoric
 > Disorder: The Carolina Premenstrual Assessment Scoring System
-> (C-PASS).*  
+> (C-PASS).*\
 > American Journal of Psychiatry, 174(1), 51–59.
 > <https://doi.org/10.1176/appi.ajp.2016.15121510> **Please cite this
 > paper if you utilize the CPASS tool in the shiny app.**
 
-> **The shiny app is also accessible online here:**  
+> **The shiny app is also accessible online here:**\
 > 👉 <https://menstrualcycledata.shinyapps.io/shiny/>
 
 ------------------------------------------------------------------------
@@ -447,6 +503,7 @@ indicating the day after a positive luteinizing-hormone test, estimating
 the day of ovulation.
 
 ``` r
+
 cycle_df = cycledata
 dim(cycle_df)
 #> [1] 619   5
@@ -463,6 +520,7 @@ head(cycle_df)
 ### Applying PACTS
 
 ``` r
+
 cycle_df_scaled = pacts_scaling(data = cycle_df, id = id, date = daterated, menses = menses, ovtoday = ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35)
 #> id: id
 #> date: date
@@ -473,8 +531,12 @@ cycle_df_scaled = pacts_scaling(data = cycle_df, id = id, date = daterated, mens
 For full documentation, type `?pacts_scaling()` in R console. The lower
 and upper cycle length bounds may be adjusted, but the default is 21-35
 days as that was what was validated in Nagpal et al., (2025). Only
-cycles between 21 and 35 days will get scaled, or if a luteal phase with
-confirmed ovulation and menses onset is between 7-18 days.
+cycles between 21 and 35 days will get scaled – with the further
+requirement that, for a confirmed ovulation, the luteal phase (ovulation
+to next menses) is between 7-18 days and the follicular phase (menses to
+ovulation) is between 8-25 days. All four phase-length bounds are
+separately adjustable (`luteal_phase_min_days`/`max_days`,
+`follicular_phase_min_days`/`max_days`).
 
 `cycle_df_scaled` will now have additional variables as well as
 observations. In this dataset we went from initially having 619
@@ -545,39 +607,49 @@ individuals and cycles.
 #### Cycle time variables are added in cycle_df_scaled
 
 ``` r
+
 names(cycle_df_scaled)
-#>  [1] "id"                     "date"                   "menses"                
-#>  [4] "ovtoday"                "symptom"                "daterated"             
-#>  [7] "m2mcount"               "mcyclength"             "cycle_incomplete"      
-#> [10] "cyclenum"               "ovtoday_impute"         "scaled_cycleday"       
-#> [13] "scaled_cycleday_ov"     "scaled_cycleday_impute" "scaled_cycleday_imp_ov"
-#> [16] "cyclic_time"            "cyclic_time_impute"     "cyclic_time_ov"        
-#> [19] "cyclic_time_imp_ov"     "luteal_length"
+#>  [1] "id"                                "date"                             
+#>  [3] "menses"                            "ovtoday"                          
+#>  [5] "symptom"                           "daterated"                        
+#>  [7] "m2mcount"                          "mcyclength"                       
+#>  [9] "cycle_incomplete"                  "cyclenum"                         
+#> [11] "ovtoday_impute"                    "scaled_cycleday"                  
+#> [13] "scaled_cycleday_ov"                "scaled_cycleday_impute"           
+#> [15] "scaled_cycleday_imp_ov"            "cyclic_time"                      
+#> [17] "cyclic_time_impute"                "cyclic_time_impute_extended_phase"
+#> [19] "cyclic_time_ov"                    "cyclic_time_imp_ov"               
+#> [21] "cyclic_time_imp_ov_extended_phase" "luteal_length"
 ```
 
-- `scaled_cycleday`:  
+- `scaled_cycleday`:\
   A continuous cycle time variable centered on **menses onset**
   (`menses == 1 → 0`), ranging from –1 (start of luteal phase) to +1
   (ovulation). Includes **only biomarker-confirmed** ovulation cycles.
 
-- `scaled_cycleday_impute`:  
+- `scaled_cycleday_impute`:\
   Same as above, but also includes cycles with **imputed ovulation**
   (assigned to day –15 before next menses). Increases dataset coverage,
   but with lower precision.
 
-- `scaled_cycleday_ov`:  
+- `scaled_cycleday_ov`:\
   A cycle time variable centered on **ovulation** (`ovtoday == 1 → 0`),
   ranging from –1 (start of follicular phase) to +1 (end of luteal
   phase). Biomarker-confirmed ovulation only.
 
-- `scaled_cycleday_imp_ov`:  
+- `scaled_cycleday_imp_ov`:\
   Same as above, but includes **imputed ovulation**
   (`ovtoday_impute == 1`) for cycles lacking confirmation. Centered on
   either confirmed or imputed ovulation.
 
-- `ovtoday_impute`:  
+- `ovtoday_impute`:\
   A binary indicator identifying **imputed ovulation days** (value = 1),
   estimated as 15 days before the next menses onset.
+
+- `menses_impute`: Present only when `impute_next_menses = TRUE`. A
+  binary indicator identifying **imputed menses onsets** (value = 1)
+  placed forward from a confirmed ovulation (ovulation + 14 days by
+  default).
 
 - `mcyclength`: Indicates the length of a menses-to-menses cycle an
   observation belongs to.
@@ -624,6 +696,7 @@ replace `c("symptom")` with the outcomes of interest:
 e.g.`c("symptom1", "symptom2", "symptom3")`
 
 ``` r
+
 checkdata = cycledata_check(cycle_df_scaled, symptom_columns = c("symptom"))
 #> Warning: ID number 8 has < 10 observations for symptom
 ```
@@ -636,6 +709,7 @@ a corresponding scaled cycle time measure (taking into account imputed
 ovulation) both overall, and by phase (luteal and follicular).
 
 ``` r
+
 checkdata$by_id
 #> # A tibble: 25 × 4
 #>       id symptom_nonNA symptom_luteal symptom_follicular
@@ -656,6 +730,7 @@ checkdata$by_id
 We can also examine this in aggregate, looking at the sample as a whole:
 
 ``` r
+
 checkdata$overall
 #> # A tibble: 1 × 3
 #>   symptom_nonNA symptom_luteal symptom_follicular
@@ -665,11 +740,13 @@ checkdata$overall
 
 Overall, 574 observations with non-NA or non-missing values for
 `symptom` were scaled because they existed in menses-to-menses cycles
-between 21 and 35 days and associated luteal phases (for cycles that had
-a reported value for `ovtoday`) were between 7-18 days. We can also
-visualize non-missing symptom data across the cycle:
+between 21 and 35 days, with associated luteal phases (for cycles that
+had a reported value for `ovtoday`) between 7-18 days and follicular
+phases between 8-25 days. We can also visualize non-missing symptom data
+across the cycle:
 
 ``` r
+
 checkdata$data_symptom_plots
 #> $symptom
 ```
@@ -679,6 +756,7 @@ checkdata$data_symptom_plots
 ### Checking Ovulation Data Availability
 
 ``` r
+
 ov_summary = summary_ovulation(cycle_df_scaled)
 ```
 
@@ -694,6 +772,7 @@ Imputation](#ovulation-assessment-or-imputation)).
 We can examine this across the entire sample:
 
 ``` r
+
 ov_summary$ovstatus_total
 #>          Total Confirmed Ovulation
 #> N cycles                        14
@@ -704,6 +783,7 @@ ov_summary$ovstatus_total
 And also by each id in the dataset:
 
 ``` r
+
 ov_summary$ovstatus_id
 #> # A tibble: 25 × 3
 #>       id `Total cycles with confirmed ovulation` Total cycles with imputed ovu…¹
@@ -742,6 +822,7 @@ are supported by the package `zoo`.
 Let’s take a look at the parameters of `cycle_plot`:
 
 ``` r
+
 cycle_plot(
   data,
   symptom,
@@ -754,7 +835,7 @@ cycle_plot(
 )
 ```
 
-- `data`:  
+- `data`:\
   A dataframe containing the cycle-aligned data. Must include the
   relevant scaled cycle time variables (`scaled_cycleday`,
   `scaled_cycleday_ov`, `cyclic_time`, etc.) and the symptom column.
@@ -762,20 +843,20 @@ cycle_plot(
   [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
   first.
 
-- `symptom`:  
+- `symptom`:\
   A string specifying the name of the symptom or outcome variable to
   visualize.
 
-- `centering`:  
+- `centering`:\
   Whether to center the x-axis on `"menses"` (default) or `"ovulation"`.
   This determines which scaled cycle day variable is used.
 
-- `include_impute`:  
+- `include_impute`:\
   Logical. If `TRUE`, uses both confirmed and imputed ovulation cycles.
   Set to `FALSE` to restrict the analysis to biomarker-confirmed cycles
   only.
 
-- `y_scale`:  
+- `y_scale`:\
   Specifies how to scale the y-axis:
 
   - `"person-centered"`: Mean person-centered values
@@ -784,16 +865,16 @@ cycle_plot(
     [`zoo::rollapply`](https://rdrr.io/pkg/zoo/man/rollapply.html)
   - `"means"`: Raw mean values of participants
 
-- `rollingavg`:  
+- `rollingavg`:\
   Number of days used for rolling average smoothing (default = 5).
   Computed using `zoo::rollapply.`
 
-- `align_val`:  
+- `align_val`:\
   Controls alignment of the rolling average window (`"center"`,
   `"left"`, or `"right"`). Passed to
   [`zoo::rollapply`](https://rdrr.io/pkg/zoo/man/rollapply.html).
 
-- `se`:  
+- `se`:\
   Logical. If `TRUE`, includes a standard error ribbon around the group
   mean.
 
@@ -806,6 +887,7 @@ function, which applies a moving average over the time series, with the
 settings as:
 
 ``` r
+
 zoo::rollapply(
   variable,         # vector of values
   rollingavg,       # size of the moving window (default = 5 days)
@@ -817,10 +899,10 @@ zoo::rollapply(
 ```
 
 > If you use the `"person-centered_roll"` option for the `y_scale`,
-> please cite the `zoo` package:  
+> please cite the `zoo` package:\
 > Zeileis A, Grothendieck G (2005). “zoo: S3 Infrastructure for Regular
-> and Irregular Time Series.”  
-> *Journal of Statistical Software*, *14*(6), 1–27.  
+> and Irregular Time Series.”\
+> *Journal of Statistical Software*, *14*(6), 1–27.\
 > <https://doi.org/10.18637/jss.v014.i06>
 
 ------------------------------------------------------------------------
@@ -828,6 +910,7 @@ zoo::rollapply(
 #### Symptom, Menses-centered
 
 ``` r
+
 cycle_plot_df_menses <- cycle_plot(
   cycle_df_scaled,
   "symptom",
@@ -871,8 +954,9 @@ much higher or lower they are compared to their normal, and is used in
     symptom variable across the cycle.
 
 ``` r
+
 cycle_plot_df_menses$data
-#> # A tibble: 744 × 25
+#> # A tibble: 744 × 27
 #>       id date       menses ovtoday symptom daterated  m2mcount mcyclength
 #>    <int> <date>      <dbl>   <dbl>   <dbl> <date>        <dbl>      <dbl>
 #>  1     1 2024-01-20      1       0       5 2024-01-20        1         24
@@ -886,15 +970,16 @@ cycle_plot_df_menses$data
 #>  9     1 2024-01-28      0       0       3 2024-01-28        9         24
 #> 10     1 2024-01-29      0       0       4 2024-01-29       10         24
 #> # ℹ 734 more rows
-#> # ℹ 17 more variables: cycle_incomplete <dbl>, cyclenum <int>,
+#> # ℹ 19 more variables: cycle_incomplete <dbl>, cyclenum <int>,
 #> #   ovtoday_impute <int>, scaled_cycleday <dbl>, scaled_cycleday_ov <dbl>,
 #> #   scaled_cycleday_impute <dbl>, scaled_cycleday_imp_ov <dbl>,
-#> #   cyclic_time <dbl>, cyclic_time_impute <dbl>, cyclic_time_ov <dbl>,
-#> #   cyclic_time_imp_ov <dbl>, luteal_length <dbl>, symptom.m <dbl>,
-#> #   symptom.d <dbl>, symptom.d.roll <dbl>, cycleday_perc <dbl>, …
+#> #   cyclic_time <dbl>, cyclic_time_impute <dbl>,
+#> #   cyclic_time_impute_extended_phase <int>, cyclic_time_ov <dbl>,
+#> #   cyclic_time_imp_ov <dbl>, cyclic_time_imp_ov_extended_phase <int>, …
 ```
 
 ``` r
+
 cycle_plot_df_menses$summary
 #> # A tibble: 22 × 3
 #>    cycleday_5perc mean_dev_roll     se
@@ -913,6 +998,7 @@ cycle_plot_df_menses$summary
 ```
 
 ``` r
+
 cycle_plot_df_menses$plot
 #> Warning: Removed 1 row containing missing values or values outside the scale range
 #> (`geom_line()`).
@@ -931,6 +1017,7 @@ This plot is a ggplot object and can be edited using the package
 Here is the same data, centered on ovulation.
 
 ``` r
+
 cycle_plot_df_ov <- cycle_plot(
   cycle_df_scaled,
   "symptom",
@@ -942,6 +1029,7 @@ cycle_plot_df_ov <- cycle_plot(
 ```
 
 ``` r
+
 cycle_plot_df_ov$plot
 #> Warning: Removed 1 row containing missing values or values outside the scale range
 #> (`geom_line()`).
@@ -966,6 +1054,7 @@ each. Rolling averages are supported by the package `zoo`.
 Let’s take a look at the parameters of `cycle_plot_individual`:
 
 ``` r
+
 cycle_plot_individual(
   data,
   id,
@@ -977,23 +1066,23 @@ cycle_plot_individual(
 )
 ```
 
-- `data`:  
+- `data`:\
   A dataframe containing scaled cycle data with at least `id`,
   `cyclenum`, and the relevant symptom variables. The dataframe must
   already include the appropriate scaled cycle time columns.
 
-- `id`:  
+- `id`:\
   A numeric or character value specifying the participant ID to
   visualize.
 
-- `symptoms`:  
+- `symptoms`:\
   A character vector of one or more symptom variables to plot.
 
-- `centering`:  
+- `centering`:\
   Center the plot on `"menses"` (default) or `"ovulation"`. Determines
   which scaled time variable is used.
 
-- `y_scale`:  
+- `y_scale`:\
   Specifies the type of y-axis transformation:
 
   - `"person-centered"`: Deviation from participant mean
@@ -1003,19 +1092,19 @@ cycle_plot_individual(
   - `"raw"`: Uncentered raw values
   - `"roll"`: Rolling average of raw values
 
-- `include_impute`:  
+- `include_impute`:\
   Logical. If `TRUE`, includes cycles with imputed ovulation.
 
-- `rollingavg`:  
+- `rollingavg`:\
   Number of days to use in the rolling average window (default = 5).
   Applies only when using `"roll"` or `"person-centered_roll"` scales.
   Computed using `zoo::rollapply.`
 
   > **Note:** If you use the `"person-centered_roll"` or `"roll"` option
-  > for the `y_scale`, please cite the `zoo` package:  
+  > for the `y_scale`, please cite the `zoo` package:\
   > Zeileis A, Grothendieck G (2005). “zoo: S3 Infrastructure for
-  > Regular and Irregular Time Series.”  
-  > *Journal of Statistical Software*, *14*(6), 1–27.  
+  > Regular and Irregular Time Series.”\
+  > *Journal of Statistical Software*, *14*(6), 1–27.\
   > <https://doi.org/10.18637/jss.v014.i06>
 
 ------------------------------------------------------------------------
@@ -1026,6 +1115,7 @@ This is what the raw data of symptom looks like across the first (and
 only cycle) for ID = 2:
 
 ``` r
+
 cycle_plot_menses_id_2 <- cycle_plot_individual(
   cycle_df_scaled,
   id = 2, 
@@ -1046,6 +1136,7 @@ As you can see, it is difficult to examine any trends. Smoothing using
 understand what the trajectory looks like for participant ID = 2.
 
 ``` r
+
 cycle_plot_menses_id_2 <- cycle_plot_individual(
   cycle_df_scaled,
   id = 2, 
@@ -1070,6 +1161,7 @@ function, which applies a moving average over the time series, with the
 settings as:
 
 ``` r
+
 zoo::rollapply(
   variable,         # vector of values
   rollingavg,       # size of the moving window (default = 5 days)
@@ -1105,6 +1197,7 @@ a participant ID has in the dataset.
 #### Cycle_1 summary for ID = 2
 
 ``` r
+
 cycle_plot_menses_id_2$symptom$Cycle_1$summary
 #> # A tibble: 21 × 7
 #>    cycleday_5perc mean_dev mean_dev_roll raw_sx sx_roll cycleday mcyclength
@@ -1125,6 +1218,7 @@ cycle_plot_menses_id_2$symptom$Cycle_1$summary
 #### Cycle_1 plot for ID = 2
 
 ``` r
+
 cycle_plot_menses_id_2$symptom$Cycle_1$plot
 ```
 
@@ -1133,6 +1227,7 @@ cycle_plot_menses_id_2$symptom$Cycle_1$plot
 Cycles can also be examined ovulation-centered.
 
 ``` r
+
 cycle_plot_ov_id_2 <- cycle_plot_individual(
   cycle_df_scaled,
   id = 2, 
@@ -1209,14 +1304,14 @@ individual-level variation across the menstrual cycle:
   outcome is not normally distributed. This is especially important in
   clinical research, where outcomes (e.g., symptom counts, skewed
   severity ratings, binary diagnoses) are frequently **not**
-  Gaussian/normal.  
+  Gaussian/normal.\
   **Important:** Always assess the distribution of residuals and choose
   a family that matches your outcome (e.g., Poisson or negative binomial
   for count data, binomial for binary outcomes) rather than defaulting
-  to Gaussian.  
+  to Gaussian.\
   See
   [`family.mgcv`](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/family.mgcv.html)
-  and  
+  and\
   Wood, S.N., Pya, N., & Saefken, B. (2016). *Smoothing parameter and
   model selection for general smooth models.* *Journal of the American
   Statistical Association, 111*, 1548–1575.
@@ -1288,6 +1383,7 @@ approximately normal. However, you should always assess your model for
 heteroscedasticity and examine the distribution of residuals.
 
 ``` r
+
 cycle_df_scaled$symptom_log = log(cycle_df_scaled$symptom + 1) #log-transforming our outcome variable symptom
 ```
 
@@ -1303,6 +1399,7 @@ model. This ensures transparency and avoids confusion when interpreting
 model results.
 
 ``` r
+
 selected_vars <- c("cyclic_time_impute", "symptom_log" )
 datSX <- cycle_df_scaled[complete.cases(cycle_df_scaled[selected_vars]), ]
 ```
@@ -1310,6 +1407,7 @@ datSX <- cycle_df_scaled[complete.cases(cycle_df_scaled[selected_vars]), ]
 Let’s run the GAMM!
 
 ``` r
+
 datSX$id = as.factor(datSX$id) # ALWAYS factor id before putting it in a gam formula
 
 gamm1 <- mgcv::gam(
@@ -1325,38 +1423,37 @@ gamm1 <- mgcv::gam(
 
 This model includes:
 
-- **`symptom_log`**  
+- **`symptom_log`**\
   The outcome variable (log-transformed symptom).
 
-- **`s(cyclic_time_impute)`**  
+- **`s(cyclic_time_impute)`**\
   A smooth term modeling the **fixed effect** of cycle time (scaled,
   centered on menses) across the sample, where -1 and +1 both represent
   the same hormonal timepoint across the cycle (ovulation). This
   captures **nonlinear, average trends** in the symptom over the cycle.
 
-- **`s(id, bs = 're')`**  
+- **`s(id, bs = 're')`**\
   A **random intercept** for each participant. This accounts for
   **individual differences in average symptom level**.
 
-- **`s(cyclic_time_impute, id, bs = 're')`**
-  A **random slope**: allows each participant’s trajectory to be tilted
-  (steeper, flatter, or reversed) **linearly** relative to the
-  population-level smooth. Because the basis is `"re"` on both margins,
-  this term is linear in `cyclic_time_impute` per person — it shifts the
-  slope of the line, not the shape of the curve. It does **not** give
-  each participant their own nonlinear cyclic trajectory; every
-  participant shares the same population-level curve shape
-  (`s(cyclic_time_impute, bs = "cc")`) and only its intercept and linear
-  slope vary by person. (A true per-person nonlinear cyclic trajectory
-  would require a factor-smooth interaction,
-  e.g. `s(cyclic_time_impute, id, bs = "fs", xt = list(bs = "cc"))`,
+- **`s(cyclic_time_impute, id, bs = 're')`** A **random slope**: allows
+  each participant’s trajectory to be tilted (steeper, flatter, or
+  reversed) **linearly** relative to the population-level smooth.
+  Because the basis is `"re"` on both margins, this term is linear in
+  `cyclic_time_impute` per person — it shifts the slope of the line, not
+  the shape of the curve. It does **not** give each participant their
+  own nonlinear cyclic trajectory; every participant shares the same
+  population-level curve shape (`s(cyclic_time_impute, bs = "cc")`) and
+  only its intercept and linear slope vary by person. (A true per-person
+  nonlinear cyclic trajectory would require a factor-smooth interaction,
+  e.g. `s(cyclic_time_impute, id, bs = "fs", xt = list(bs = "cc"))`,
   which is a substantially larger model not used here.)
 
-- **`data = datSX`**  
+- **`data = datSX`**\
   The dataset used for model fitting. It should contain only complete
   cases for all model variables.
 
-- **`method = 'REML'`**  
+- **`method = 'REML'`**\
   Fits the model using Restricted Maximum Likelihood, which improves
   estimation of smoothness and variance components, especially in the
   presence of random effects.
@@ -1368,6 +1465,7 @@ After fitting the model with
 summary with:
 
 ``` r
+
 summary(gamm1)
 ```
 
@@ -1419,7 +1517,7 @@ s(cyclic_time_impute,id)  edf = 15.89  F = 1.83    p = 8.36e-05 ***
 Each smooth term contributes to explaining nonlinear or hierarchical
 effects:
 
-- **`s(cyclic_time_impute)`**:  
+- **`s(cyclic_time_impute)`**:\
   Captures the **overall nonlinear trend** in symptom expression across
   the standardized cycle.
   - The **high edf** (≈7.4) reflects flexibility in the shape of the
@@ -1427,15 +1525,15 @@ effects:
     nonlinear pattern.
   - The **very small p-value** suggests this population-level pattern is
     **strongly significant** for nonlinearity
-- **`s(id, bs = "re")`**:  
+- **`s(id, bs = "re")`**:\
   Models **random intercept** to account for **baseline differences**
   across individuals.
   - The significant p-value (`p = 0.001`) indicates meaningful variation
     in symptom baseline levels.
-- **`s(cyclic_time_impute, id, bs = "re")`**:
-  Captures each participant’s **linear tilt** (steeper, flatter, or
-  reversed) relative to the population-level curve — not a separate
-  nonlinear shape per person.
+- **`s(cyclic_time_impute, id, bs = "re")`**: Captures each
+  participant’s **linear tilt** (steeper, flatter, or reversed) relative
+  to the population-level curve — not a separate nonlinear shape per
+  person.
   - The effect is **statistically significant** (`p = 8.36e-05`),
     indicating meaningful **heterogeneity** in the linear slope of
     symptom change across individuals, on top of the shared
@@ -1451,7 +1549,7 @@ effects:
     Scale est. = 0.076068   
     n = 575
 
-- **Adjusted R²** of 0.533:  
+- **Adjusted R²** of 0.533:\
   The model explains over **53% of the variance** in the log-transformed
   symptom outcome. It is roughly the squared correlation between
   observed and fitted values, adjusted for model complexity. It is used
@@ -1463,11 +1561,11 @@ effects:
   deviance (a measure of error) to that of a null model. It should be
   used when comparing models or working with non-normal outcomes.
 
-- **REML**:  
+- **REML**:\
   Indicates the restricted maximum likelihood used in model
   fitting—important for selecting smoothing parameters in GAMs.
 
-- **n = 575**:  
+- **n = 575**:\
   The number of complete observations included in the model after
   listwise deletion.
 
@@ -1492,6 +1590,7 @@ for now we will share the code below.
 #### First, we need to compute predicted or model-implied values
 
 ``` r
+
 plotdat <- expand.grid(cyclic_time_impute = seq(-1, 1, by = 0.05),
                       id = 0) # setting id = 0 suppresses random effects, to model just the fixed effect (sample-wide) of your outcome across the cycle
 
@@ -1505,6 +1604,7 @@ plotdat$conf.high = pred$conf.high
 #### Plotting model-implied values
 
 ``` r
+
 # Plotting
 gamplot <- ggplot(plotdat, aes(x = cyclic_time_impute, y = estimate)) +
   scale_x_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50), 

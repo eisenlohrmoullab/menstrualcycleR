@@ -5,7 +5,14 @@ Internal helper functions to process the data.
 ## Usage
 
 ``` r
-process_luteal_phase_base(data, id, date, menses)
+process_luteal_phase_base(
+  data,
+  id,
+  date,
+  menses,
+  luteal_phase_min_days = 7,
+  luteal_phase_max_days = 18
+)
 ```
 
 ## Arguments

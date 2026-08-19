@@ -493,7 +493,7 @@
     </div>
 
     <div class="callout info" style="margin-top: 14px;">
-      <strong>Inclusion defaults:</strong> <code>menstrualcycleR</code> scales cycles 21–35 days, with luteal phases 7–18 days and follicular phases 8–25 days (Bull et al., 2019 norms from &gt;600,000 cycles). The cycle-length bounds are user-adjustable (<code>lower_cyclength_bound</code> / <code>upper_cyclength_bound</code>); the phase-length windows are fixed in the package.
+      <strong>Inclusion defaults:</strong> <code>menstrualcycleR</code> scales cycles 21–35 days, with luteal phases 7–18 days and follicular phases 8–25 days (Bull et al., 2019 norms from &gt;600,000 cycles). As of v0.1.7, all six bounds are user-adjustable and independent of each other: the cycle-length bounds (<code>lower_cyclength_bound</code> / <code>upper_cyclength_bound</code>) and, separately, the phase-length windows (<code>luteal_phase_min_days</code> / <code>max_days</code>, <code>follicular_phase_min_days</code> / <code>max_days</code>). Through v0.1.6 the phase-length windows were hardcoded, not arguments at all — widen them directly now if your population's luteal or follicular phases genuinely run longer or shorter than these norms, rather than accepting a truncated <code>cyclic_time</code>. See <code>?pacts_scaling</code>, section "Internal phase-length caps," for the full history and how <code>cyclic_time_impute</code>'s narrower fallback (<code>cyclic_time_impute_extended_phase</code>) complements these.
     </div>
   </div>
 

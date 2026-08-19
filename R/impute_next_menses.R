@@ -1,12 +1,17 @@
 #' Impute a next-menses onset from a confirmed ovulation (Internal)
 #'
 #' Implements the GENERAL next-menses imputation rule: for each
-#' biomarker-confirmed ovulation (`ovtoday == 1`) that is not already closed by
-#' an observed menses onset within `max_window` days, synthesize a menses onset
+#' biomarker-confirmed ovulation (`ovtoday == 1`) that has NO observed menses
+#' onset recorded anywhere after it for that person, synthesize a menses onset
 #' at `ovulation + luteal_days` (the population-average luteal length, so
 #' ovulation + 14 = the "LH+15"/last-follicular-day rule). This lets a confirmed
-#' ovulation whose next menses was never recorded still contribute a scalable
-#' cycle, rather than being dropped for lack of a closing anchor.
+#' ovulation whose next menses was never recorded at all still contribute a
+#' scalable cycle, rather than being dropped for lack of a closing anchor.
+#'
+#' A real, observed closing menses -- at ANY distance from the ovulation, not
+#' just a nearby one -- always wins and is never overridden or duplicated by an
+#' imputed onset (see the `max_window` entry below for why this search is
+#' deliberately unbounded as of 0.1.7).
 #'
 #' Study-specific gating (e.g. blocking imputation across treatment phases or
 #' documented off-study breaks, trust-ordered de-duplication of anchors) is
@@ -21,8 +26,19 @@
 #' @param data A data frame in long format (one row per id-date).
 #' @param id,date,menses,ovtoday Unquoted column names, as in [pacts_scaling()].
 #' @param luteal_days Days after ovulation to place the imputed onset. Default 14.
-#' @param max_window Skip imputation for an ovulation if an observed menses onset
-#'   falls within this many days after it. Default 20.
+#' @param max_window Not currently used to gate the impute decision -- kept for
+#'   argument-signature stability; a non-default value has no effect on the
+#'   result. Through 0.1.6, imputation fired whenever no OBSERVED menses onset
+#'   fell within `max_window` days after a confirmed ovulation (default 20).
+#'   That was a real bug, not a documented tradeoff: a genuine luteal phase
+#'   just outside the window (confirmed on this package's own `cycledata`
+#'   example, id 8: a real 22-day luteal phase) got a fabricated onset
+#'   synthesized at day 14 anyway, which OVERWROTE that participant's actually
+#'   observed `menses == 0` day to `1` -- corrupting real data, not just adding
+#'   an imputed row. As of 0.1.7 a real closing menses at ANY distance always
+#'   prevents imputation; only a confirmed ovulation with NO recorded closing
+#'   menses anywhere in that person's remaining data is treated as open. See
+#'   `NEWS.md` for the full history.
 #'
 #' @return `data` with imputed menses onsets added (existing rows updated, or new
 #'   rows appended for onset dates outside the observed range) and a
@@ -51,15 +67,20 @@ impute_next_menses_onsets <- function(data, id, date, menses, ovtoday,
   ov  <- data.frame(id = data[[idn]][is_ov],   ov_date = d_date[is_ov],   stringsAsFactors = FALSE)
   men <- data.frame(id = data[[idn]][is_mens], m_date  = d_date[is_mens], stringsAsFactors = FALSE)
 
-  # candidate onset = ov + luteal_days; drop it if an observed menses closes the
-  # cycle within (ov, ov + max_window]
+  # candidate onset = ov + luteal_days; drop it if ANY observed menses closes
+  # the cycle after ov_date -- unbounded, deliberately not restricted to
+  # max_window (see the roxygen entry for max_window: bounding this search
+  # was the 0.1.6 bug, not a real design tradeoff. A real closing menses
+  # recorded at any distance is always the right anchor; synthesizing an
+  # earlier phantom one when a real later one exists would overwrite actual
+  # data with fabricated data, which is strictly worse than leaving a long
+  # real cycle for the caller's overall cycle-length bound to exclude if it's
+  # implausibly long).
   cand <- ov %>%
     dplyr::mutate(cand_date = .data$ov_date + lubridate::days(luteal_days)) %>%
     dplyr::left_join(men, by = "id", relationship = "many-to-many") %>%
     dplyr::group_by(.data$id, .data$ov_date, .data$cand_date) %>%
-    dplyr::summarise(has_closing = any(!is.na(.data$m_date) &
-                                       .data$m_date >  .data$ov_date &
-                                       .data$m_date <= .data$ov_date + lubridate::days(max_window)),
+    dplyr::summarise(has_closing = any(!is.na(.data$m_date) & .data$m_date > .data$ov_date),
                      .groups = "drop") %>%
     dplyr::filter(!.data$has_closing) %>%
     dplyr::distinct(.data$id, .data$cand_date)

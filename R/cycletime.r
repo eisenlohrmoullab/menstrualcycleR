@@ -12,8 +12,10 @@
 #' @param date A date column indicating when the data was recorded.
 #' @param menses A binary column (`0`/`1`) indicating the first day of menses onset, where `1` represents menses onset.
 #' @param ovtoday A binary column (`0`/`1`) indicating the estimated day of ovulation, where `1` represents ovulation.
-#' @param lower_cyclength_bound A numeric that indicates the lower bound of cycle lengths that the function will scale, the default is 21 
+#' @param lower_cyclength_bound A numeric that indicates the lower bound of cycle lengths that the function will scale, the default is 21
 #' @param upper_cyclength_bound A numeric that indicates the upper bound of cycle lengths that the function will scale, the default is 35
+#' @param luteal_phase_min_days,luteal_phase_max_days Numeric bounds on the confirmed-ovulation luteal phase (ovulation to next menses) that cyclic_lut/cyclic_time will scale, default 7 and 18 (Bull et al. 2019 norms). See pacts_scaling()'s "Internal phase-length caps" section.
+#' @param follicular_phase_min_days,follicular_phase_max_days Numeric bounds on the confirmed-ovulation follicular phase (menses to ovulation) that cyclic_fol/cyclic_time will scale, default 8 and 25 (Bull et al. 2019 norms). See pacts_scaling()'s "Internal phase-length caps" section.
 #'
 #' @return The input data frame with the following additional variables:
 #' 
@@ -56,7 +58,9 @@
 
 
 
-calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35) {
+calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35,
+                                 luteal_phase_min_days = 7, luteal_phase_max_days = 18,
+                                 follicular_phase_min_days = 8, follicular_phase_max_days = 25) {
   `%>%` <- magrittr::`%>%`
   # Check if input data is a data frame
   if (!is.data.frame(data)) {
@@ -95,8 +99,12 @@ calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength
     dplyr::arrange(!!date, .by_group = TRUE)
   
   # Apply the processing functions in sequence
-  data <- process_luteal_phase_base(data, id, date, menses)
-  data <- process_follicular_phase_base(data, id, date, menses)
+  data <- process_luteal_phase_base(data, id, date, menses,
+                                     luteal_phase_min_days = luteal_phase_min_days,
+                                     luteal_phase_max_days = luteal_phase_max_days)
+  data <- process_follicular_phase_base(data, id, date, menses,
+                                         follicular_phase_min_days = follicular_phase_min_days,
+                                         follicular_phase_max_days = follicular_phase_max_days)
   data <- calculate_ovtoday_impute(data, id, date, menses)
   data <- process_luteal_phase_impute(data, id, date, menses)
   data <- process_follicular_phase_impute(data, id, date, menses)
@@ -173,8 +181,10 @@ calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength
         scaled_cycleday_imp_ov,
         cyclic_time,
         cyclic_time_impute,
+        cyclic_time_impute_extended_phase,
         cyclic_time_ov,
         cyclic_time_imp_ov,
+        cyclic_time_imp_ov_extended_phase,
         luteal_length
       )
     )

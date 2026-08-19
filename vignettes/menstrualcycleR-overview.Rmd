@@ -141,9 +141,11 @@ By default, `menstrualcycleR` includes only cycles between **21 and 35 days** in
 - Greater variability in timing
 - Increased likelihood of anovulation
 
-This range can be modified by the user, especially in cases where ovulation is confirmed for all cycles and the study population includes naturally shorter or longer cycles.
+This range can be modified by the user (`lower_cyclength_bound` / `upper_cyclength_bound`), especially in cases where ovulation is confirmed for all cycles and the study population includes naturally shorter or longer cycles.
 
-Additionally, `menstrualcycleR` will only scale luteal phases if the length is **between 7 and 18 days**. This judgement is based on norms from over 600,000 ovulatory cycles reported in Bull et al., (2019). 
+Additionally, for a **confirmed** ovulation, `menstrualcycleR` will only scale the **luteal phase** (ovulation to next menses) if its length is **between 7 and 18 days** (`luteal_phase_min_days` / `luteal_phase_max_days`), and only scale the **follicular phase** (menses to ovulation) if its length is **between 8 and 25 days** (`follicular_phase_min_days` / `follicular_phase_max_days`). Both judgements are based on norms from over 600,000 ovulatory cycles reported in Bull et al., (2019).
+
+As of v0.1.7, **all four of these phase-length bounds are user-adjustable**, independently of the overall cycle-length bounds above -- widen them directly if your study population has genuinely longer or shorter phases than the Bull et al. norms assume, rather than accepting a truncated `cyclic_time` for those cycles. `cyclic_time_impute` additionally has a further, narrower fallback for confirmed-ovulation phases that still run past even a widened bound (flagged in `cyclic_time_impute_extended_phase`) -- see `?pacts_scaling()`, section "Internal phase-length caps," for the full detail on all six length arguments and how they interact.
 
 ---
 
@@ -346,7 +348,7 @@ head(cycle_df)
 cycle_df_scaled = pacts_scaling(data = cycle_df, id = id, date = daterated, menses = menses, ovtoday = ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35)
 ```
 
-For full documentation, type `?pacts_scaling()` in R console. The lower and upper cycle length bounds may be adjusted, but the default is 21-35 days as that was what was validated in Nagpal et al., (2025). Only cycles between 21 and 35 days will get scaled, or if a luteal phase with confirmed ovulation and menses onset is between 7-18 days. 
+For full documentation, type `?pacts_scaling()` in R console. The lower and upper cycle length bounds may be adjusted, but the default is 21-35 days as that was what was validated in Nagpal et al., (2025). Only cycles between 21 and 35 days will get scaled -- with the further requirement that, for a confirmed ovulation, the luteal phase (ovulation to next menses) is between 7-18 days and the follicular phase (menses to ovulation) is between 8-25 days. All four phase-length bounds are separately adjustable (`luteal_phase_min_days`/`max_days`, `follicular_phase_min_days`/`max_days`).
 
 `cycle_df_scaled` will now have additional variables as well as observations.  In this dataset we went from initially having 619 observations in `cycle_df` and then having 744 observations in `cycle_df_scaled`. 
 When scaling the cycle using `pacts_scaling()`, each cycle is required to have a complete sequence of calendar days from menses onset to the next menses onset. If a participant missed reporting symptoms on any day within a cycle, the function inserts placeholder rows with `NA` values to ensure continuity. This process allows accurate computation of cycle-aligned time variables.
@@ -468,7 +470,7 @@ We can also examine this in aggregate, looking at the sample as a whole:
 checkdata$overall
 ```
 
-Overall, 574 observations with non-NA or non-missing values for `symptom` were scaled because they existed in menses-to-menses cycles between 21 and 35 days and associated luteal phases (for cycles that had a reported value for `ovtoday`) were between 7-18 days. We can also visualize non-missing symptom data across the cycle: 
+Overall, 574 observations with non-NA or non-missing values for `symptom` were scaled because they existed in menses-to-menses cycles between 21 and 35 days, with associated luteal phases (for cycles that had a reported value for `ovtoday`) between 7-18 days and follicular phases between 8-25 days. We can also visualize non-missing symptom data across the cycle:
 
 ```{r cycledata_check_plot,fig.width=7, fig.height=6}
 checkdata$data_symptom_plots

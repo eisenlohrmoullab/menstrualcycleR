@@ -87,8 +87,10 @@ server <- function(input, output, session) {
         "cyclic_time", 
         "cyclic_time_ov",
         "cyclic_time_impute", 
-        "cyclic_time_impute", 
-        "cyclic_time_imp_ov", 
+        "cyclic_time_impute",
+        "cyclic_time_impute_extended_phase",
+        "cyclic_time_imp_ov",
+        "cyclic_time_imp_ov_extended_phase",
         "luteal_length"
       )
     )
@@ -231,8 +233,10 @@ server <- function(input, output, session) {
         "cyclic_time",
         "cyclic_time_ov",
         "cyclic_time_impute", 
-        "cyclic_time_impute", 
-        "cyclic_time_imp_ov", 
+        "cyclic_time_impute",
+        "cyclic_time_impute_extended_phase",
+        "cyclic_time_imp_ov",
+        "cyclic_time_imp_ov_extended_phase",
         "luteal_length"
       )
     )
@@ -684,8 +688,10 @@ server <- function(input, output, session) {
         "cyclic_time",
         "cyclic_time_ov",
         "cyclic_time_impute", 
-        "cyclic_time_impute", 
-        "cyclic_time_imp_ov", 
+        "cyclic_time_impute",
+        "cyclic_time_impute_extended_phase",
+        "cyclic_time_imp_ov",
+        "cyclic_time_imp_ov_extended_phase",
         "luteal_length"
       )
     )

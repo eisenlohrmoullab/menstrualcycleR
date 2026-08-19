@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">menstrualcycleR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -175,7 +175,34 @@ possible to ensure precise alignment.</p>
 <p>Functions in <code>menstrualcycleR</code> automatically flag imputed
 ovulation using a binary column (<code>ovtoday_impute</code>) so that
 users can report and model uncertainty.</p>
+<div class="section level4">
+<h4 id="optional-imputing-the-next-menses-from-a-confirmed-ovulation">Optional: imputing the next menses from a confirmed ovulation<a class="anchor" aria-label="anchor" href="#optional-imputing-the-next-menses-from-a-confirmed-ovulation"></a>
+</h4>
+<p>The imputation above works in one direction: given an observed
+<strong>menses onset</strong>, it estimates the
+<strong>ovulation</strong> 15 days earlier. The reverse case also
+happens: a cycle has a <strong>biomarker-confirmed ovulation</strong>
+but the <strong>next menses onset was never recorded</strong> (the
+participant stopped surveying, or the closing period was missed). By
+default such a cycle cannot be scaled, because there is no anchor to
+close it.</p>
+<p>Setting <code>impute_next_menses = TRUE</code> in
+<code><a href="../reference/pacts_scaling.html">pacts_scaling()</a></code> opts in to closing that cycle by imputing a
+menses onset <strong>forward</strong> from the confirmed ovulation,
+placed at <code>ovulation + next_menses_luteal_days</code> (default 14
+days, so ovulation + 14 = the last follicular day, i.e. the “LH+15”
+convention). Imputation is skipped when an observed menses already
+closes the cycle within <code>next_menses_max_window</code> days
+(default 20), so a recorded period is never overridden. Imputed onsets
+are flagged in a new <code>menses_impute</code> column, exactly as
+imputed ovulations are flagged in <code>ovtoday_impute</code>, so the
+two can be reported separately. This option is <strong>off by
+default</strong>, so existing analyses are unchanged; only the general
+rule is applied, and any study-specific gating (for example, not
+imputing across a treatment phase or a documented off-study break) is
+left to the caller.</p>
 <hr>
+</div>
 </div>
 <div class="section level3">
 <h3 id="purpose-and-use-cases">Purpose and Use Cases<a class="anchor" aria-label="anchor" href="#purpose-and-use-cases"></a>
@@ -263,13 +290,34 @@ show:</p>
 <li>Greater variability in timing</li>
 <li>Increased likelihood of anovulation</li>
 </ul>
-<p>This range can be modified by the user, especially in cases where
-ovulation is confirmed for all cycles and the study population includes
-naturally shorter or longer cycles.</p>
-<p>Additionally, <code>menstrualcycleR</code> will only scale luteal
-phases if the length is <strong>between 7 and 18 days</strong>. This
-judgement is based on norms from over 600,000 ovulatory cycles reported
-in Bull et al., (2019).</p>
+<p>This range can be modified by the user
+(<code>lower_cyclength_bound</code> /
+<code>upper_cyclength_bound</code>), especially in cases where ovulation
+is confirmed for all cycles and the study population includes naturally
+shorter or longer cycles.</p>
+<p>Additionally, for a <strong>confirmed</strong> ovulation,
+<code>menstrualcycleR</code> will only scale the <strong>luteal
+phase</strong> (ovulation to next menses) if its length is
+<strong>between 7 and 18 days</strong>
+(<code>luteal_phase_min_days</code> /
+<code>luteal_phase_max_days</code>), and only scale the
+<strong>follicular phase</strong> (menses to ovulation) if its length is
+<strong>between 8 and 25 days</strong>
+(<code>follicular_phase_min_days</code> /
+<code>follicular_phase_max_days</code>). Both judgements are based on
+norms from over 600,000 ovulatory cycles reported in Bull et al.,
+(2019).</p>
+<p>As of v0.1.7, <strong>all four of these phase-length bounds are
+user-adjustable</strong>, independently of the overall cycle-length
+bounds above – widen them directly if your study population has
+genuinely longer or shorter phases than the Bull et al. norms assume,
+rather than accepting a truncated <code>cyclic_time</code> for those
+cycles. <code>cyclic_time_impute</code> additionally has a further,
+narrower fallback for confirmed-ovulation phases that still run past
+even a widened bound (flagged in
+<code>cyclic_time_impute_extended_phase</code>) – see
+<code>?pacts_scaling()</code>, section “Internal phase-length caps,” for
+the full detail on all six length arguments and how they interact.</p>
 <hr>
 </div>
 <div class="section level3">
@@ -457,6 +505,11 @@ main analyses of Nagpal et al. (2025) include.</p></li>
 <li><p><code>ovtoday_impute</code>:<br>
 A binary indicator identifying <strong>imputed ovulation days</strong>
 (value = 1), estimated as 15 days before the next menses onset.</p></li>
+<li><p><code>menses_impute</code>: Present only when
+<code>impute_next_menses = TRUE</code>. A binary indicator identifying
+<strong>imputed menses onsets</strong> (value = 1) placed forward from a
+confirmed ovulation (at ovulation + 14 days by default), distinguishing
+them from observed onsets.</p></li>
 </ul>
 <hr>
 </div>
@@ -579,9 +632,13 @@ ovulation.</p>
 <p>For full documentation, type <code>?pacts_scaling()</code> in R
 console. The lower and upper cycle length bounds may be adjusted, but
 the default is 21-35 days as that was what was validated in Nagpal et
-al., (2025). Only cycles between 21 and 35 days will get scaled, or if a
-luteal phase with confirmed ovulation and menses onset is between 7-18
-days.</p>
+al., (2025). Only cycles between 21 and 35 days will get scaled – with
+the further requirement that, for a confirmed ovulation, the luteal
+phase (ovulation to next menses) is between 7-18 days and the follicular
+phase (menses to ovulation) is between 8-25 days. All four phase-length
+bounds are separately adjustable
+(<code>luteal_phase_min_days</code>/<code>max_days</code>,
+<code>follicular_phase_min_days</code>/<code>max_days</code>).</p>
 <p><code>cycle_df_scaled</code> will now have additional variables as
 well as observations. In this dataset we went from initially having 619
 observations in <code>cycle_df</code> and then having 744 observations
@@ -764,13 +821,17 @@ individuals and cycles.</p>
 </h4>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">cycle_df_scaled</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "id"                     "date"                   "menses"                </span></span>
-<span><span class="co">#&gt;  [4] "ovtoday"                "symptom"                "daterated"             </span></span>
-<span><span class="co">#&gt;  [7] "m2mcount"               "mcyclength"             "cycle_incomplete"      </span></span>
-<span><span class="co">#&gt; [10] "cyclenum"               "ovtoday_impute"         "scaled_cycleday"       </span></span>
-<span><span class="co">#&gt; [13] "scaled_cycleday_ov"     "scaled_cycleday_impute" "scaled_cycleday_imp_ov"</span></span>
-<span><span class="co">#&gt; [16] "cyclic_time"            "cyclic_time_impute"     "cyclic_time_ov"        </span></span>
-<span><span class="co">#&gt; [19] "cyclic_time_imp_ov"     "luteal_length"</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] "id"                                "date"                             </span></span>
+<span><span class="co">#&gt;  [3] "menses"                            "ovtoday"                          </span></span>
+<span><span class="co">#&gt;  [5] "symptom"                           "daterated"                        </span></span>
+<span><span class="co">#&gt;  [7] "m2mcount"                          "mcyclength"                       </span></span>
+<span><span class="co">#&gt;  [9] "cycle_incomplete"                  "cyclenum"                         </span></span>
+<span><span class="co">#&gt; [11] "ovtoday_impute"                    "scaled_cycleday"                  </span></span>
+<span><span class="co">#&gt; [13] "scaled_cycleday_ov"                "scaled_cycleday_impute"           </span></span>
+<span><span class="co">#&gt; [15] "scaled_cycleday_imp_ov"            "cyclic_time"                      </span></span>
+<span><span class="co">#&gt; [17] "cyclic_time_impute"                "cyclic_time_impute_extended_phase"</span></span>
+<span><span class="co">#&gt; [19] "cyclic_time_ov"                    "cyclic_time_imp_ov"               </span></span>
+<span><span class="co">#&gt; [21] "cyclic_time_imp_ov_extended_phase" "luteal_length"</span></span></code></pre></div>
 <ul>
 <li><p><code>scaled_cycleday</code>:<br>
 A continuous cycle time variable centered on <strong>menses
@@ -793,6 +854,10 @@ Centered on either confirmed or imputed ovulation.</p></li>
 <li><p><code>ovtoday_impute</code>:<br>
 A binary indicator identifying <strong>imputed ovulation days</strong>
 (value = 1), estimated as 15 days before the next menses onset.</p></li>
+<li><p><code>menses_impute</code>: Present only when
+<code>impute_next_menses = TRUE</code>. A binary indicator identifying
+<strong>imputed menses onsets</strong> (value = 1) placed forward from a
+confirmed ovulation (ovulation + 14 days by default).</p></li>
 <li><p><code>mcyclength</code>: Indicates the length of a
 menses-to-menses cycle an observation belongs to.</p></li>
 <li><p><code>luteal_length</code>: Indicates the length of the luteal
@@ -872,10 +937,10 @@ whole:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           575            218                357</span></span></code></pre></div>
 <p>Overall, 574 observations with non-NA or non-missing values for
 <code>symptom</code> were scaled because they existed in
-menses-to-menses cycles between 21 and 35 days and associated luteal
+menses-to-menses cycles between 21 and 35 days, with associated luteal
 phases (for cycles that had a reported value for <code>ovtoday</code>)
-were between 7-18 days. We can also visualize non-missing symptom data
-across the cycle:</p>
+between 7-18 days and follicular phases between 8-25 days. We can also
+visualize non-missing symptom data across the cycle:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">checkdata</span><span class="op">$</span><span class="va">data_symptom_plots</span></span>
 <span><span class="co">#&gt; $symptom</span></span></code></pre></div>
@@ -1062,7 +1127,7 @@ the trajectory of the symptom variable across the cycle.</p></li>
 </ol>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_df_menses</span><span class="op">$</span><span class="va">data</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 744 × 25</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 744 × 27</span></span></span>
 <span><span class="co">#&gt;       id date       menses ovtoday symptom daterated  m2mcount mcyclength</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1 2024-01-20      1       0       5 2024-01-20        1         24</span></span>
@@ -1076,12 +1141,12 @@ the trajectory of the symptom variable across the cycle.</p></li>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     1 2024-01-28      0       0       3 2024-01-28        9         24</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     1 2024-01-29      0       0       4 2024-01-29       10         24</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 734 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 17 more variables: cycle_incomplete &lt;dbl&gt;, cyclenum &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 19 more variables: cycle_incomplete &lt;dbl&gt;, cyclenum &lt;int&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   ovtoday_impute &lt;int&gt;, scaled_cycleday &lt;dbl&gt;, scaled_cycleday_ov &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   scaled_cycleday_impute &lt;dbl&gt;, scaled_cycleday_imp_ov &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   cyclic_time &lt;dbl&gt;, cyclic_time_impute &lt;dbl&gt;, cyclic_time_ov &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   cyclic_time_imp_ov &lt;dbl&gt;, luteal_length &lt;dbl&gt;, symptom.m &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   symptom.d &lt;dbl&gt;, symptom.d.roll &lt;dbl&gt;, cycleday_perc &lt;dbl&gt;, …</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   cyclic_time &lt;dbl&gt;, cyclic_time_impute &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   cyclic_time_impute_extended_phase &lt;int&gt;, cyclic_time_ov &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   cyclic_time_imp_ov &lt;dbl&gt;, cyclic_time_imp_ov_extended_phase &lt;int&gt;, …</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_df_menses</span><span class="op">$</span><span class="va">summary</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 22 × 3</span></span></span>
