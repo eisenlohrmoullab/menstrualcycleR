@@ -109,7 +109,9 @@ pacts_scaling(
   for a closing menses, which was a real bug (a genuine luteal phase
   just past the window got a fabricated onset that overwrote
   actually-observed data). As of 0.1.7 a real closing menses at any
-  distance always prevents imputation.
+  distance always prevents imputation. Passing this argument explicitly
+  (any value) triggers a warning, since it would otherwise be a silent
+  no-op for a caller relying on the old behavior.
 
 - luteal_phase_min_days, luteal_phase_max_days:
 
@@ -246,6 +248,18 @@ pre-existing override) are flagged in
 `cyclic_time_impute_extended_phase`. `cyclic_time_imp_ov`, the
 ovulation-centered sibling of `cyclic_time_impute`, receives the
 identical fallback, flagged in `cyclic_time_imp_ov_extended_phase`.
+**This fallback only ever widens coverage, in one direction:** the four
+bound arguments narrow `cyclic_time`/`cyclic_time_ov` directly, but the
+fallback ignores `luteal_phase_max_days`/`follicular_phase_max_days`
+entirely (it checks only the floor and the overall cycle-length bound) –
+so narrowing either `*_max_days` argument below its default to exclude
+implausibly long phases from analysis does *not* exclude them from
+`cyclic_time_impute`/`cyclic_time_imp_ov`, which recover them anyway
+through this fallback. A caller who wants that stricter behavior in the
+imputed columns too should additionally filter out rows where
+`cyclic_time_impute_extended_phase == 1` (or the `_imp_ov` equivalent)
+after calling this function; there is no argument that disables the
+fallback itself.
 
 **History.** These caps existed as hardcoded literals in every released
 version of this package (v0.1.0 onward; git history traces the specific

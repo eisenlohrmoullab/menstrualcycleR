@@ -64,23 +64,37 @@ impute_next_menses_onsets <- function(data, id, date, menses, ovtoday,
   is_mens <- !is.na(data[[mn]]) & data[[mn]] == 1
   if (!any(is_ov)) { data$menses_impute <- 0L; return(data) }
 
-  ov  <- data.frame(id = data[[idn]][is_ov],   ov_date = d_date[is_ov],   stringsAsFactors = FALSE)
+  # next_ov_date: the id's own next confirmed ovulation after this one (NA if
+  # there isn't one). Needed below to scope "closing menses" to THIS
+  # ovulation's cycle -- without it, a real closing menses that actually
+  # belongs to a LATER ovulation gets misread as closing this one too,
+  # wrongly suppressing imputation for a genuinely open earlier cycle in any
+  # id with more than one confirmed ovulation.
+  ov  <- data.frame(id = data[[idn]][is_ov],   ov_date = d_date[is_ov],   stringsAsFactors = FALSE) %>%
+    dplyr::arrange(.data$id, .data$ov_date) %>%
+    dplyr::group_by(.data$id) %>%
+    dplyr::mutate(next_ov_date = dplyr::lead(.data$ov_date)) %>%
+    dplyr::ungroup()
   men <- data.frame(id = data[[idn]][is_mens], m_date  = d_date[is_mens], stringsAsFactors = FALSE)
 
-  # candidate onset = ov + luteal_days; drop it if ANY observed menses closes
-  # the cycle after ov_date -- unbounded, deliberately not restricted to
-  # max_window (see the roxygen entry for max_window: bounding this search
-  # was the 0.1.6 bug, not a real design tradeoff. A real closing menses
-  # recorded at any distance is always the right anchor; synthesizing an
-  # earlier phantom one when a real later one exists would overwrite actual
-  # data with fabricated data, which is strictly worse than leaving a long
-  # real cycle for the caller's overall cycle-length bound to exclude if it's
-  # implausibly long).
+  # candidate onset = ov + luteal_days; drop it if any observed menses closes
+  # THIS ovulation's own cycle -- falls after ov_date and, if there is a next
+  # confirmed ovulation for this id, strictly before it. Deliberately NOT
+  # restricted to max_window (see the roxygen entry for max_window: bounding
+  # this search by a day count was the 0.1.6 bug, not a real design tradeoff.
+  # A real closing menses recorded at any distance is always the right
+  # anchor; synthesizing an earlier phantom one when a real later one exists
+  # would overwrite actual data with fabricated data, which is strictly worse
+  # than leaving a long real cycle for the caller's overall cycle-length
+  # bound to exclude if it's implausibly long). The next-ovulation bound
+  # above is a different kind of restriction -- it scopes "closing" to the
+  # right cycle, it does not reintroduce a day-count cap.
   cand <- ov %>%
     dplyr::mutate(cand_date = .data$ov_date + lubridate::days(luteal_days)) %>%
     dplyr::left_join(men, by = "id", relationship = "many-to-many") %>%
     dplyr::group_by(.data$id, .data$ov_date, .data$cand_date) %>%
-    dplyr::summarise(has_closing = any(!is.na(.data$m_date) & .data$m_date > .data$ov_date),
+    dplyr::summarise(has_closing = any(!is.na(.data$m_date) & .data$m_date > .data$ov_date &
+                                          (is.na(.data$next_ov_date) | .data$m_date < .data$next_ov_date)),
                      .groups = "drop") %>%
     dplyr::filter(!.data$has_closing) %>%
     dplyr::distinct(.data$id, .data$cand_date)

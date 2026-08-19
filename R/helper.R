@@ -331,9 +331,14 @@ process_follicular_phase_base <- function(data, id, date, menses,
 
   # Ovulation-centered counterpart of cyclic_fol_uncapped -- mirrors
   # cyclic_lut_ov_uncapped in process_luteal_phase_base(). Feeds only
-  # cyclic_time_imp_ov's extended-phase fallback.
+  # cyclic_time_imp_ov's extended-phase fallback. Carries the same
+  # !is.na(percfol_ov) guard as cyclic_fol_ov above -- without it, a
+  # luteal/follicular boundary day that percfol_ov nulls out to avoid
+  # double-counting (see percfol's own case_when) could still leak an
+  # uncapped follicular value into cyclic_time_ov_uncapped with no
+  # equivalent dedup protection.
   data = data %>%
-    dplyr::mutate(cyclic_fol_ov_uncapped = dplyr::case_when(!is.na(cyclic_fol_uncapped) ~ -1*(1 - cyclic_fol_uncapped),
+    dplyr::mutate(cyclic_fol_ov_uncapped = dplyr::case_when(!is.na(cyclic_fol_uncapped) & !is.na(percfol_ov) ~ -1*(1 - cyclic_fol_uncapped),
                                                              TRUE ~ NA))
 
   return(data)
@@ -853,17 +858,35 @@ create_scaled_cycleday <- function(data, id, date, menses) {
       cyclic_time_imp_ov = dplyr::coalesce(cyclic_time_ov, cyclic_time_imp_ov1, cyclic_time_ov_uncapped)
     )
   
+  # cyclic_time_impute / cyclic_time_imp_ov are about to be unconditionally
+  # pinned at the menses anchor below, regardless of which tier supplied their
+  # value above -- capture whether that override actually fires (same
+  # predicate, read BEFORE the overwrite) so the two _extended_phase flags can
+  # be corrected to match. Without this, a row whose published value is really
+  # this menses-anchor pin can still be marked "filled by the uncapped
+  # fallback," even though the pinned value has nothing to do with it (for
+  # cyclic_time_imp_ov the pin, +1, actively disagrees with the fallback's own
+  # -1 at that row; for cyclic_time_impute the pin, 0, currently happens to
+  # coincide with the fallback's value there, masking the same underlying gap).
   data <- data %>%
     dplyr::arrange(!!date, .by_group = TRUE) %>%
     dplyr::group_by(!!id) %>%
     dplyr::mutate(
+      menses_anchor_pins_impute = !!menses == 1 & !is.na(dplyr::lag(cyclic_time_impute)),
+      menses_anchor_pins_imp_ov = !!menses == 1 & !is.na(dplyr::lag(cyclic_time_imp_ov)),
       scaled_cycleday_impute = dplyr::case_when(
         !!menses == 1 & !is.na(dplyr::lag(scaled_cycleday_impute)) ~ 0,
         TRUE ~ scaled_cycleday_impute
       ),
+      cyclic_time_impute_extended_phase = dplyr::if_else(
+        menses_anchor_pins_impute, 0L, cyclic_time_impute_extended_phase
+      ),
       cyclic_time_impute = dplyr::case_when(
         !!menses == 1 & !is.na(dplyr::lag(cyclic_time_impute)) ~ 0,
         TRUE ~ cyclic_time_impute
+      ),
+      cyclic_time_imp_ov_extended_phase = dplyr::if_else(
+        menses_anchor_pins_imp_ov, 0L, cyclic_time_imp_ov_extended_phase
       ),
       cyclic_time_imp_ov = dplyr::case_when(
         !!menses == 1 & !is.na(dplyr::lag(cyclic_time_imp_ov)) ~ 1,
@@ -873,7 +896,8 @@ create_scaled_cycleday <- function(data, id, date, menses) {
         !!menses == 1 & !is.na(dplyr::lag(scaled_cycleday_imp_ov)) ~ -1,
         TRUE ~ scaled_cycleday_imp_ov
       )
-    )
+    ) %>%
+    dplyr::select(-menses_anchor_pins_impute, -menses_anchor_pins_imp_ov)
   
   data <- data %>%
     dplyr::arrange(!!date) %>% # Ensure proper ordering

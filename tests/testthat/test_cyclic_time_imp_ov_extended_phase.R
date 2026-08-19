@@ -127,3 +127,35 @@ test_that("an incomplete trailing cycle does not get extended-phase fallback cov
   expect_true(all(is.na(out$cyclic_time_imp_ov[luteal_rows])))
   expect_true(all(out$cyclic_time_imp_ov_extended_phase[luteal_rows] == 0))
 })
+
+test_that("BUG FIX: the menses-anchor pin is never flagged extended_phase, even when it contradicts the fallback's own value", {
+  # Found on adversarial review of the cyclic_time_imp_ov mirror: unlike the
+  # ovtoday anchor (excluded above), cyclic_time_imp_ov ALSO gets an
+  # unconditional pin at the MENSES anchor (helper.R, "menses==1 &
+  # !is.na(lag(cyclic_time_imp_ov)) ~ 1") -- a pin cyclic_time_impute shares
+  # too, but there it's pinned to 0, which happens to equal what the fallback
+  # naturally computes at a menses-onset row (foldaycount==0 there), so the
+  # mislabeling was invisible. cyclic_time_imp_ov's pin (+1) has no such
+  # coincidence: it directly contradicts the fallback's own -1 at that row.
+  #
+  # Cycle 1 (day 1-28): menses day 1, ov day 14 (follicular 13, in-band),
+  # ordinary. Cycle 2 starts day 29 (closes cycle 1's luteal at 15 days,
+  # in-band) with a 28-day follicular phase (exceeds the 25-day default cap)
+  # -- ov day 57, luteal closes day 64 (7 days, in-band; mcyclength 35, the
+  # upper edge of the default [21,35] bound).
+  df <- data.frame(
+    id      = "A",
+    date    = as.Date("2026-01-01") + 0:69,
+    menses  = as.integer((0:69) %in% (c(1, 29, 64) - 1)),
+    ovtoday = as.integer((0:69) %in% (c(14, 57) - 1))
+  )
+  out <- pacts_scaling(df, id = id, date = date, menses = menses, ovtoday = ovtoday)
+
+  anchor_row <- out$id == "A" & out$date == as.Date("2026-01-29")
+  expect_equal(sum(anchor_row), 1)
+  # correctly pinned to 1 by the menses-anchor override...
+  expect_equal(out$cyclic_time_imp_ov[anchor_row], 1)
+  # ...and NOT flagged as fallback-derived, even though the fallback tier
+  # itself computes -1 (a sign-flipped, contradictory value) at this exact row.
+  expect_equal(out$cyclic_time_imp_ov_extended_phase[anchor_row], 0L)
+})

@@ -114,6 +114,29 @@ test_that("impute_next_menses = TRUE increases CONFIRMED scaled coverage for a g
   expect_gt(sum(on$menses_impute, na.rm = TRUE), 0)
 })
 
+test_that("BUG FIX: a later ovulation's real closing menses does not suppress imputation for an earlier, genuinely open one", {
+  # Found on adversarial review of the unbounded-search fix above: has_closing
+  # originally checked "does ANY later menses exist for this id", not "does a
+  # menses close THIS ovulation before the id's next confirmed ovulation." An
+  # id with two ovulations and no menses between them -- ov day 1 (no closing
+  # menses of its own), ov day 40, real closing menses day 45 -- had the day-45
+  # menses misread as closing the day-1 ovulation too, wrongly suppressing its
+  # imputation even though it has no real closing menses before day 40.
+  mk <- function(id, ov_days, mens_days, n) data.frame(
+    id = id, daterated = as.Date("2026-01-01") + 0:(n - 1),
+    menses = as.integer((0:(n - 1)) %in% (mens_days - 1)),
+    ovtoday = as.integer((0:(n - 1)) %in% (ov_days - 1)))
+  synth <- mk("A", ov_days = c(1, 40), mens_days = c(45), n = 50)
+
+  imp <- impute_next_menses_onsets(synth, id, daterated, menses, ovtoday)
+
+  # the day-1 ovulation gets its own imputed onset at ov+14 = day 15.
+  expect_equal(imp$menses_impute[imp$daterated == as.Date("2026-01-01") + 14], 1)
+  # the day-40 ovulation is correctly left alone -- day 45 really does close it.
+  expect_equal(sum(imp$menses_impute[imp$daterated > as.Date("2026-01-01") + 20]), 0)
+  expect_equal(imp$menses[imp$daterated == as.Date("2026-01-01") + 44], 1)  # real day-45 onset untouched
+})
+
 test_that("impute_next_menses = TRUE now correctly fires zero times on cycledata (no genuinely open cycles)", {
   on  <- pacts_scaling(cycledata, id = id, date = daterated, menses = menses, ovtoday = ovtoday,
                        impute_next_menses = TRUE)

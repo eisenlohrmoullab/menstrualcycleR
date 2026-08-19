@@ -121,6 +121,44 @@
   need imputation turns out to have a real closing menses just beyond the old,
   buggy window. That confirms the bug was the entire source of imputation
   activity on that example, not a partial contributor to it.
+* **Fixed** (found in a final pre-push adversarial review, same day): the
+  unbounded closing-menses search above checked "does *any* later menses
+  exist for this id," not "does a menses close *this* ovulation before the
+  id's next confirmed ovulation" -- so for an id with more than one
+  ovulation, a later ovulation's real closing menses could be misread as
+  closing an earlier one too, wrongly suppressing imputation for an earlier
+  cycle that has no real closing menses of its own before the next
+  ovulation. `impute_next_menses_onsets()` now additionally bounds the
+  search by the id's own next confirmed ovulation (not by a day count --
+  that was the original 0.1.6 bug) when there is one.
+* **Fixed** (same review): `cyclic_time_imp_ov_extended_phase` did not
+  account for the pre-existing menses-anchor override that unconditionally
+  pins `cyclic_time_imp_ov` to `1` at `menses == 1` -- so a menses-onset row
+  could be flagged as "filled by the uncapped fallback" while actually
+  showing the pinned value, which can directly contradict what the fallback
+  itself computed there (the analogous pin for `cyclic_time_impute`, `0`,
+  happens to coincide with the fallback's own value on a menses-onset row,
+  masking the identical gap in that column). Both `_extended_phase` flags
+  now correctly read `0` whenever the menses-anchor pin is what actually
+  determined the published value, mirroring the existing ovulation-anchor
+  exclusion.
+* **Hardened** (same review, no demonstrated trigger found): `cyclic_fol_ov_uncapped`
+  was missing the `percfol_ov` overlap guard its capped sibling `cyclic_fol_ov`
+  carries, which exists to prevent double-counting a luteal/follicular
+  boundary day. Added for consistency with the capped path; extensive testing
+  (500+ randomized datasets plus targeted boundary constructions) did not
+  find a case where the missing guard produced a wrong value, since the
+  unconditional ovulation-anchor override currently masks the one row where
+  it could matter.
+* **Documentation:** the "Getting Started" vignette's description of
+  `impute_next_menses`/`next_menses_max_window` still described the pre-0.1.7
+  bounded-window search; corrected. `pacts_scaling()`'s roxygen now states
+  explicitly that narrowing `luteal_phase_max_days`/`follicular_phase_max_days`
+  below their defaults does **not** make `cyclic_time_impute`/`cyclic_time_imp_ov`
+  stricter (only widening the bound affects them) -- the uncapped fallback
+  ignores the ceiling argument entirely and only respects the floor and the
+  overall cycle-length bound. `next_menses_max_window` now emits a warning if
+  passed explicitly, rather than silently doing nothing.
 * Found via a person-by-person review of CLEAR-1/2/3 cycle data (2026-08-19);
   see `pacts-gam-pipeline/cycle_data_prep/CYCLE_METHODS_DECISIONS.md` for the
   full methods-decision record.

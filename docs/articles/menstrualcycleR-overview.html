@@ -191,16 +191,19 @@ close it.</p>
 menses onset <strong>forward</strong> from the confirmed ovulation,
 placed at <code>ovulation + next_menses_luteal_days</code> (default 14
 days, so ovulation + 14 = the last follicular day, i.e. the “LH+15”
-convention). Imputation is skipped when an observed menses already
-closes the cycle within <code>next_menses_max_window</code> days
-(default 20), so a recorded period is never overridden. Imputed onsets
-are flagged in a new <code>menses_impute</code> column, exactly as
-imputed ovulations are flagged in <code>ovtoday_impute</code>, so the
-two can be reported separately. This option is <strong>off by
-default</strong>, so existing analyses are unchanged; only the general
-rule is applied, and any study-specific gating (for example, not
-imputing across a treatment phase or a documented off-study break) is
-left to the caller.</p>
+convention). Imputation is skipped whenever an observed menses already
+closes the cycle, at any distance, so a recorded period is never
+overridden – the <code>next_menses_max_window</code> argument from
+earlier versions no longer affects this (as of 0.1.7; see
+<code><a href="../reference/pacts_scaling.html">?pacts_scaling</a></code>), because bounding that check by a day count
+was itself a bug: a real closing menses just beyond the old window was
+invisible to it and got overwritten. Imputed onsets are flagged in a new
+<code>menses_impute</code> column, exactly as imputed ovulations are
+flagged in <code>ovtoday_impute</code>, so the two can be reported
+separately. This option is <strong>off by default</strong>, so existing
+analyses are unchanged; only the general rule is applied, and any
+study-specific gating (for example, not imputing across a treatment
+phase or a documented off-study break) is left to the caller.</p>
 <hr>
 </div>
 </div>
