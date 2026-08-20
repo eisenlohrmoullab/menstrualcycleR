@@ -10,10 +10,11 @@
 # Two deliberate starter choices (see the chat where this was set up):
 #   1. Single platform (Ubuntu, current R) to start, for reliable green runs.
 #      Add more OS / R versions to a matrix later once passing is routine.
-#   2. error-on: "error" -- fail only on genuine ERRORS, not on the package's
-#      KNOWN pre-existing WARNINGs/NOTEs (undeclared `purrr`, Rd doc drift, etc.;
-#      tracked in _READINESS_PLAN.md). Tighten to "warning" after that backlog
-#      is cleared so style regressions get caught too.
+#   2. error-on: "warning" -- R CMD check reached a clean 0 errors / 0 warnings /
+#      0 notes state on 2026-08-19 (the WARNING/NOTE backlog this comment used
+#      to reference, tracked in a now-deleted _READINESS_PLAN.md, is cleared),
+#      so this is tightened from the original "error"-only starter setting to
+#      also catch WARNINGs -- a real regression should turn CI red, not just NOTEs.
 #
 # Derived from the r-lib/actions "check-standard" example:
 # https://github.com/r-lib/actions/tree/v2/examples
@@ -54,5 +55,5 @@ jobs:
           # Full check INCLUDING the vignette. The vignette's build-time deps
           # (tidyverse, marginaleffects) are now declared in DESCRIPTION Suggests,
           # so menstrualcycleR-overview.Rmd builds in a clean environment.
-          error-on: '"error"'
+          error-on: '"warning"'
           upload-snapshots: true

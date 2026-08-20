@@ -526,10 +526,6 @@ head(cycle_df)
 ``` r
 
 cycle_df_scaled = pacts_scaling(data = cycle_df, id = id, date = daterated, menses = menses, ovtoday = ovtoday, lower_cyclength_bound = 21, upper_cyclength_bound = 35)
-#> id: id
-#> date: date
-#> menses: menses
-#> ovtoday: ovtoday
 ```
 
 For full documentation, type `?pacts_scaling()` in R console. The lower

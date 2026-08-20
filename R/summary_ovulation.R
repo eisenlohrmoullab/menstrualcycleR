@@ -107,8 +107,4 @@ summary_ovulation <- function(data){
     ovstatus_total = ovstatus_total,
     ovstatus_id = ovstatus_id
   ))
-  
-  print(ovstatus_total)
-  print(ovstatus_id)
-  
 }

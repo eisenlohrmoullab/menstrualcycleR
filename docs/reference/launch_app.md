@@ -17,3 +17,11 @@ launch_app()
 Users can upload a `.csv` file, process their data using built-in PACTS
 functionality, and explore cycle-aligned visualizations to support
 analysis and interpretation.
+
+Requires the shinyjs and cpass packages, which are Suggests (not
+installed automatically with menstrualcycleR) because they are only
+needed for this app, not for
+[`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+or any other exported function. Install them with
+`install.packages("shinyjs")` and
+`remotes::install_github("lasy/cpass")`.

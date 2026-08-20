@@ -2,6 +2,70 @@
 
 ## menstrualcycleR 0.1.7
 
+- **Deployment-readiness pass (2026-08-19):** `R CMD check` now runs
+  clean (0 errors, 0 warnings, 0 notes; was 2 notes). Found and fixed:
+  - A private, machine-local operator-notes file (deliberately
+    gitignored, never meant to leave this machine) was shipping inside
+    the built package tarball, because `.Rbuildignore` excluded one of
+    the two repo-root operator-notes files but not the other. Fixed; the
+    local settings directory excluded too as a preventive measure.
+  - [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+    had no input validation at all: a missing column threw a raw rlang
+    stack trace, and – more seriously – a character-coded
+    `menses`/`ovtoday` (e.g. `"yes"`/`"no"` instead of `0`/`1`) produced
+    **no error or warning**, silently returning every derived column as
+    `NA`. Both now fail immediately with a specific message naming the
+    argument and the actual problem (missing column, quoted-string
+    column name, wrong type, or an out-of-range value).
+  - [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)’s
+    `@return` documented only the legacy `scaled_cycleday*` columns and
+    omitted
+    `cyclic_time`/`cyclic_time_impute`/`cyclic_time_ov`/`cyclic_time_imp_ov`
+    – the actual recommended output, and the variables reported in
+    Nagpal et al. (2025) – along with
+    `mcyclength`/`m2mcount`/`cyclenum`/`cycle_incomplete`/`luteal_length`.
+    All now documented; `@return` also states plainly that
+    `scaled_cycleday*` is a legacy, independently-computed
+    implementation, not interchangeable with `cyclic_time*`.
+  - `calculate_mcyclength()` (called internally by every
+    [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+    call) had leftover debug
+    [`print()`](https://rdrr.io/r/base/print.html) statements firing
+    unconditionally on every call. Removed.
+  - `mgcv` (used only in the vignette) moved from `Imports` to
+    `Suggests`; `shinyjs`/`cpass` (used only by the optional
+    [`launch_app()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/launch_app.md)
+    Shiny app) moved from `Imports` to `Suggests` too, with
+    [`launch_app()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/launch_app.md)
+    now checking for them and giving an actionable install message if
+    missing, rather than requiring every user of
+    [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+    to install them.
+  - No
+    [`?menstrualcycleR`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/menstrualcycleR-package.md)
+    package-level help topic existed. Added, with a “where to start”
+    pointer to
+    [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+    and the vignette.
+  - [`cycle_plot_individual()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot_individual.md)’s
+    own `@examples` never actually called the function it documents;
+    fixed, and `@return`’s described list shape corrected to match the
+    real (one level deeper than documented) nesting.
+  - Smaller documentation fixes:
+    [`cycledata_check()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycledata_check.md)’s
+    `@return` now names its third list element’s real accessor
+    (`data_symptom_plots`); a stray example comment in
+    [`cycle_plot()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot.md)
+    was silently dropped from the rendered docs (missing `#'` prefix);
+    dead [`print()`](https://rdrr.io/r/base/print.html) calls after
+    [`return()`](https://rdrr.io/r/base/function.html) in
+    [`summary_ovulation()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/summary_ovulation.md)
+    removed; `README.md` gained a runnable quick-start example and now
+    recommends `build_vignettes = TRUE` on install.
+  - The CI workflow (`R-CMD-check.yaml`) was set to `error-on: "error"`
+    with a comment saying to tighten it to `"warning"` once the check’s
+    pre-existing WARNING/NOTE backlog (tracked in a file that no longer
+    exists) was cleared. It now is; tightened.
 - **New:** the 18-day luteal and 25-day follicular phase-length caps
   described below are now caller-adjustable arguments to
   [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)

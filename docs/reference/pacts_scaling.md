@@ -136,35 +136,44 @@ pacts_scaling(
 
 ## Value
 
-The original data frame with the following additional columns:
+The original data frame with the following additional columns. **Use the
+four `cyclic_time*` columns for analysis** – they are the variables
+reported in Nagpal et al. (2025) and the ones this package actively
+maintains. The four `scaled_cycleday*` columns are an earlier, legacy
+implementation of the same idea, kept only for backward compatibility
+with existing analysis code; they are numerically similar but *not*
+identical to their `cyclic_time*` counterparts (different coverage,
+small value differences even on rows both cover) and should not be
+treated as interchangeable with them.
 
-- `scaled_cycleday`: A continuous cycle time variable centered on menses
-  onset (`menses == 1` → 0), ranging from -1 (start of luteal phase) to
-  +1 (ovulation). Only includes cycles with biomarker-confirmed
-  ovulation.
+- `cyclic_time`: The primary, menses-anchored cycle time variable,
+  centered on menses onset (`menses == 1` -\> 0) and spanning -1 (start
+  of luteal phase) to +1 (ovulation). Only covers cycles with
+  biomarker-confirmed ovulation whose luteal and follicular phases both
+  fall within `[luteal_phase_min_days, luteal_phase_max_days]` /
+  `[follicular_phase_min_days, follicular_phase_max_days]` – see
+  "Internal phase-length caps" below.
 
-- `scaled_cycleday_impute`: Same as above, but includes cycles where
-  ovulation was imputed using day -15. Offers broader coverage across
-  the dataset, at the cost of lower precision.
+- `cyclic_time_impute`: Same as `cyclic_time`, but with broader
+  coverage: falls back to imputed ovulation (`ovtoday_impute`) for
+  cycles without confirmed ovulation, and then to the phase-cap fallback
+  described below for phases that exceed the internal caps. Flagged by
+  `cyclic_time_impute_extended_phase` (below) wherever that last
+  fallback tier supplied the value.
 
-- `scaled_cycleday_ov`: A cycle time variable centered on ovulation day
-  (`ovtoday == 1` → 0), ranging from -1 (start of follicular phase) to
-  +1 (end of luteal phase). Only includes cycles with confirmed
-  ovulation.
+- `cyclic_time_ov`: The ovulation-anchored counterpart of `cyclic_time`
+  – centered on confirmed ovulation (`ovtoday == 1` -\> 0), spanning -1
+  (start of follicular phase) to +1 (end of luteal phase). Same
+  confirmed-ovulation-only, phase-cap-gated coverage as `cyclic_time`.
 
-- `scaled_cycleday_imp_ov`: Same as above, but uses imputed ovulation
-  (`ovtoday_impute == 1`) for cycles lacking biomarker confirmation.
-  Centered on either confirmed or imputed ovulation.
+- `cyclic_time_imp_ov`: The ovulation-anchored counterpart of
+  `cyclic_time_impute` – same imputed-ovulation and phase-cap fallbacks,
+  flagged by `cyclic_time_imp_ov_extended_phase`.
 
 - `ovtoday_impute`: A binary column indicating imputed ovulation days
   (value `1`) for cycles without confirmed ovulation, estimated as 15
-  days before menses onset.
-
-- `menses_impute`: Present only when `impute_next_menses = TRUE`. A
-  binary column marking menses onsets that were *imputed forward* from a
-  confirmed ovulation (value `1`) versus observed onsets (`0`). Report
-  the imputed-versus-observed onset rate for transparency, just as you
-  would for imputed ovulation.
+  days before menses onset. Report the confirmed-versus-imputed rate for
+  transparency.
 
 - `cyclic_time_impute_extended_phase`: Binary column (`0`/`1`) marking
   rows where `cyclic_time_impute` was filled by the phase-cap fallback
@@ -175,6 +184,37 @@ The original data frame with the following additional columns:
 - `cyclic_time_imp_ov_extended_phase`: The same flag as
   `cyclic_time_impute_extended_phase`, for the ovulation-centered
   `cyclic_time_imp_ov` column.
+
+- `mcyclength`: The length, in days, of the menses-to-menses cycle this
+  row belongs to.
+
+- `m2mcount`: A forward day count starting from each menses onset (day
+  of onset = 0).
+
+- `cyclenum`: Which complete menses-to-menses cycle, in sequence, this
+  row belongs to, per `id`.
+
+- `cycle_incomplete`: Binary (`0`/`1`); `1` marks a still-open trailing
+  cycle with no closing menses yet observed (unless
+  `impute_next_menses = TRUE` closes it – see below).
+
+- `luteal_length`: The confirmed-ovulation luteal phase length in days,
+  only populated when it falls within
+  `[luteal_phase_min_days, luteal_phase_max_days]` (`NA` otherwise,
+  including for imputed-ovulation or incomplete cycles).
+
+- `menses_impute`: Present only when `impute_next_menses = TRUE`. A
+  binary column marking menses onsets that were *imputed forward* from a
+  confirmed ovulation (value `1`) versus observed onsets (`0`). Report
+  the imputed-versus-observed onset rate for transparency, just as you
+  would for imputed ovulation.
+
+- `scaled_cycleday`, `scaled_cycleday_impute`, `scaled_cycleday_ov`,
+  `scaled_cycleday_imp_ov`: Legacy variables – see note above. Same
+  conceptual meaning as their `cyclic_time*` counterparts
+  (confirmed-only / imputed-inclusive, x menses-anchored /
+  ovulation-anchored) but computed independently; do not mix the two
+  families within one analysis.
 
 ## Details
 
@@ -289,10 +329,6 @@ data_with_scaling <- pacts_scaling(
   lower_cyclength_bound = 21, 
   upper_cyclength_bound = 35
 )
-#> id: id
-#> date: date
-#> menses: menses
-#> ovtoday: ovtoday
 
 
 # View the result

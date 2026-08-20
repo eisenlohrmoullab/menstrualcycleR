@@ -7,6 +7,8 @@
 ^\.DS_Store$             
 ^Meta$
 ^CLAUDE\.md$
+^CLAUDE\.local\.md$
+^\.claude$
 ^_pkgdown\.yml$
 ^pkgdown$
 ^docs$

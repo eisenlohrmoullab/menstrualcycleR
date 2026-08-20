@@ -46,6 +46,7 @@ and provides flexibility in choosing the y-axis scale for the plot.
 }
 \examples{
 # Example usage:
+# Load the example dataset
 cycle_df = cycledata
 
 data_with_scaling <- pacts_scaling(

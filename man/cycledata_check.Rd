@@ -30,7 +30,7 @@ A list containing three components:
 \item Number of non-missing values during the luteal phase.
 \item Number of non-missing values during the follicular phase.
 }
-\item \strong{Plots}: Visualizations showing the availability of non-missing data for each symptom, stratified by ID.
+\item \strong{\code{data_symptom_plots}}: Visualizations showing the availability of non-missing data for each symptom, stratified by ID.
 }
 }
 \description{

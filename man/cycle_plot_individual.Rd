@@ -30,11 +30,15 @@ cycle_plot_individual(
 \item{rollingavg}{A numeric indicating how many days of a rolling average to use, the default is 5}
 }
 \value{
-A list where each cycle contains:
+A named list, one element per entry in \code{symptoms}. Each of those is itself a named
+list, one element per cycle (named \code{"Cycle_1"}, \code{"Cycle_2"}, ...), each containing:
 \itemize{
 \item \verb{$plot}: The cycle-specific ggplot object with the ID displayed
 \item \verb{$summary}: The corresponding summary data
 }
+
+So for a single symptom \code{"symptom"} and its first cycle, access the plot as
+\code{result[["symptom"]][["Cycle_1"]]$plot}.
 }
 \description{
 This function creates cycle-specific plots and summary statistics for a specified individual (\code{id}),
@@ -44,15 +48,22 @@ storing both in a named list for easy access.
 cycle_df = cycledata
 
 data_with_scaling <- pacts_scaling(
-  cycle_df, 
-  id = id, 
-  date = daterated, 
-  menses = menses, 
-  ovtoday = ovtoday, 
-  lower_cyclength_bound = 21, 
+  cycle_df,
+  id = id,
+  date = daterated,
+  menses = menses,
+  ovtoday = ovtoday,
+  lower_cyclength_bound = 21,
   upper_cyclength_bound = 35
 )
 
+result <- cycle_plot_individual(
+  data_with_scaling,
+  id = unique(data_with_scaling$id)[1],
+  symptoms = "symptom"
+)
 
-
+# the first cycle's plot and summary for "symptom":
+result[["symptom"]][["Cycle_1"]]$plot
+result[["symptom"]][["Cycle_1"]]$summary
 }

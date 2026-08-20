@@ -12,11 +12,39 @@ To install and load the `menstrualcycleR` package, follow these steps:
 
 2. Install `menstrualcycleR` from GitHub 
 
-`remotes::install_github("eisenlohrmoullab/menstrualcycleR")`
+`remotes::install_github("eisenlohrmoullab/menstrualcycleR", build_vignettes = TRUE)`
 
 3. Load the package 
 
 `library(menstrualcycleR)`
+
+## Quick start
+
+`pacts_scaling()` is the main function: give it a long-format diary (one row per person-day)
+with menses and ovulation markers, and it returns the same data with continuous,
+phase-aligned cycle-time columns added.
+
+```r
+library(menstrualcycleR)
+
+# cycledata is a small example dataset bundled with the package
+scaled <- pacts_scaling(
+  cycledata,
+  id      = id,
+  date    = daterated,
+  menses  = menses,
+  ovtoday = ovtoday
+)
+
+# cyclic_time / cyclic_time_impute / cyclic_time_ov / cyclic_time_imp_ov are the
+# columns to model -- see ?pacts_scaling for what each one covers
+head(scaled[, c("id", "daterated", "cyclic_time", "cyclic_time_impute")])
+```
+
+For the full workflow, including GAMM modeling of the resulting cycle-time
+variables, see the vignette (`vignette("menstrualcycleR-overview")` once
+installed with `build_vignettes = TRUE` above, or the hosted copy linked
+below) or `?menstrualcycleR` for an overview of every exported function.
 
 To utilize the shinyapp, visit: https://menstrualcycledata.shinyapps.io/shiny/
 

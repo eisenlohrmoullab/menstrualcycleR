@@ -49,8 +49,8 @@ A list containing three components:
 
   3.  Number of non-missing values during the follicular phase.
 
-- **Plots**: Visualizations showing the availability of non-missing data
-  for each symptom, stratified by ID.
+- **`data_symptom_plots`**: Visualizations showing the availability of
+  non-missing data for each symptom, stratified by ID.
 
 ## Examples
 
@@ -67,10 +67,6 @@ data_with_scaling <- pacts_scaling(
   lower_cyclength_bound = 21, 
   upper_cyclength_bound = 35
 )
-#> id: id
-#> date: date
-#> menses: menses
-#> ovtoday: ovtoday
 
 # Analyze symptom data availability
 data_available_info <- cycledata_check(

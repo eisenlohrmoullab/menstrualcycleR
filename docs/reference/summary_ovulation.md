@@ -99,10 +99,6 @@ data_with_scaling <- pacts_scaling(
   lower_cyclength_bound = 21, 
   upper_cyclength_bound = 35
 )
-#> id: id
-#> date: date
-#> menses: menses
-#> ovtoday: ovtoday
 
 ov_summary = summary_ovulation(data_with_scaling)
 print(ov_summary)

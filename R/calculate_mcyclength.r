@@ -49,14 +49,7 @@ calculate_mcyclength <- function(data, id, date, menses, ovtoday) {
   date <- rlang::enquo(date)
   id <- rlang::enquo(id)
   ovtoday <- rlang::enquo(ovtoday)
-  
-  # Print column names to debug
-  print(glue::glue("id: {rlang::quo_name(id)}"))
-  print(glue::glue("date: {rlang::quo_name(date)}"))
-  print(glue::glue("menses: {rlang::quo_name(menses)}"))
-  print(glue::glue("ovtoday: {rlang::quo_name(ovtoday)}"))
-  
-  
+
   # Step 1: Ensure date is in Date format
   # Coerce date column to Date if needed
   if (!inherits(dplyr::pull(data, !!date), "Date")) {

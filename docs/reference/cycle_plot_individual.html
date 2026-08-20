@@ -93,30 +93,62 @@ storing both in a named list for easy access.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list where each cycle contains:</p><ul><li><p><code>$plot</code>: The cycle-specific ggplot object with the ID displayed</p></li>
+    <p>A named list, one element per entry in <code>symptoms</code>. Each of those is itself a named
+list, one element per cycle (named <code>"Cycle_1"</code>, <code>"Cycle_2"</code>, ...), each containing:</p><ul><li><p><code>$plot</code>: The cycle-specific ggplot object with the ID displayed</p></li>
 <li><p><code>$summary</code>: The corresponding summary data</p></li>
-</ul></div>
+</ul><p>So for a single symptom <code>"symptom"</code> and its first cycle, access the plot as
+<code>result[["symptom"]][["Cycle_1"]]$plot</code>.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">cycle_df</span> <span class="op">=</span> <span class="va">cycledata</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">data_with_scaling</span> <span class="op">&lt;-</span> <span class="fu"><a href="pacts_scaling.html">pacts_scaling</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">cycle_df</span>, </span></span>
-<span class="r-in"><span>  id <span class="op">=</span> <span class="va">id</span>, </span></span>
-<span class="r-in"><span>  date <span class="op">=</span> <span class="va">daterated</span>, </span></span>
-<span class="r-in"><span>  menses <span class="op">=</span> <span class="va">menses</span>, </span></span>
-<span class="r-in"><span>  ovtoday <span class="op">=</span> <span class="va">ovtoday</span>, </span></span>
-<span class="r-in"><span>  lower_cyclength_bound <span class="op">=</span> <span class="fl">21</span>, </span></span>
+<span class="r-in"><span>  <span class="va">cycle_df</span>,</span></span>
+<span class="r-in"><span>  id <span class="op">=</span> <span class="va">id</span>,</span></span>
+<span class="r-in"><span>  date <span class="op">=</span> <span class="va">daterated</span>,</span></span>
+<span class="r-in"><span>  menses <span class="op">=</span> <span class="va">menses</span>,</span></span>
+<span class="r-in"><span>  ovtoday <span class="op">=</span> <span class="va">ovtoday</span>,</span></span>
+<span class="r-in"><span>  lower_cyclength_bound <span class="op">=</span> <span class="fl">21</span>,</span></span>
 <span class="r-in"><span>  upper_cyclength_bound <span class="op">=</span> <span class="fl">35</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> id: id</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> date: date</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> menses: menses</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ovtoday: ovtoday</span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">cycle_plot_individual</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">data_with_scaling</span>,</span></span>
+<span class="r-in"><span>  id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">data_with_scaling</span><span class="op">$</span><span class="va">id</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span></span>
+<span class="r-in"><span>  symptoms <span class="op">=</span> <span class="st">"symptom"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># the first cycle's plot and summary for "symptom":</span></span></span>
+<span class="r-in"><span><span class="va">result</span><span class="op">[[</span><span class="st">"symptom"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="st">"Cycle_1"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">plot</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Removed 1 row containing missing values or values outside the scale range</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> (`geom_line()`).</span>
+<span class="r-plt img"><img src="cycle_plot_individual-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="va">result</span><span class="op">[[</span><span class="st">"symptom"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="st">"Cycle_1"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">summary</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 20 × 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    cycleday_5perc mean_dev mean_dev_roll raw_sx sx_roll cycleday mcyclength</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>           0     <span style="color: #BB0000;">NaN</span>            0.877   <span style="color: #BB0000;">NaN</span>      3.67     11           24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>           0.05    1.21         1.63      4      4.42     12.5         24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>           0.1     2.21         1.88      5      4.67     14           24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>           0.15  <span style="color: #BB0000;">NaN</span>            1.46    <span style="color: #BB0000;">NaN</span>      4.25     15           24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>           0.2     1.21         1.04      4      3.83     16.5         24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>           0.25    0.211        0.211     3      3        18           24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>           0.3    -<span style="color: #BB0000;">1.79</span>        -<span style="color: #BB0000;">1.04</span>      1      1.75     19.5         24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>           0.35   -<span style="color: #BB0000;">1.79</span>        -<span style="color: #BB0000;">1.54</span>      1      1.25     21           24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>           0.4    -<span style="color: #BB0000;">1.79</span>        -<span style="color: #BB0000;">1.19</span>      1      1.6      22           24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>           0.45   -<span style="color: #BB0000;">0.289</span>       -<span style="color: #BB0000;">0.914</span>     2.5    1.88     23.5         24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span>           0.5     2.21         1.54      5      4.33      1           24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span>           0.55    2.21         1.54      5      4.33      2           24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">13</span>           0.6     0.211        0.961     3      3.75      3           24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">14</span>           0.65  <span style="color: #BB0000;">NaN</span>           -<span style="color: #BB0000;">0.039</span><span style="color: #BB0000; text-decoration: underline;">5</span>  <span style="color: #BB0000;">NaN</span>      2.75      4           24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">15</span>           0.7    -<span style="color: #BB0000;">0.789</span>       -<span style="color: #BB0000;">1.04</span>      2      1.75      5           24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">16</span>           0.8    -<span style="color: #BB0000;">1.79</span>        -<span style="color: #BB0000;">1.54</span>      1      1.25      6           24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">17</span>           0.85   -<span style="color: #BB0000;">1.79</span>        -<span style="color: #BB0000;">1.19</span>      1      1.6       7           24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">18</span>           0.9    -<span style="color: #BB0000;">1.79</span>        -<span style="color: #BB0000;">0.789</span>     1      2         8           24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">19</span>           0.95    0.211       -<span style="color: #BB0000;">0.539</span>     3      2.25      9           24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">20</span>           1       1.21        -<span style="color: #BB0000;">0.123</span>     4      2.67     10           24</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

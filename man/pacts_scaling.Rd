@@ -52,16 +52,28 @@ pacts_scaling(
 \item{follicular_phase_min_days, follicular_phase_max_days}{Numeric bounds (days) on how long a \strong{confirmed} ovulation's follicular phase (menses to ovulation) may be for \code{cyclic_fol}/\code{cyclic_time} to scale it. Defaults \code{8} and \code{25}, from Bull et al. (2019) norms in 21-35 day cycles. Same independence from \code{lower_cyclength_bound}/\code{upper_cyclength_bound} as the luteal pair above. See the "Internal phase-length caps" section below.}
 }
 \value{
-The original data frame with the following additional columns:
+The original data frame with the following additional columns. \strong{Use the four
+\code{cyclic_time*} columns for analysis} -- they are the variables reported in Nagpal et al.
+(2025) and the ones this package actively maintains. The four \code{scaled_cycleday*} columns
+are an earlier, legacy implementation of the same idea, kept only for backward compatibility
+with existing analysis code; they are numerically similar but \emph{not} identical to their
+\code{cyclic_time*} counterparts (different coverage, small value differences even on rows both
+cover) and should not be treated as interchangeable with them.
 \itemize{
-\item \code{scaled_cycleday}: A continuous cycle time variable centered on menses onset (\code{menses == 1} → 0), ranging from -1 (start of luteal phase) to +1 (ovulation). Only includes cycles with biomarker-confirmed ovulation.
-\item \code{scaled_cycleday_impute}: Same as above, but includes cycles where ovulation was imputed using day -15. Offers broader coverage across the dataset, at the cost of lower precision.
-\item \code{scaled_cycleday_ov}: A cycle time variable centered on ovulation day (\code{ovtoday == 1} → 0), ranging from -1 (start of follicular phase) to +1 (end of luteal phase). Only includes cycles with confirmed ovulation.
-\item \code{scaled_cycleday_imp_ov}: Same as above, but uses imputed ovulation (\code{ovtoday_impute == 1}) for cycles lacking biomarker confirmation. Centered on either confirmed or imputed ovulation.
-\item \code{ovtoday_impute}: A binary column indicating imputed ovulation days (value \code{1}) for cycles without confirmed ovulation, estimated as 15 days before menses onset.
-\item \code{menses_impute}: Present only when \code{impute_next_menses = TRUE}. A binary column marking menses onsets that were \emph{imputed forward} from a confirmed ovulation (value \code{1}) versus observed onsets (\code{0}). Report the imputed-versus-observed onset rate for transparency, just as you would for imputed ovulation.
+\item \code{cyclic_time}: The primary, menses-anchored cycle time variable, centered on menses onset (\code{menses == 1} -> 0) and spanning -1 (start of luteal phase) to +1 (ovulation). Only covers cycles with biomarker-confirmed ovulation whose luteal and follicular phases both fall within \code{[luteal_phase_min_days, luteal_phase_max_days]} / \code{[follicular_phase_min_days, follicular_phase_max_days]} -- see "Internal phase-length caps" below.
+\item \code{cyclic_time_impute}: Same as \code{cyclic_time}, but with broader coverage: falls back to imputed ovulation (\code{ovtoday_impute}) for cycles without confirmed ovulation, and then to the phase-cap fallback described below for phases that exceed the internal caps. Flagged by \code{cyclic_time_impute_extended_phase} (below) wherever that last fallback tier supplied the value.
+\item \code{cyclic_time_ov}: The ovulation-anchored counterpart of \code{cyclic_time} -- centered on confirmed ovulation (\code{ovtoday == 1} -> 0), spanning -1 (start of follicular phase) to +1 (end of luteal phase). Same confirmed-ovulation-only, phase-cap-gated coverage as \code{cyclic_time}.
+\item \code{cyclic_time_imp_ov}: The ovulation-anchored counterpart of \code{cyclic_time_impute} -- same imputed-ovulation and phase-cap fallbacks, flagged by \code{cyclic_time_imp_ov_extended_phase}.
+\item \code{ovtoday_impute}: A binary column indicating imputed ovulation days (value \code{1}) for cycles without confirmed ovulation, estimated as 15 days before menses onset. Report the confirmed-versus-imputed rate for transparency.
 \item \code{cyclic_time_impute_extended_phase}: Binary column (\code{0}/\code{1}) marking rows where \code{cyclic_time_impute} was filled by the phase-cap fallback described below (value \code{1}), versus the normal confirmed or imputed-ovulation paths (\code{0}). Report this rate alongside the imputed-ovulation rate for full transparency about coverage.
 \item \code{cyclic_time_imp_ov_extended_phase}: The same flag as \code{cyclic_time_impute_extended_phase}, for the ovulation-centered \code{cyclic_time_imp_ov} column.
+\item \code{mcyclength}: The length, in days, of the menses-to-menses cycle this row belongs to.
+\item \code{m2mcount}: A forward day count starting from each menses onset (day of onset = 0).
+\item \code{cyclenum}: Which complete menses-to-menses cycle, in sequence, this row belongs to, per \code{id}.
+\item \code{cycle_incomplete}: Binary (\code{0}/\code{1}); \code{1} marks a still-open trailing cycle with no closing menses yet observed (unless \code{impute_next_menses = TRUE} closes it -- see below).
+\item \code{luteal_length}: The confirmed-ovulation luteal phase length in days, only populated when it falls within \code{[luteal_phase_min_days, luteal_phase_max_days]} (\code{NA} otherwise, including for imputed-ovulation or incomplete cycles).
+\item \code{menses_impute}: Present only when \code{impute_next_menses = TRUE}. A binary column marking menses onsets that were \emph{imputed forward} from a confirmed ovulation (value \code{1}) versus observed onsets (\code{0}). Report the imputed-versus-observed onset rate for transparency, just as you would for imputed ovulation.
+\item \code{scaled_cycleday}, \code{scaled_cycleday_impute}, \code{scaled_cycleday_ov}, \code{scaled_cycleday_imp_ov}: Legacy variables -- see note above. Same conceptual meaning as their \code{cyclic_time*} counterparts (confirmed-only / imputed-inclusive, x menses-anchored / ovulation-anchored) but computed independently; do not mix the two families within one analysis.
 }
 }
 \description{

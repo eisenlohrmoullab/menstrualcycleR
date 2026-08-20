@@ -120,14 +120,26 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>The original data frame with the following additional columns:</p><ul><li><p><code>scaled_cycleday</code>: A continuous cycle time variable centered on menses onset (<code>menses == 1</code> → 0), ranging from -1 (start of luteal phase) to +1 (ovulation). Only includes cycles with biomarker-confirmed ovulation.</p></li>
-<li><p><code>scaled_cycleday_impute</code>: Same as above, but includes cycles where ovulation was imputed using day -15. Offers broader coverage across the dataset, at the cost of lower precision.</p></li>
-<li><p><code>scaled_cycleday_ov</code>: A cycle time variable centered on ovulation day (<code>ovtoday == 1</code> → 0), ranging from -1 (start of follicular phase) to +1 (end of luteal phase). Only includes cycles with confirmed ovulation.</p></li>
-<li><p><code>scaled_cycleday_imp_ov</code>: Same as above, but uses imputed ovulation (<code>ovtoday_impute == 1</code>) for cycles lacking biomarker confirmation. Centered on either confirmed or imputed ovulation.</p></li>
-<li><p><code>ovtoday_impute</code>: A binary column indicating imputed ovulation days (value <code>1</code>) for cycles without confirmed ovulation, estimated as 15 days before menses onset.</p></li>
-<li><p><code>menses_impute</code>: Present only when <code>impute_next_menses = TRUE</code>. A binary column marking menses onsets that were <em>imputed forward</em> from a confirmed ovulation (value <code>1</code>) versus observed onsets (<code>0</code>). Report the imputed-versus-observed onset rate for transparency, just as you would for imputed ovulation.</p></li>
+    <p>The original data frame with the following additional columns. <strong>Use the four
+<code>cyclic_time*</code> columns for analysis</strong> – they are the variables reported in Nagpal et al.
+(2025) and the ones this package actively maintains. The four <code>scaled_cycleday*</code> columns
+are an earlier, legacy implementation of the same idea, kept only for backward compatibility
+with existing analysis code; they are numerically similar but <em>not</em> identical to their
+<code>cyclic_time*</code> counterparts (different coverage, small value differences even on rows both
+cover) and should not be treated as interchangeable with them.</p><ul><li><p><code>cyclic_time</code>: The primary, menses-anchored cycle time variable, centered on menses onset (<code>menses == 1</code> -&gt; 0) and spanning -1 (start of luteal phase) to +1 (ovulation). Only covers cycles with biomarker-confirmed ovulation whose luteal and follicular phases both fall within <code>[luteal_phase_min_days, luteal_phase_max_days]</code> / <code>[follicular_phase_min_days, follicular_phase_max_days]</code> – see "Internal phase-length caps" below.</p></li>
+<li><p><code>cyclic_time_impute</code>: Same as <code>cyclic_time</code>, but with broader coverage: falls back to imputed ovulation (<code>ovtoday_impute</code>) for cycles without confirmed ovulation, and then to the phase-cap fallback described below for phases that exceed the internal caps. Flagged by <code>cyclic_time_impute_extended_phase</code> (below) wherever that last fallback tier supplied the value.</p></li>
+<li><p><code>cyclic_time_ov</code>: The ovulation-anchored counterpart of <code>cyclic_time</code> – centered on confirmed ovulation (<code>ovtoday == 1</code> -&gt; 0), spanning -1 (start of follicular phase) to +1 (end of luteal phase). Same confirmed-ovulation-only, phase-cap-gated coverage as <code>cyclic_time</code>.</p></li>
+<li><p><code>cyclic_time_imp_ov</code>: The ovulation-anchored counterpart of <code>cyclic_time_impute</code> – same imputed-ovulation and phase-cap fallbacks, flagged by <code>cyclic_time_imp_ov_extended_phase</code>.</p></li>
+<li><p><code>ovtoday_impute</code>: A binary column indicating imputed ovulation days (value <code>1</code>) for cycles without confirmed ovulation, estimated as 15 days before menses onset. Report the confirmed-versus-imputed rate for transparency.</p></li>
 <li><p><code>cyclic_time_impute_extended_phase</code>: Binary column (<code>0</code>/<code>1</code>) marking rows where <code>cyclic_time_impute</code> was filled by the phase-cap fallback described below (value <code>1</code>), versus the normal confirmed or imputed-ovulation paths (<code>0</code>). Report this rate alongside the imputed-ovulation rate for full transparency about coverage.</p></li>
 <li><p><code>cyclic_time_imp_ov_extended_phase</code>: The same flag as <code>cyclic_time_impute_extended_phase</code>, for the ovulation-centered <code>cyclic_time_imp_ov</code> column.</p></li>
+<li><p><code>mcyclength</code>: The length, in days, of the menses-to-menses cycle this row belongs to.</p></li>
+<li><p><code>m2mcount</code>: A forward day count starting from each menses onset (day of onset = 0).</p></li>
+<li><p><code>cyclenum</code>: Which complete menses-to-menses cycle, in sequence, this row belongs to, per <code>id</code>.</p></li>
+<li><p><code>cycle_incomplete</code>: Binary (<code>0</code>/<code>1</code>); <code>1</code> marks a still-open trailing cycle with no closing menses yet observed (unless <code>impute_next_menses = TRUE</code> closes it – see below).</p></li>
+<li><p><code>luteal_length</code>: The confirmed-ovulation luteal phase length in days, only populated when it falls within <code>[luteal_phase_min_days, luteal_phase_max_days]</code> (<code>NA</code> otherwise, including for imputed-ovulation or incomplete cycles).</p></li>
+<li><p><code>menses_impute</code>: Present only when <code>impute_next_menses = TRUE</code>. A binary column marking menses onsets that were <em>imputed forward</em> from a confirmed ovulation (value <code>1</code>) versus observed onsets (<code>0</code>). Report the imputed-versus-observed onset rate for transparency, just as you would for imputed ovulation.</p></li>
+<li><p><code>scaled_cycleday</code>, <code>scaled_cycleday_impute</code>, <code>scaled_cycleday_ov</code>, <code>scaled_cycleday_imp_ov</code>: Legacy variables – see note above. Same conceptual meaning as their <code>cyclic_time*</code> counterparts (confirmed-only / imputed-inclusive, x menses-anchored / ovulation-anchored) but computed independently; do not mix the two families within one analysis.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -157,10 +169,6 @@
 <span class="r-in"><span>  lower_cyclength_bound <span class="op">=</span> <span class="fl">21</span>, </span></span>
 <span class="r-in"><span>  upper_cyclength_bound <span class="op">=</span> <span class="fl">35</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> id: id</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> date: date</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> menses: menses</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ovtoday: ovtoday</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># View the result</span></span></span>

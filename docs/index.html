@@ -65,16 +65,37 @@
 <li><p>Install the <code>remotes</code> package (if not already installed): <code>install.packages("remotes")</code></p></li>
 <li><p>Install <code>menstrualcycleR</code> from GitHub</p></li>
 </ol>
-<p><code>remotes::install_github("eisenlohrmoullab/menstrualcycleR")</code></p>
+<p><code>remotes::install_github("eisenlohrmoullab/menstrualcycleR", build_vignettes = TRUE)</code></p>
 <ol start="3" style="list-style-type: decimal">
 <li>Load the package</li>
 </ol>
 <p><code><a href="https://eisenlohrmoullab.github.io/menstrualcycleR/">library(menstrualcycleR)</a></code></p>
+<div class="section level2">
+<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+</h2>
+<p><code><a href="reference/pacts_scaling.html">pacts_scaling()</a></code> is the main function: give it a long-format diary (one row per person-day) with menses and ovulation markers, and it returns the same data with continuous, phase-aligned cycle-time columns added.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://eisenlohrmoullab.github.io/menstrualcycleR/">menstrualcycleR</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># cycledata is a small example dataset bundled with the package</span></span>
+<span><span class="va">scaled</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/pacts_scaling.html">pacts_scaling</a></span><span class="op">(</span></span>
+<span>  <span class="va">cycledata</span>,</span>
+<span>  id      <span class="op">=</span> <span class="va">id</span>,</span>
+<span>  date    <span class="op">=</span> <span class="va">daterated</span>,</span>
+<span>  menses  <span class="op">=</span> <span class="va">menses</span>,</span>
+<span>  ovtoday <span class="op">=</span> <span class="va">ovtoday</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># cyclic_time / cyclic_time_impute / cyclic_time_ov / cyclic_time_imp_ov are the</span></span>
+<span><span class="co"># columns to model -- see ?pacts_scaling for what each one covers</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">scaled</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"daterated"</span>, <span class="st">"cyclic_time"</span>, <span class="st">"cyclic_time_impute"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<p>For the full workflow, including GAMM modeling of the resulting cycle-time variables, see the vignette (<code><a href="articles/menstrualcycleR-overview.html">vignette("menstrualcycleR-overview")</a></code> once installed with <code>build_vignettes = TRUE</code> above, or the hosted copy linked below) or <code><a href="reference/menstrualcycleR-package.html">?menstrualcycleR</a></code> for an overview of every exported function.</p>
 <p>To utilize the shinyapp, visit: <a href="https://menstrualcycledata.shinyapps.io/shiny/" class="external-link uri">https://menstrualcycledata.shinyapps.io/shiny/</a></p>
 <p>For a tutorial on using <code>menstrualcycleR</code> visit: <a href="https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.html" class="uri">https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.html</a></p>
 <p>For a visual explainer of how PACTS works — why cycle-day counting misaligns hormones and how PACTS realigns them — visit: <a href="https://eisenlohrmoullab.github.io/menstrualcycleR/pacts-explainer.html" class="uri">https://eisenlohrmoullab.github.io/menstrualcycleR/pacts-explainer.html</a></p>
 <p>To browse an auto-generated, annotated bibliography of papers that cite, apply, or extend <code>menstrualcycleR</code> and PACTS, visit: <a href="https://menstrualcycler.base44.app" class="external-link uri">https://menstrualcycler.base44.app</a></p>
 <p>For a history of changes by version, see the changelog: <a href="https://eisenlohrmoullab.github.io/menstrualcycleR/news/index.html" class="uri">https://eisenlohrmoullab.github.io/menstrualcycleR/news/index.html</a></p>
+</div>
 <div class="section level2">
 <h2 id="how-to-cite">How to cite<a class="anchor" aria-label="anchor" href="#how-to-cite"></a>
 </h2>

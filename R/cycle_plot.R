@@ -21,7 +21,7 @@
 #'
 #' @examples
 #' # Example usage:
-# Load the example dataset
+#' # Load the example dataset
 #' cycle_df = cycledata
 #'
 #' data_with_scaling <- pacts_scaling(

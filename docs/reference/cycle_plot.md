@@ -78,6 +78,7 @@ across the menstrual cycle.
 
 ``` r
 # Example usage:
+# Load the example dataset
 cycle_df = cycledata
 
 data_with_scaling <- pacts_scaling(
@@ -89,10 +90,6 @@ data_with_scaling <- pacts_scaling(
   lower_cyclength_bound = 21, 
   upper_cyclength_bound = 35
 )
-#> id: id
-#> date: date
-#> menses: menses
-#> ovtoday: ovtoday
 
 cycle_plot_data <- cycle_plot(
   data_with_scaling,

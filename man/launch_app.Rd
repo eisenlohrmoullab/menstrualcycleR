@@ -14,4 +14,9 @@ in an intuitive, user-friendly interface.
 \details{
 Users can upload a \code{.csv} file, process their data using built-in PACTS functionality, and explore cycle-aligned visualizations
 to support analysis and interpretation.
+
+Requires the \pkg{shinyjs} and \pkg{cpass} packages, which are Suggests (not installed
+automatically with menstrualcycleR) because they are only needed for this app, not for
+\code{pacts_scaling()} or any other exported function. Install them with
+\code{install.packages("shinyjs")} and \code{remotes::install_github("lasy/cpass")}.
 }

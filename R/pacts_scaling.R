@@ -30,16 +30,28 @@
 #' @param luteal_phase_min_days,luteal_phase_max_days Numeric bounds (days) on how long a **confirmed** ovulation's luteal phase (ovulation to next menses) may be for `cyclic_lut`/`cyclic_time`/`luteal_length` to scale it. Defaults `7` and `18`, from Bull et al. (2019) norms in 21-35 day cycles. Independent of `lower_cyclength_bound`/`upper_cyclength_bound`, which bound the *whole cycle*, not this one phase -- widen these directly if your study population has longer or shorter luteal phases than the default norms assume. See the "Internal phase-length caps" section below.
 #' @param follicular_phase_min_days,follicular_phase_max_days Numeric bounds (days) on how long a **confirmed** ovulation's follicular phase (menses to ovulation) may be for `cyclic_fol`/`cyclic_time` to scale it. Defaults `8` and `25`, from Bull et al. (2019) norms in 21-35 day cycles. Same independence from `lower_cyclength_bound`/`upper_cyclength_bound` as the luteal pair above. See the "Internal phase-length caps" section below.
 #'
-#' @return The original data frame with the following additional columns:
+#' @return The original data frame with the following additional columns. \strong{Use the four
+#' \code{cyclic_time*} columns for analysis} -- they are the variables reported in Nagpal et al.
+#' (2025) and the ones this package actively maintains. The four \code{scaled_cycleday*} columns
+#' are an earlier, legacy implementation of the same idea, kept only for backward compatibility
+#' with existing analysis code; they are numerically similar but \emph{not} identical to their
+#' \code{cyclic_time*} counterparts (different coverage, small value differences even on rows both
+#' cover) and should not be treated as interchangeable with them.
 #' \itemize{
-#'   \item \code{scaled_cycleday}: A continuous cycle time variable centered on menses onset (`menses == 1` → 0), ranging from -1 (start of luteal phase) to +1 (ovulation). Only includes cycles with biomarker-confirmed ovulation.
-#'   \item \code{scaled_cycleday_impute}: Same as above, but includes cycles where ovulation was imputed using day -15. Offers broader coverage across the dataset, at the cost of lower precision.
-#'   \item \code{scaled_cycleday_ov}: A cycle time variable centered on ovulation day (`ovtoday == 1` → 0), ranging from -1 (start of follicular phase) to +1 (end of luteal phase). Only includes cycles with confirmed ovulation.
-#'   \item \code{scaled_cycleday_imp_ov}: Same as above, but uses imputed ovulation (`ovtoday_impute == 1`) for cycles lacking biomarker confirmation. Centered on either confirmed or imputed ovulation.
-#'   \item \code{ovtoday_impute}: A binary column indicating imputed ovulation days (value `1`) for cycles without confirmed ovulation, estimated as 15 days before menses onset.
-#'   \item \code{menses_impute}: Present only when `impute_next_menses = TRUE`. A binary column marking menses onsets that were *imputed forward* from a confirmed ovulation (value `1`) versus observed onsets (`0`). Report the imputed-versus-observed onset rate for transparency, just as you would for imputed ovulation.
+#'   \item \code{cyclic_time}: The primary, menses-anchored cycle time variable, centered on menses onset (`menses == 1` -> 0) and spanning -1 (start of luteal phase) to +1 (ovulation). Only covers cycles with biomarker-confirmed ovulation whose luteal and follicular phases both fall within \code{[luteal_phase_min_days, luteal_phase_max_days]} / \code{[follicular_phase_min_days, follicular_phase_max_days]} -- see "Internal phase-length caps" below.
+#'   \item \code{cyclic_time_impute}: Same as \code{cyclic_time}, but with broader coverage: falls back to imputed ovulation (\code{ovtoday_impute}) for cycles without confirmed ovulation, and then to the phase-cap fallback described below for phases that exceed the internal caps. Flagged by \code{cyclic_time_impute_extended_phase} (below) wherever that last fallback tier supplied the value.
+#'   \item \code{cyclic_time_ov}: The ovulation-anchored counterpart of \code{cyclic_time} -- centered on confirmed ovulation (`ovtoday == 1` -> 0), spanning -1 (start of follicular phase) to +1 (end of luteal phase). Same confirmed-ovulation-only, phase-cap-gated coverage as \code{cyclic_time}.
+#'   \item \code{cyclic_time_imp_ov}: The ovulation-anchored counterpart of \code{cyclic_time_impute} -- same imputed-ovulation and phase-cap fallbacks, flagged by \code{cyclic_time_imp_ov_extended_phase}.
+#'   \item \code{ovtoday_impute}: A binary column indicating imputed ovulation days (value `1`) for cycles without confirmed ovulation, estimated as 15 days before menses onset. Report the confirmed-versus-imputed rate for transparency.
 #'   \item \code{cyclic_time_impute_extended_phase}: Binary column (`0`/`1`) marking rows where \code{cyclic_time_impute} was filled by the phase-cap fallback described below (value `1`), versus the normal confirmed or imputed-ovulation paths (`0`). Report this rate alongside the imputed-ovulation rate for full transparency about coverage.
 #'   \item \code{cyclic_time_imp_ov_extended_phase}: The same flag as \code{cyclic_time_impute_extended_phase}, for the ovulation-centered \code{cyclic_time_imp_ov} column.
+#'   \item \code{mcyclength}: The length, in days, of the menses-to-menses cycle this row belongs to.
+#'   \item \code{m2mcount}: A forward day count starting from each menses onset (day of onset = 0).
+#'   \item \code{cyclenum}: Which complete menses-to-menses cycle, in sequence, this row belongs to, per \code{id}.
+#'   \item \code{cycle_incomplete}: Binary (`0`/`1`); `1` marks a still-open trailing cycle with no closing menses yet observed (unless \code{impute_next_menses = TRUE} closes it -- see below).
+#'   \item \code{luteal_length}: The confirmed-ovulation luteal phase length in days, only populated when it falls within \code{[luteal_phase_min_days, luteal_phase_max_days]} (\code{NA} otherwise, including for imputed-ovulation or incomplete cycles).
+#'   \item \code{menses_impute}: Present only when `impute_next_menses = TRUE`. A binary column marking menses onsets that were *imputed forward* from a confirmed ovulation (value `1`) versus observed onsets (`0`). Report the imputed-versus-observed onset rate for transparency, just as you would for imputed ovulation.
+#'   \item \code{scaled_cycleday}, \code{scaled_cycleday_impute}, \code{scaled_cycleday_ov}, \code{scaled_cycleday_imp_ov}: Legacy variables -- see note above. Same conceptual meaning as their \code{cyclic_time*} counterparts (confirmed-only / imputed-inclusive, x menses-anchored / ovulation-anchored) but computed independently; do not mix the two families within one analysis.
 #' }
 #'
 #' @section Internal phase-length caps, and how they differ from the cycle-length bounds: a confirmed ovulation's luteal phase (ovulation to next menses) is only scaled by \code{cyclic_lut}/\code{cyclic_time} when it falls within \code{[luteal_phase_min_days, luteal_phase_max_days]} (default 7-18 days), and its follicular phase (menses to ovulation) only within \code{[follicular_phase_min_days, follicular_phase_max_days]} (default 8-25 days) -- both from Bull et al. (2019) norms in 21-35 day cycles. \strong{As of this version these four bounds are caller-adjustable, independently of \code{lower_cyclength_bound}/\code{upper_cyclength_bound}}, which bound the whole cycle, not either phase individually. In every version through 0.1.6 they were hardcoded (not arguments at all), so a cycle could fall entirely inside the caller's accepted overall length (e.g. the whole \code{[20,43]}-day CLEAR lab standard) and still have one phase silently uncovered by \code{cyclic_time}, because that phase alone exceeded the fixed 18 or 25 day limit with no way to widen it. A caller whose study population has genuinely longer or shorter phases than the Bull et al. norms should now widen these four arguments directly, rather than relying on the fallback described next. \code{cyclic_time_impute} additionally falls back, for exactly the days a capped phase would otherwise leave with no coverage at all (a confirmed ovulation already suppresses the ordinary imputed-ovulation fallback -- see \code{ovtoday_impute}; and a still-open trailing cycle, \code{cycle_incomplete == 1}, never gets this fallback either, matching every other imputed column), to the same phase fraction computed \emph{without} the phase-length ceiling (the floor still applies), gated only on the overall cycle falling within the caller's own \code{[lower_cyclength_bound, upper_cyclength_bound]}. That fallback exists for whatever still runs past even a caller-widened phase bound, trading phase-length plausibility for coverage in the imputed column only -- it never touches \code{cyclic_time} itself. Those filled rows (excluding the ovulation-anchor day itself, whose value is always pinned by a separate, pre-existing override) are flagged in \code{cyclic_time_impute_extended_phase}. \code{cyclic_time_imp_ov}, the ovulation-centered sibling of \code{cyclic_time_impute}, receives the identical fallback, flagged in \code{cyclic_time_imp_ov_extended_phase}. \strong{This fallback only ever widens coverage, in one direction:} the four bound arguments narrow \code{cyclic_time}/\code{cyclic_time_ov} directly, but the fallback ignores \code{luteal_phase_max_days}/\code{follicular_phase_max_days} entirely (it checks only the floor and the overall cycle-length bound) -- so narrowing either \code{*_max_days} argument below its default to exclude implausibly long phases from analysis does \emph{not} exclude them from \code{cyclic_time_impute}/\code{cyclic_time_imp_ov}, which recover them anyway through this fallback. A caller who wants that stricter behavior in the imputed columns too should additionally filter out rows where \code{cyclic_time_impute_extended_phase == 1} (or the \code{_imp_ov} equivalent) after calling this function; there is no argument that disables the fallback itself.
@@ -82,6 +94,52 @@ pacts_scaling <- function(data, id, date, menses, ovtoday, lower_cyclength_bound
   date <- rlang::enquo(date)
   menses <- rlang::enquo(menses)
   ovtoday <- rlang::enquo(ovtoday)
+
+  # Validate id/date/menses/ovtoday up front, with messages naming the actual
+  # problem, instead of letting a bad input reach the dplyr/case_when internals
+  # below -- which either throw an opaque internal stack trace, or (for a
+  # character-coded menses/ovtoday, the most plausible first-time mistake)
+  # silently return every derived column as NA with no error or warning at all.
+  data_cols <- names(data)
+  .check_col <- function(quo, argname) {
+    if (!rlang::quo_is_symbol(quo)) {
+      expr <- rlang::quo_get_expr(quo)
+      if (is.character(expr) && length(expr) == 1) {
+        stop("pacts_scaling(): `", argname, " = \"", expr, "\"` looks like a quoted string, but ",
+             "this argument takes a bare, unquoted column name -- try `", argname, " = ", expr,
+             "` instead.", call. = FALSE)
+      }
+      stop("pacts_scaling(): `", argname, "` must be a single bare column name (e.g. `",
+           argname, " = ", argname, "`), not an expression.", call. = FALSE)
+    }
+    nm <- rlang::as_name(quo)
+    if (!nm %in% data_cols) {
+      stop("pacts_scaling(): column `", nm, "` (passed as `", argname, "`) was not found in `data`. ",
+           "Available columns: ", paste(data_cols, collapse = ", "), ".", call. = FALSE)
+    }
+    nm
+  }
+  menses_nm  <- .check_col(menses,  "menses")
+  ovtoday_nm <- .check_col(ovtoday, "ovtoday")
+  .check_col(id, "id")
+  .check_col(date, "date")
+
+  .check_binary01 <- function(colname, argname) {
+    v <- data[[colname]]
+    if (is.character(v) || is.factor(v)) {
+      stop("pacts_scaling(): `", argname, "` (column `", colname, "`) must be numeric 0/1 (or ",
+           "logical), not ", class(v)[1], ". Recode it as 0 = no, 1 = yes before calling ",
+           "pacts_scaling().", call. = FALSE)
+    }
+    bad <- setdiff(unique(v[!is.na(v)]), c(0, 1))
+    if (length(bad) > 0) {
+      stop("pacts_scaling(): `", argname, "` (column `", colname, "`) must contain only 0, 1, or NA ",
+           "-- found other value(s): ", paste(utils::head(bad, 5), collapse = ", "), ". Recode it as ",
+           "0/1 before calling pacts_scaling().", call. = FALSE)
+    }
+  }
+  .check_binary01(menses_nm, "menses")
+  .check_binary01(ovtoday_nm, "ovtoday")
 
   # OPT-IN next-menses imputation (default FALSE keeps published behavior identical).
   # Synthesizes a menses onset at ovulation + next_menses_luteal_days for a confirmed

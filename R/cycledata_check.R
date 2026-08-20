@@ -22,7 +22,7 @@
 #'   2. Number of non-missing values during the luteal phase.
 #'   3. Number of non-missing values during the follicular phase.
 #'
-#' - **Plots**: Visualizations showing the availability of non-missing data for each symptom, stratified by ID.
+#' - **`data_symptom_plots`**: Visualizations showing the availability of non-missing data for each symptom, stratified by ID.
 #'
 #' @export
 #'

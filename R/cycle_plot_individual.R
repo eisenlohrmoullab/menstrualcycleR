@@ -11,26 +11,37 @@
 #' @param include_impute A boolean indicating whether to use imputed cycle time values.
 #' @param rollingavg A numeric indicating how many days of a rolling average to use, the default is 5
 #'
-#' @return A list where each cycle contains:
+#' @return A named list, one element per entry in `symptoms`. Each of those is itself a named
+#' list, one element per cycle (named `"Cycle_1"`, `"Cycle_2"`, ...), each containing:
 #' - `$plot`: The cycle-specific ggplot object with the ID displayed
-#' - `$summary`: The corresponding summary data 
+#' - `$summary`: The corresponding summary data
+#'
+#' So for a single symptom `"symptom"` and its first cycle, access the plot as
+#' `result[["symptom"]][["Cycle_1"]]$plot`.
 #' @export
 #'
 #' @examples
 #' cycle_df = cycledata
 #'
 #' data_with_scaling <- pacts_scaling(
-#'   cycle_df, 
-#'   id = id, 
-#'   date = daterated, 
-#'   menses = menses, 
-#'   ovtoday = ovtoday, 
-#'   lower_cyclength_bound = 21, 
+#'   cycle_df,
+#'   id = id,
+#'   date = daterated,
+#'   menses = menses,
+#'   ovtoday = ovtoday,
+#'   lower_cyclength_bound = 21,
 #'   upper_cyclength_bound = 35
 #' )
-#' 
-#' 
-#' 
+#'
+#' result <- cycle_plot_individual(
+#'   data_with_scaling,
+#'   id = unique(data_with_scaling$id)[1],
+#'   symptoms = "symptom"
+#' )
+#'
+#' # the first cycle's plot and summary for "symptom":
+#' result[["symptom"]][["Cycle_1"]]$plot
+#' result[["symptom"]][["Cycle_1"]]$summary
 
 
 cycle_plot_individual <- function(data, id, symptoms, centering = "menses", 

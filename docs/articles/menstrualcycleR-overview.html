@@ -627,11 +627,7 @@ ovulation.</p>
 <h3 id="applying-pacts">Applying PACTS<a class="anchor" aria-label="anchor" href="#applying-pacts"></a>
 </h3>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cycle_df_scaled</span> <span class="op">=</span> <span class="fu"><a href="../reference/pacts_scaling.html">pacts_scaling</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">cycle_df</span>, id <span class="op">=</span> <span class="va">id</span>, date <span class="op">=</span> <span class="va">daterated</span>, menses <span class="op">=</span> <span class="va">menses</span>, ovtoday <span class="op">=</span> <span class="va">ovtoday</span>, lower_cyclength_bound <span class="op">=</span> <span class="fl">21</span>, upper_cyclength_bound <span class="op">=</span> <span class="fl">35</span><span class="op">)</span></span>
-<span><span class="co">#&gt; id: id</span></span>
-<span><span class="co">#&gt; date: date</span></span>
-<span><span class="co">#&gt; menses: menses</span></span>
-<span><span class="co">#&gt; ovtoday: ovtoday</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">cycle_df_scaled</span> <span class="op">=</span> <span class="fu"><a href="../reference/pacts_scaling.html">pacts_scaling</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">cycle_df</span>, id <span class="op">=</span> <span class="va">id</span>, date <span class="op">=</span> <span class="va">daterated</span>, menses <span class="op">=</span> <span class="va">menses</span>, ovtoday <span class="op">=</span> <span class="va">ovtoday</span>, lower_cyclength_bound <span class="op">=</span> <span class="fl">21</span>, upper_cyclength_bound <span class="op">=</span> <span class="fl">35</span><span class="op">)</span></span></code></pre></div>
 <p>For full documentation, type <code>?pacts_scaling()</code> in R
 console. The lower and upper cycle length bounds may be adjusted, but
 the default is 21-35 days as that was what was validated in Nagpal et
