@@ -5,10 +5,15 @@
 # unflagged (cyclic_time_impute_extended_phase stayed 0). The run-closing loop in
 # process_luteal_phase_base() (R/helper.R) could not distinguish "this run closed because a real
 # menses onset was observed" from "this run closed because the data (or this id's rows) simply
-# ran out" -- both leave the next row's lutdaycount NA. Confirmed live in the shipped CLEAR
-# v20260819 release: 20 participants / 112 fabricated confirmed cyclic_time days, present in every
-# prior release too (the bug predates 0.1.7). Fixed by requiring the run's terminal row to
-# actually be a menses onset before closing lutmax.
+# ran out" -- both leave the next row's lutdaycount NA. Present in every prior release (the bug
+# predates 0.1.7). Real exposure in the shipped CLEAR v20260819 release, measured carefully against
+# anchor snapshots (an initial "20 participants / 112 days" estimate, measured against release rows,
+# turned out to be a large overcount -- most censored tails were already covered by the pipeline's
+# own flagged rescue policy, which is separate from this bug): 4 unflagged fabricated confirmed
+# days (participant 3140) plus 14 treatment-phase day-slots in a derived layer. See
+# pacts-gam-pipeline/cycle_data_prep/CYCLE_METHODS_DECISIONS.md D-2026-08-20c for the full
+# bookkeeping. Fixed by requiring the run's terminal row to actually be a menses onset before
+# closing lutmax.
 
 test_that("BUG FIX (R1): a right-censored luteal phase (no closing menses, data just ends) is NOT scaled -- cyclic_time, cyclic_time_ov, and luteal_length all stay NA, cycle_incomplete stays 1", {
   # menses day 1, confirmed ov day 15, data ends 10 days later with NO closing menses.
