@@ -51,7 +51,15 @@ impute_next_menses_onsets <- function(data, id, date, menses, ovtoday,
   mn  <- rlang::as_name(rlang::enquo(menses)); on <- rlang::as_name(rlang::enquo(ovtoday))
 
   orig_class <- class(data[[dn]])
-  as_date_v  <- function(x) if (inherits(x, "Date")) x else lubridate::ymd(x)
+  # Same POSIXct fix as calculate_mcyclength.r: ymd() NAs any timestamp with a
+  # nonzero time-of-day, silently breaking the date-matching this function
+  # relies on throughout. Coerce POSIXct via as.Date() in its own timezone
+  # (dropping time-of-day, not re-parsing a string) instead.
+  as_date_v  <- function(x) {
+    if (inherits(x, "Date")) return(x)
+    if (inherits(x, "POSIXt")) return(as.Date(x, tz = attr(x, "tzone")))
+    lubridate::ymd(x)
+  }
   # Return imputed onset dates in the SAME class the caller passed, so bind_rows
   # does not error on a <Date> vs <character>/<factor> mismatch and the downstream
   # lubridate::ymd() coercion behaves identically to the observed rows.
@@ -79,8 +87,13 @@ impute_next_menses_onsets <- function(data, id, date, menses, ovtoday,
 
   # candidate onset = ov + luteal_days; drop it if any observed menses closes
   # THIS ovulation's own cycle -- falls after ov_date and, if there is a next
-  # confirmed ovulation for this id, strictly before it. Deliberately NOT
-  # restricted to max_window (see the roxygen entry for max_window: bounding
+  # confirmed ovulation for this id, on or before it (BUG FIX, pre-release
+  # adversarial review 2026-08-20, finding S2: a strict `<` here excluded the
+  # tie case where the only closing menses lands exactly ON the next
+  # ovulation's own date, wrongly treating this ovulation as unclosed and
+  # fabricating a phantom onset despite a real closing menses existing --
+  # the same bug class the unbounded-search fix above exists to prevent).
+  # Deliberately NOT restricted to max_window (see the roxygen entry for max_window: bounding
   # this search by a day count was the 0.1.6 bug, not a real design tradeoff.
   # A real closing menses recorded at any distance is always the right
   # anchor; synthesizing an earlier phantom one when a real later one exists
@@ -94,7 +107,7 @@ impute_next_menses_onsets <- function(data, id, date, menses, ovtoday,
     dplyr::left_join(men, by = "id", relationship = "many-to-many") %>%
     dplyr::group_by(.data$id, .data$ov_date, .data$cand_date) %>%
     dplyr::summarise(has_closing = any(!is.na(.data$m_date) & .data$m_date > .data$ov_date &
-                                          (is.na(.data$next_ov_date) | .data$m_date < .data$next_ov_date)),
+                                          (is.na(.data$next_ov_date) | .data$m_date <= .data$next_ov_date)),
                      .groups = "drop") %>%
     dplyr::filter(!.data$has_closing) %>%
     dplyr::distinct(.data$id, .data$cand_date)

@@ -51,12 +51,36 @@ calculate_mcyclength <- function(data, id, date, menses, ovtoday) {
   ovtoday <- rlang::enquo(ovtoday)
 
   # Step 1: Ensure date is in Date format
-  # Coerce date column to Date if needed
-  if (!inherits(dplyr::pull(data, !!date), "Date")) {
+  # Coerce date column to Date if needed. lubridate::ymd() returns NA for any
+  # POSIXct with a nonzero time-of-day (e.g. a 09:00 survey timestamp) -- and
+  # those NA rows are then silently dropped by the filter below and refilled
+  # as empty calendar days by tidyr::complete(), so a single non-midnight
+  # timestamp on an ovulation day silently deletes that ovulation with no
+  # error. Handle POSIXct explicitly via as.Date() in its own timezone
+  # (dropping the time-of-day is correct there; re-parsing its string
+  # representation through ymd() is not, and is exactly what breaks). Character/
+  # factor input keeps going through ymd() as before. Either way, warn if
+  # coercion creates NAs that weren't already NA, so data loss is loud instead
+  # of silent -- this is a realistic path: pacts_scaling()'s own docs already
+  # anticipate timestamped input ("post-midnight survey entries").
+  orig_date_col <- dplyr::pull(data, !!date)
+  if (!inherits(orig_date_col, "Date")) {
+    coerced_date_col <- if (inherits(orig_date_col, "POSIXt")) {
+      as.Date(orig_date_col, tz = attr(orig_date_col, "tzone"))
+    } else {
+      lubridate::ymd(orig_date_col)
+    }
+    new_na <- sum(is.na(coerced_date_col) & !is.na(orig_date_col))
+    if (new_na > 0) {
+      warning(sprintf(
+        "calculate_mcyclength(): coercing `date` to Date produced %d new NA value(s) not present in the original column -- those row(s) will be dropped. Check the date column's format/timezone.",
+        new_na
+      ), call. = FALSE)
+    }
     data <- data %>%
-      dplyr::mutate(!!date := lubridate::ymd(!!date))
+      dplyr::mutate(!!date := coerced_date_col)
   }
-  
+
   # Step 2: Remove rows with missing dates
   data <- data %>%
     dplyr::filter(!is.na(!!date))

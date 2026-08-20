@@ -73,15 +73,31 @@ process_luteal_phase_base <- function(data, id, date, menses,
     )
   
   # Calculate lutmax
-  # A luteal run ends either when the next row's lutdaycount is NA or when we
-  # reach the final row of the dataset. The `i == nrow(data)` clause closes the
-  # run for the last participant; without it, the last row was never treated as
-  # a run-end, so the final participant's luteal phase never received a lutmax
-  # and scaled_cycleday came back all-NA (position-dependent bug).
+  # A luteal run's lutdaycount[i+1] goes NA both when a real menses onset closes
+  # it (menses[i] == 1, which is exactly what resets lutdaycount1 to NA inside
+  # calculate_lutdaycount() above) AND when the run simply runs out of data
+  # (end of file, or end of this id's rows, which the `id != lag(id)` guard in
+  # the lutdaycount case_when above also NAs) -- lutdaycount alone can't tell
+  # these apart. Closing lutmax on the second case fabricates a complete luteal
+  # phase out of a right-censored (still-open) one: a confirmed ovulation with
+  # no closing menses yet observed would otherwise get a real lutmax/
+  # cyclic_time/luteal_length as if the last observed day were menses-eve.
+  # Require the run's terminal row (i, not i+1 -- lutdaycount[i+1] going NA
+  # reflects menses[i], since lutdaycount1 is NA'd at the SAME row menses
+  # fires, one step before the lag that produces lutdaycount[i+1]) to actually
+  # BE a menses onset. This still closes the deliberately supported
+  # ov-then-menses fragment (no opening menses needed), since that case's
+  # terminal row is a real menses row -- only genuinely-open runs are now left
+  # uncapped (lutmax stays NA, matching what the follicular side already does
+  # for the mirror case via the valid_group check below).
+  menses_col <- rlang::quo_name(menses)
   for (i in 1:nrow(data)) {
     if (!is.na(data$lutdaycount[i]) &&
         (i == nrow(data) || is.na(data$lutdaycount[i + 1]))) {
-      data$lutmax[(i - (data$lutdaycount[i])):i] <- as.numeric(data$lutdaycount[i])
+      closed_by_menses <- !is.na(data[[menses_col]][i]) && data[[menses_col]][i] == 1
+      if (closed_by_menses) {
+        data$lutmax[(i - (data$lutdaycount[i])):i] <- as.numeric(data$lutdaycount[i])
+      }
     }
   }
   
@@ -306,13 +322,26 @@ process_follicular_phase_base <- function(data, id, date, menses,
   
   
   # Calculate percfol and percfol_ov
-  data <- data %>% 
+  data <- data %>%
     dplyr::mutate(
       percfol = dplyr::case_when(
         !is.na(lutperc1) & !is.na(folperc) & folperc != 0 ~ NA,
         TRUE ~ folperc
       ),
-      percfol_ov = percfol - 1
+      percfol_ov = percfol - 1,
+      # Uncapped mirror of percfol's own dedup guard immediately above, built
+      # from folperc_uncapped (not the capped folperc). Needed because
+      # percfol_ov (derived from the CAPPED folperc) goes NA for two
+      # unrelated reasons -- a genuine luteal/follicular boundary-day overlap
+      # (the case the guard exists for) AND simply because the follicular
+      # phase exceeds follicular_phase_max_days -- and cyclic_fol_ov_uncapped
+      # below must only be blocked by the first reason, not the second (which
+      # is exactly the case its own fallback exists to cover). See
+      # cyclic_fol_ov_uncapped's own comment.
+      percfol_uncapped_dedup = dplyr::case_when(
+        !is.na(lutperc1) & !is.na(folperc_uncapped) & folperc_uncapped != 0 ~ NA,
+        TRUE ~ folperc_uncapped
+      )
     )
   
   # Calculate follicular phase part of cyclic time
@@ -331,14 +360,21 @@ process_follicular_phase_base <- function(data, id, date, menses,
 
   # Ovulation-centered counterpart of cyclic_fol_uncapped -- mirrors
   # cyclic_lut_ov_uncapped in process_luteal_phase_base(). Feeds only
-  # cyclic_time_imp_ov's extended-phase fallback. Carries the same
-  # !is.na(percfol_ov) guard as cyclic_fol_ov above -- without it, a
-  # luteal/follicular boundary day that percfol_ov nulls out to avoid
-  # double-counting (see percfol's own case_when) could still leak an
-  # uncapped follicular value into cyclic_time_ov_uncapped with no
-  # equivalent dedup protection.
+  # cyclic_time_imp_ov's extended-phase fallback.
+  #
+  # BUG FIX (pre-release adversarial review, 2026-08-20, finding S3): this used
+  # to reuse percfol_ov (the CAPPED path's dedup guard) here. That was wrong:
+  # percfol_ov is NA whenever the follicular phase exceeds
+  # follicular_phase_max_days -- which is precisely the case this fallback
+  # exists to cover -- so it silently zeroed out ALL ov-centered fallback
+  # coverage for over-cap follicular phases, contradicting the documented
+  # "identical fallback" claim (cyclic_time_impute's mirror fallback was
+  # unaffected, since it never depended on this guard). Guards against the
+  # SAME luteal/follicular boundary-day overlap using percfol_uncapped_dedup
+  # instead, which is built from folperc_uncapped and so only NAs for a real
+  # overlap, not for exceeding the cap.
   data = data %>%
-    dplyr::mutate(cyclic_fol_ov_uncapped = dplyr::case_when(!is.na(cyclic_fol_uncapped) & !is.na(percfol_ov) ~ -1*(1 - cyclic_fol_uncapped),
+    dplyr::mutate(cyclic_fol_ov_uncapped = dplyr::case_when(!is.na(cyclic_fol_uncapped) & !is.na(percfol_uncapped_dedup) ~ -1*(1 - cyclic_fol_uncapped),
                                                              TRUE ~ NA))
 
   return(data)

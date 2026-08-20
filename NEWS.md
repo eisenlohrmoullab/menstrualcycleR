@@ -1,5 +1,49 @@
 # menstrualcycleR 0.1.7
 
+* **Fixed (release-blocker, found in a pre-release adversarial review, 2026-08-20):**
+  a right-censored luteal phase -- a confirmed ovulation with no closing menses yet
+  observed, because data collection simply ended -- was being scaled as if it were a
+  complete, closed luteal phase, in the strict confirmed-only columns
+  (`cyclic_time`, `cyclic_time_ov`, `luteal_length`), completely unflagged. The
+  run-closing logic in `process_luteal_phase_base()` could not distinguish "this
+  run closed because a real menses onset was observed" from "this run closed
+  because the data (or this participant's rows) simply ran out" -- both left the
+  same internal marker unset. Confirmed present in every prior release (the bug
+  predates 0.1.7); fixed by requiring the run's terminal row to actually be a
+  menses onset before treating it as closed. Fires for any participant whose
+  data collection ends 7+ days after a confirmed ovulation with no closing
+  menses observed -- routine in real studies, not an edge case. Five new
+  regression tests.
+* **Fixed (release-blocker, same review):** a date column passed as `POSIXct`
+  with a nonzero time-of-day (e.g. a 09:00 survey timestamp) was silently
+  coerced to `NA` and the row dropped -- so a single non-midnight timestamp on
+  an ovulation day silently deleted that ovulation with no warning, and
+  uniformly-timestamped input crashed with an opaque internal error. Fixed by
+  coercing `POSIXct` via its own timezone (dropping the time-of-day directly)
+  instead of re-parsing a string representation of it; a genuine parse failure
+  now warns explicitly rather than failing silently. Six new regression tests.
+* **Fixed (should-fix, same review):** `impute_next_menses`'s closing-menses
+  search required the closing menses to fall strictly before the participant's
+  next confirmed ovulation. When the only closing menses landed exactly on the
+  next ovulation's own date (a tie), that real closing menses was invisible to
+  the check, and a phantom onset was fabricated anyway -- the same bug class
+  the 0.1.7 unbounded-search fix (above) exists to prevent, surviving in this
+  one tie case. Fixed.
+* **Fixed (should-fix, same review):** the `cyclic_time_imp_ov` phase-cap
+  fallback's follicular side reused a dedup guard built from the *capped*
+  follicular fraction, which is `NA` both for a genuine luteal/follicular
+  boundary overlap (what the guard is for) and simply because the follicular
+  phase exceeds `follicular_phase_max_days` (exactly the case the fallback
+  exists to cover) -- so an over-cap follicular phase got **zero**
+  `cyclic_time_imp_ov` fallback coverage, contradicting the documented
+  "identical fallback" claim versus `cyclic_time_impute` (which was
+  unaffected). Fixed with a separate dedup signal built from the uncapped
+  follicular fraction instead.
+* **Note:** the new `pacts_scaling()` input validation (below) will newly
+  hard-reject an intensity-coded `menses`/`ovtoday` column (e.g. `0`/`1`/`2`/`3`
+  for bleeding intensity) that previously ran silently, scaling nothing
+  meaningful. This is intentional -- such a column was never valid input --
+  but is a behavior change worth knowing about if upgrading.
 * **Deployment-readiness pass (2026-08-19):** `R CMD check` now runs clean (0 errors, 0
   warnings, 0 notes; was 2 notes). Found and fixed:
   - A private, machine-local operator-notes file (deliberately gitignored, never meant to
