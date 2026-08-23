@@ -48,13 +48,13 @@ below) or `?menstrualcycleR` for an overview of every exported function.
 
 To utilize the shinyapp, visit: https://menstrualcycledata.shinyapps.io/shiny/
 
-For a tutorial on using `menstrualcycleR` visit: https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.html
+For a tutorial on using `menstrualcycleR` visit: https://menstrualcycler.clearlabresearch.com/articles/menstrualcycleR-overview.html
 
-For a visual explainer of how PACTS works — why cycle-day counting misaligns hormones and how PACTS realigns them — visit: https://eisenlohrmoullab.github.io/menstrualcycleR/pacts-explainer.html
+For a visual explainer of how PACTS works — why cycle-day counting misaligns hormones and how PACTS realigns them — visit: https://menstrualcycler.clearlabresearch.com/pacts-explainer.html
 
 To browse an auto-generated, annotated bibliography of papers that cite, apply, or extend `menstrualcycleR` and PACTS, visit: https://menstrualcycler.base44.app
 
-For a history of changes by version, see the changelog: https://eisenlohrmoullab.github.io/menstrualcycleR/news/index.html
+For a history of changes by version, see the changelog: https://menstrualcycler.clearlabresearch.com/news/index.html
 
 ## How to cite
 
