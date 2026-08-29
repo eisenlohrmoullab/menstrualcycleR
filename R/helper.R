@@ -392,10 +392,16 @@ calculate_ovtoday_impute <- function(data, id, date, menses) {
   # Step 1: Calculate `lutlength_impute` and `follength_impute`
   data <- data %>%
     dplyr::mutate(
-      lutlength_impute = 14,
-      # Assign fixed value 14 to lutlength_impute
+      # Imputed ovulation is placed 14 days before the next menses, so the
+      # implied follicular phase is `mcyclength - 14`. A cycle of 14 days or
+      # fewer therefore has no follicular days to impute over, and the old code
+      # passed a negative length to seq_len() further down, which errors with an
+      # opaque "argument must be coercible to non-negative integer". Reachable
+      # whenever lower_cyclength_bound < 15 -- and the bundled Shiny app allows
+      # a minimum of 10. Such cycles now simply get no imputed ovulation.
       follength_impute = dplyr::if_else(
         cycle_incomplete != 1 &
+          mcyclength > 14 &
           (
             mcyclength >= lower_cyclength_bound &
               mcyclength <= upper_cyclength_bound

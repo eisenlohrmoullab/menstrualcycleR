@@ -131,7 +131,15 @@ calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength
         TRUE ~ scaled_cycleday_ov
       ),
       scaled_cycleday_imp_ov = dplyr::case_when(
-        ovtoday | ovtoday_impute == 1 & is.na(scaled_cycleday_imp_ov) ~ 0,
+        # Parenthesised deliberately. `&` binds tighter than `|` in R, so the
+        # unparenthesised form parsed as `ovtoday | (ovtoday_impute == 1 &
+        # is.na(...))`, which made the is.na() guard inert for ovtoday == 1 --
+        # not what the line reads as, and not what the confirmed-ovulation
+        # sibling above does. Verified behaviour-neutral on `cycledata` and on a
+        # 15,433-row study dataset with 221 ovulation anchors (every output
+        # column identical), because lines further down reset these
+        # unconditionally. Corrected so the code means what it says.
+        (ovtoday == 1 | ovtoday_impute == 1) & is.na(scaled_cycleday_imp_ov) ~ 0,
         TRUE ~ scaled_cycleday_imp_ov
       ), 
       cyclic_time = dplyr::case_when(

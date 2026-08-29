@@ -79,7 +79,13 @@ summary_ovulation <- function(data){
     dplyr::group_by(id, .data$cyclenum) %>%
     dplyr::summarise(
       # Total cycles with cycle length < 21 or > 35 and ovtoday == 0, ovtoday_impute == 0
-      cycles_outside_norm = ifelse(all(.data$mcyclength < 21  &
+      # NOTE the operator is `|`, not `&`: a cycle cannot be both shorter than
+      # 21 and longer than 35 days, so the previous `&` made this permanently 0.
+      # 21/35 are the package's reference norm, not the caller's bounds -- this
+      # is a descriptive flag, and it does NOT correspond to which cycles get
+      # scaled (see ?pacts_scaling: cycle length gates ovulation IMPUTATION,
+      # while a confirmed-ovulation cycle is gated by its phase lengths).
+      cycles_outside_norm = ifelse(all(.data$mcyclength < 21 |
                                          .data$mcyclength > 35), 1, 0),
       # Total confirmed ovulation: ovtoday == 1 and ovtoday_impute == 0
       confirmed_ovulation = ifelse(
