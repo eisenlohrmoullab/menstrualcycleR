@@ -1,3 +1,18 @@
+# menstrualcycleR 0.1.8
+
+Corrects some errors in the vignette and fixes a few small bugs. No scaled
+cycle-time values change for any existing user.
+
+To clarify how scaling eligibility works: `lower_cyclength_bound` /
+`upper_cyclength_bound` determine which cycles are eligible for an **imputed**
+ovulation. A cycle with a **confirmed** ovulation is scaled based on its phase
+lengths (luteal 7–18 days, follicular 8–25 days, each adjustable). The vignette
+now describes this accurately, and shows how to filter by cycle length after
+scaling for users who want that.
+
+Also fixes a crash affecting complete cycles of 14 days or fewer when eligible
+for ovulation imputation, plus a few minor internal corrections.
+
 # menstrualcycleR 0.1.7
 
 Four bug fixes that change scaled cycle-time values in specific situations, four new
