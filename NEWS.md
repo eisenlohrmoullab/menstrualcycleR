@@ -1,55 +1,17 @@
-# menstrualcycleR (development version)
+# menstrualcycleR 0.1.8
 
-One documentation correction that matters more than the code fixes, one crash fix, and
-two small correctness fixes. No scaled cycle-time value changes for any existing user:
-output was verified identical on `cycledata` and on a 15,433-row study dataset with 221
-confirmed ovulation anchors.
+Corrects some errors in the vignette and fixes a few small bugs. No scaled
+cycle-time values change for any existing user.
 
-## Documentation
+To clarify how scaling eligibility works: `lower_cyclength_bound` /
+`upper_cyclength_bound` determine which cycles are eligible for an **imputed**
+ovulation. A cycle with a **confirmed** ovulation is scaled based on its phase
+lengths (luteal 7–18 days, follicular 8–25 days, each adjustable). The vignette
+now describes this accurately, and shows how to filter by cycle length after
+scaling for users who want that.
 
-* **The cycle-length bounds were documented as an inclusion criterion. They are not.**
-  Situation: any user reading the vignette to decide whether their long or short cycles
-  would be scaled. Before: the vignette stated "menstrualcycleR includes only cycles
-  between 21 and 35 days", "Cycles outside this range are excluded", and "Only cycles
-  between 21 and 35 days will get scaled". Now: corrected throughout.
-  `lower_cyclength_bound` / `upper_cyclength_bound` decide whether **ovulation is
-  imputed** for a cycle with no confirmed ovulation. When a cycle *has* a confirmed
-  ovulation its length is never consulted — it is scaled if its luteal phase fits
-  `luteal_phase_min_days`–`luteal_phase_max_days` (7–18) and its follicular phase fits
-  `follicular_phase_min_days`–`follicular_phase_max_days` (8–25). A confirmed 45-day
-  cycle whose phases both fit is scaled at the default bounds. This is the long-standing
-  behaviour and is deliberate — scaling on cycle length alone would discard a valid phase
-  bookended by real anchors — but the documentation said the opposite. The vignette now
-  also shows how to filter by cycle length after scaling, for users who want that.
-  The bundled `cycledata` could not reveal the discrepancy: every complete cycle in it
-  falls within 22–35 days.
-
-## Bug fixes
-
-* **A complete cycle of 14 days or fewer crashed ovulation imputation.** Situation:
-  `lower_cyclength_bound` set below 15 — reachable from the bundled Shiny app, whose
-  minimum is 10 — with a complete cycle at or under 14 days. Before: an opaque error,
-  `argument must be coercible to non-negative integer` (or `replacement has length zero`
-  at exactly 14), because the implied follicular length `mcyclength - 14` was zero or
-  negative and reached `seq_len()`. Now: such cycles get no imputed ovulation and
-  scaling proceeds.
-
-* **`summary_ovulation()`'s out-of-range cycle count could never be non-zero.**
-  Situation: internal only — the count is not currently printed. Before: the predicate
-  was `all(mcyclength < 21 & mcyclength > 35)`, which no cycle can satisfy. Now: `|`.
-  Note the 21/35 in this check are a fixed reference norm, not the caller's bounds, and
-  — per the documentation correction above — do not correspond to which cycles are
-  scaled.
-
-* **An `is.na()` guard was inert because of operator precedence.** Situation: internal
-  only. Before: `ovtoday | ovtoday_impute == 1 & is.na(...)` parsed as
-  `ovtoday | (ovtoday_impute == 1 & is.na(...))`, so the guard never applied when
-  `ovtoday == 1`. Now: parenthesised to match the confirmed-ovulation branch above it.
-  Verified to change no output value, because later lines reset those columns
-  unconditionally.
-
-* **Removed a dead assignment.** `lutlength_impute` was assigned a constant 14 and never
-  read anywhere in the package, and did not appear in the returned data.
+Also fixes a crash affecting complete cycles of 14 days or fewer when eligible
+for ovulation imputation, plus a few minor internal corrections.
 
 # menstrualcycleR 0.1.7
 
