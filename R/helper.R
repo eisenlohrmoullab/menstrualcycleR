@@ -6,6 +6,10 @@
 #' @param id A column specifying individual ids.
 #' @param date A column specifying the dates.
 #' @param menses A column indicating menses (0/1).
+#' @param luteal_phase_min_days,luteal_phase_max_days Numeric bounds (days) on how long a
+#'   confirmed ovulation's luteal phase (ovulation to next menses) may be for `cyclic_lut`/
+#'   `cyclic_time`/`luteal_length` to scale it. Defaults `7` and `18` (Bull et al. 2019 norms);
+#'   see `?pacts_scaling`'s "Internal phase-length caps" section.
 #'
 #' @return A data frame with processed data.
 #' @keywords internal

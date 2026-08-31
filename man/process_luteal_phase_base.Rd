@@ -21,6 +21,11 @@ process_luteal_phase_base(
 \item{date}{A column specifying the dates.}
 
 \item{menses}{A column indicating menses (0/1).}
+
+\item{luteal_phase_min_days, luteal_phase_max_days}{Numeric bounds (days) on how long a
+confirmed ovulation's luteal phase (ovulation to next menses) may be for \code{cyclic_lut}/
+\code{cyclic_time}/\code{luteal_length} to scale it. Defaults \code{7} and \code{18} (Bull et al. 2019 norms);
+see \code{?pacts_scaling}'s "Internal phase-length caps" section.}
 }
 \value{
 A data frame with processed data.

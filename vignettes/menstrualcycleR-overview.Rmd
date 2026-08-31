@@ -434,6 +434,12 @@ names(cycle_df_scaled)
 - `menses_impute`:
   Present only when `impute_next_menses = TRUE`. A binary indicator identifying **imputed menses onsets** (value = 1) placed forward from a confirmed ovulation (ovulation + 14 days by default).
 
+- `m2mcount`:
+  A forward day count starting from each menses onset (day of onset = 0), reset at every new cycle.
+
+- `cyclenum`:
+  Which complete menses-to-menses cycle, in sequence, this row belongs to, per `id`. `NA` on `cycle_incomplete == 1` rows (a still-open trailing cycle isn't a "complete cycle" to number yet).
+
 - `mcyclength`:
   Indicates the length of a menses-to-menses cycle an observation belongs to. **On `cycle_incomplete == 1` rows this is not a cycle length** -- it is the number of days observed so far in a still-open trailing cycle. Use `mcyclength_complete` instead if you want to threshold cycle length directly (see Section 3, "Cycle Length Inclusion Criteria", above).
 
@@ -452,11 +458,17 @@ names(cycle_df_scaled)
 - `cyclic_time_impute`
  Same as above, but also includes cycles with **imputed ovulation** (assigned to day –15 before next menses). Increases dataset coverage, but with lower precision.
 
+- `cyclic_time_impute_extended_phase`:
+  Binary flag (`0`/`1`) marking rows where `cyclic_time_impute` was filled by the last-resort phase-cap fallback described in Section 3 above (value `1`), rather than by a confirmed or imputed-ovulation anchor (`0`). Report this rate alongside the imputed-ovulation rate for full transparency about coverage.
+
 - `cyclic_time_ov`
 A cycle time variable centered on **ovulation** (`ovtoday == 1 → 0`), ranging from –1 to +1. Unlike `scaled_cycleday_ov`, -1 and + 1 are parameterized to have the same hormonal meaning of **menses_onset**.  Includes **only biomarker-confirmed** ovulation.
 
 - `cyclic_time_imp_ov`
 Same as above, but includes **imputed ovulation** (`ovtoday_impute == 1`) for cycles lacking confirmation. Centered on either confirmed or imputed ovulation.
+
+- `cyclic_time_imp_ov_extended_phase`:
+  The same flag as `cyclic_time_impute_extended_phase`, for the ovulation-centered `cyclic_time_imp_ov` column.
 
 ---
   
@@ -483,7 +495,7 @@ We can also examine this in aggregate, looking at the sample as a whole:
 checkdata$overall
 ```
 
-Overall, 574 observations with non-NA or non-missing values for `symptom` were scaled. For cycles with a confirmed `ovtoday`, that required luteal phases between 7-18 days and follicular phases between 8-25 days; for cycles without one, it required a menses-to-menses length of 21-35 days so that ovulation could be imputed. (Every complete cycle in `cycledata` happens to fall in 22-35 days, so this dataset cannot illustrate the difference between the two rules.) We can also visualize non-missing symptom data across the cycle:
+Overall, 575 observations with non-NA or non-missing values for `symptom` were scaled. For cycles with a confirmed `ovtoday`, that required luteal phases between 7-18 days and follicular phases between 8-25 days; for cycles without one, it required a menses-to-menses length of 21-35 days so that ovulation could be imputed. (Every complete cycle in `cycledata` happens to fall in 22-35 days, so this dataset cannot illustrate the difference between the two rules.) We can also visualize non-missing symptom data across the cycle:
 
 ```{r cycledata_check_plot,fig.width=7, fig.height=6}
 checkdata$data_symptom_plots
@@ -939,7 +951,7 @@ symptom_log ~ s(cyclic_time_impute) + s(id, bs = "re") +
 
 #### **Parametric Coefficients**
 ```
-(Intercept)  1.30722    0.01806   72.36   <2e-16 ***
+(Intercept)  1.30963    0.01801   72.72   <2e-16 ***
 ```
 - The **intercept** represents the average value of the log-transformed symptom when all smooth terms are at their reference level.
 
@@ -947,46 +959,46 @@ symptom_log ~ s(cyclic_time_impute) + s(id, bs = "re") +
 
 #### **Smooth Terms**
 ```r
-s(cyclic_time_impute)     edf = 7.43   F = 79.04   p < 2e-16 ***
-s(id)                     edf = 12.53  F = 1.31    p = 0.00106 **
-s(cyclic_time_impute,id)  edf = 15.89  F = 1.83    p = 8.36e-05 ***
+s(cyclic_time_impute)     edf = 7.47   F = 81.60   p < 2e-16 ***
+s(id)                     edf = 13.71  F = 1.52    p = 0.00022 ***
+s(cyclic_time_impute,id)  edf = 14.75  F = 1.51    p = 0.000375 ***
 ```
 
 Each smooth term contributes to explaining nonlinear or hierarchical effects:
 
-- **`s(cyclic_time_impute)`**:  
-  Captures the **overall nonlinear trend** in symptom expression across the standardized cycle.  
-  - The **high edf** (≈7.4) reflects flexibility in the shape of the curve. Higher edf indicates more "wiggles" and complexity in the nonlinear pattern.
+- **`s(cyclic_time_impute)`**:
+  Captures the **overall nonlinear trend** in symptom expression across the standardized cycle.
+  - The **high edf** (≈7.5) reflects flexibility in the shape of the curve. Higher edf indicates more "wiggles" and complexity in the nonlinear pattern.
   - The **very small p-value** suggests this population-level pattern is **strongly significant** for nonlinearity
 
-- **`s(id, bs = "re")`**:  
+- **`s(id, bs = "re")`**:
   Models **random intercept** to account for **baseline differences** across individuals.
-  - The significant p-value (`p = 0.001`) indicates meaningful variation in symptom baseline levels.
+  - The significant p-value (`p = 0.0002`) indicates meaningful variation in symptom baseline levels.
 
 - **`s(cyclic_time_impute, id, bs = "re")`**:
   Captures each participant's **linear tilt** (steeper, flatter, or reversed) relative to the population-level curve — not a separate nonlinear shape per person.
-  - The effect is **statistically significant** (`p = 8.36e-05`), indicating meaningful **heterogeneity** in the linear slope of symptom change across individuals, on top of the shared population-level nonlinear curve.
+  - The effect is **statistically significant** (`p = 0.000375`), indicating meaningful **heterogeneity** in the linear slope of symptom change across individuals, on top of the shared population-level nonlinear curve.
 
 ---
 
 #### **Model Fit**
 ```
-R-sq.(adj) =  0.533   
-Deviance explained = 56.2%
--REML = 117.46  
-Scale est. = 0.076068   
-n = 575
+R-sq.(adj) =  0.528
+Deviance explained = 55.5%
+-REML = 125.69
+Scale est. = 0.077082
+n = 611
 ```
 
-- **Adjusted R²** of 0.533:  
-  The model explains over **53% of the variance** in the log-transformed symptom outcome. It is roughly the squared correlation between observed and fitted values, adjusted for model complexity. It is used to assess overall model fit when working with Gaussian models. 
+- **Adjusted R²** of 0.528:
+  The model explains over **52% of the variance** in the log-transformed symptom outcome. It is roughly the squared correlation between observed and fitted values, adjusted for model complexity. It is used to assess overall model fit when working with Gaussian models.
 
-- **Deviance explained**: Another metric showing over **56% of outcome variability** is accounted for. Deviance is a likelihood-based measure, more general than R², but comes from comparing the model's deviance (a measure of error) to that of a null model. It should be used when comparing models or working with non-normal outcomes. 
+- **Deviance explained**: Another metric showing over **55% of outcome variability** is accounted for. Deviance is a likelihood-based measure, more general than R², but comes from comparing the model's deviance (a measure of error) to that of a null model. It should be used when comparing models or working with non-normal outcomes.
 
-- **REML**:  
+- **REML**:
   Indicates the restricted maximum likelihood used in model fitting—important for selecting smoothing parameters in GAMs.
 
-- **n = 575**:  
+- **n = 611**:
   The number of complete observations included in the model after listwise deletion.
 
 ---
@@ -1044,7 +1056,7 @@ print(gamplot)
 
 - Eisenlohr-Moul, T. A., Kaiser, G., Weise, C., Schmalenberger, K. M., Kiesner, J., Ditzen, B., & Kleinstäuber, M. (2020). *Are there temporal subtypes of premenstrual dysphoric disorder?: Using group-based trajectory modeling to identify individual differences in symptom change.* *Psychological Medicine, 50(6)*, 964–972. https://doi.org/10.1017/S0033291719000849
 
-- Nagpal, A., Schmalenberger, K. M., Barone, J., Mulligan, E. M., Stumper, A., Knol, L., … Eisenlohr-Moul, T. A., PhD. (2025, May 6). *Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling  (PACTS) with the `menstrualcycleR` package*. https://doi.org/10.31219/osf.io/hd5xw_v1
+- Nagpal, A., Schmalenberger, K. M., Barone, J. C., Mulligan, E., Stumper, A., Knol, L., Failenschmid, J., Kiesner, J., Peters, J. R., & Eisenlohr-Moul, T. A. (2025). *Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the `menstrualcycleR` package*. *Psychoneuroendocrinology, 181*, 107584. https://doi.org/10.1016/j.psyneuen.2025.107584
 
 - Reen, E., & Kiesner, J. (2016). Individual differences in self-reported difficulty sleeping across the menstrual cycle. *Archives of Women’s Mental Health, 19*(4), 599–608. https://doi.org/10.1007/s00737-016-0621-9
 

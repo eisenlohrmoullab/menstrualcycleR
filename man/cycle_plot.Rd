@@ -17,7 +17,7 @@ cycle_plot(
 }
 \arguments{
 \item{data}{A dataframe containing the input data. Must include columns for scaled cycle day variables and the symptom variable.
-Scaled cycle day variables are added to your dataframe after applying the calculate_mcyclength() and calculate_cycletime() functions. (See examples below)}
+Scaled cycle day variables are added to your dataframe after applying the \code{pacts_scaling()} function. (See examples below)}
 
 \item{symptom}{A string specifying the symptom variable to analyze.}
 

@@ -15,13 +15,12 @@
 #' When biomarkers are unavailable, imputation via the -15 day backward-count method offers a more biologically valid estimate than assuming ovulation occurs at the cycle midpoint. This method accounts for the relative stability of the luteal phase length and is recommended over midpoint-based estimates (see Nagpal et al., 2025).
 #'
 #' For further guidance on ovulation identification and the rationale for the -15 day imputation method, see:
-#' - Nagpal et al. (2025). *Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the `menstrualcycleR` package*. https://doi.org/10.31219/osf.io/hd5xw_v1  
+#' - Nagpal et al. (2025). *Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the `menstrualcycleR` package*. *Psychoneuroendocrinology*, 107584. https://doi.org/10.1016/j.psyneuen.2025.107584
 #' - Schmalenberger et al. (2021). *How to study the menstrual cycle: Practical tools and recommendations*. *Psychoneuroendocrinology, 123*, 104895. https://doi.org/10.1016/j.psyneuen.2020.104895
 #'
 #' @keywords menstrual cycle ovulation biomarkers imputation
 #'
-#' @param data A dataframe containing the input data. Must include columns for scaled cycle day variables and symptoms/dependent variables of interest.
-#' Scaled cycle day variables are added to your dataframe after applying the `pacts_scaling()` function. (See examples below)
+#' @param data A dataframe containing the output of `pacts_scaling()` -- specifically `id`, `cyclenum`, `ovtoday`, `ovtoday_impute`, and `mcyclength_complete`. (See examples below)
 #'
 #' @return A list with two data frames:
 #' \itemize{

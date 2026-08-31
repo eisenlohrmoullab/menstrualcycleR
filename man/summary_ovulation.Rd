@@ -7,8 +7,7 @@
 summary_ovulation(data)
 }
 \arguments{
-\item{data}{A dataframe containing the input data. Must include columns for scaled cycle day variables and symptoms/dependent variables of interest.
-Scaled cycle day variables are added to your dataframe after applying the \code{pacts_scaling()} function. (See examples below)}
+\item{data}{A dataframe containing the output of \code{pacts_scaling()} -- specifically \code{id}, \code{cyclenum}, \code{ovtoday}, \code{ovtoday_impute}, and \code{mcyclength_complete}. (See examples below)}
 }
 \value{
 A list with two data frames:
@@ -48,7 +47,7 @@ When biomarkers are unavailable, imputation via the -15 day backward-count metho
 
 For further guidance on ovulation identification and the rationale for the -15 day imputation method, see:
 \itemize{
-\item Nagpal et al. (2025). \emph{Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the \code{menstrualcycleR} package}. https://doi.org/10.31219/osf.io/hd5xw_v1
+\item Nagpal et al. (2025). \emph{Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the \code{menstrualcycleR} package}. \emph{Psychoneuroendocrinology}, 107584. https://doi.org/10.1016/j.psyneuen.2025.107584
 \item Schmalenberger et al. (2021). \emph{How to study the menstrual cycle: Practical tools and recommendations}. \emph{Psychoneuroendocrinology, 123}, 104895. https://doi.org/10.1016/j.psyneuen.2020.104895
 }
 }
