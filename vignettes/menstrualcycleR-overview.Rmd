@@ -136,7 +136,7 @@ Imputed ovulation days are recorded in a binary column, `ovtoday_impute`, create
 
 ### 3. **Cycle Length Inclusion Criteria**
 
-`lower_cyclength_bound` / `upper_cyclength_bound` (default **21-35 days**) control whether **ovulation is imputed** for a cycle that has no confirmed ovulation. Cycles outside the range are not given an imputed ovulation, because they show greater variability in timing and an increased likelihood of anovulation.
+`lower_cyclength_bound` / `upper_cyclength_bound` (default **21-35 days**) control whether **ovulation is imputed** for a cycle that has no confirmed ovulation. Cycles outside the range are not given an imputed ovulation, because they show greater variability in timing and an increased likelihood of anovulation. For a cycle with no confirmed ovulation, this bound is a complete gate, not a partial one: a closed, unconfirmed cycle outside the range gets zero coverage in `cyclic_time_impute` (and every other imputed column), not reduced coverage -- it takes an ovulation marker or a widened bound to get any coverage at all.
 
 **These bounds do not decide which cycles get scaled.** When a cycle has a *confirmed* ovulation (`ovtoday == 1`), its cycle length is never consulted: the cycle is scaled if its **phase** lengths fit, i.e. luteal (ovulation to next menses) within `luteal_phase_min_days`-`luteal_phase_max_days` (7-18) and follicular (menses to ovulation) within `follicular_phase_min_days`-`follicular_phase_max_days` (8-25). A confirmed 45-day cycle whose phases both fit will be scaled at the default bounds. Scaling on cycle length alone would discard a valid phase bookended by real anchors; the practical consequence is that the cycle-length bounds are **not** an inclusion criterion.
 

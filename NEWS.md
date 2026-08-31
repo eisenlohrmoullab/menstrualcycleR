@@ -8,9 +8,15 @@ observed-so-far count happens to land in range. Before: getting this right requi
 remembering that second clause every time (documented since 0.1.8, but easy to miss --
 a downstream analysis filtered on `mcyclength` alone and admitted 263 person-days from
 a still-open cycle before the omission was caught). Now: `mcyclength_complete` is `NA`
-whenever `cycle_incomplete == 1`, so `filter(mcyclength_complete >= 21, mcyclength_complete
-<= 35)` excludes those rows automatically, with no second clause needed.
-`mcyclength` itself is unchanged.
+whenever `cycle_incomplete == 1`, so
+`filter(mcyclength_complete >= 21, mcyclength_complete <= 35)` excludes those rows
+automatically, with no second clause needed. `mcyclength` itself is unchanged.
+
+Also fixes the same defect internally in `summary_ovulation()`'s `cycles_outside_norm`
+calculation, which compared `mcyclength` (not `mcyclength_complete`) to its `[21,35]`
+reference norm. This value is currently dropped before `summary_ovulation()` returns,
+so no user-visible output changes -- the fix is so the computation is correct if this
+column is ever exposed later, rather than a landmine waiting to be uncovered.
 
 One clarification while documenting this, since it is easy to over-read the 0.1.8
 correction as "the length bound never matters": `lower_cyclength_bound`/
