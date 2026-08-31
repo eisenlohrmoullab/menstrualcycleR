@@ -4,4 +4,4 @@
 
 - [Getting Started with menstrualcycleR and Phase-Aligned Cycle Time
   Scaling
-  (PACTS)](https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.md):
+  (PACTS)](https://menstrualcycler.clearlabresearch.com/articles/menstrualcycleR-overview.md):

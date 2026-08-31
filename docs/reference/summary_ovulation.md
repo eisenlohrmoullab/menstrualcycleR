@@ -14,12 +14,10 @@ summary_ovulation(data)
 
 - data:
 
-  A dataframe containing the input data. Must include columns for scaled
-  cycle day variables and symptoms/dependent variables of interest.
-  Scaled cycle day variables are added to your dataframe after applying
-  the
-  [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
-  function. (See examples below)
+  A dataframe containing the output of
+  [`pacts_scaling()`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)
+  – specifically `id`, `cyclenum`, `ovtoday`, `ovtoday_impute`, and
+  `mcyclength_complete`. (See examples below)
 
 ## Value
 
@@ -78,8 +76,8 @@ the -15 day imputation method, see:
 
 - Nagpal et al. (2025). *Studying the Menstrual Cycle as a Continuous
   Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with
-  the `menstrualcycleR` package*.
-  https://doi.org/10.31219/osf.io/hd5xw_v1
+  the `menstrualcycleR` package*. *Psychoneuroendocrinology*, 107584.
+  https://doi.org/10.1016/j.psyneuen.2025.107584
 
 - Schmalenberger et al. (2021). *How to study the menstrual cycle:
   Practical tools and recommendations*. *Psychoneuroendocrinology,

@@ -104,7 +104,7 @@ pacts_scaling(
 
   Not currently used – kept for argument-signature stability, has no
   effect on the result. See
-  [`?impute_next_menses_onsets`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/impute_next_menses_onsets.md),
+  [`?impute_next_menses_onsets`](https://menstrualcycler.clearlabresearch.com/reference/impute_next_menses_onsets.md),
   the `max_window` entry, for why: through 0.1.6 this bounded the search
   for a closing menses, which was a real bug (a genuine luteal phase
   just past the window got a fabricated onset that overwrote
@@ -186,7 +186,19 @@ treated as interchangeable with them.
   `cyclic_time_imp_ov` column.
 
 - `mcyclength`: The length, in days, of the menses-to-menses cycle this
-  row belongs to.
+  row belongs to. **On `cycle_incomplete == 1` rows this is not a cycle
+  length** – it is the number of days observed so far in a still-open
+  trailing cycle (see `cycle_incomplete` below). Use
+  `mcyclength_complete` instead if you want to threshold cycle length
+  directly.
+
+- `mcyclength_complete`: Same as `mcyclength`, but `NA` whenever
+  `cycle_incomplete == 1`. **Prefer this column for any length
+  restriction** – e.g.
+  `mcyclength_complete >= 21 & mcyclength_complete <= 35` – since an
+  incomplete cycle's `NA` here can never satisfy a numeric comparison,
+  so it is excluded automatically without a separate
+  `cycle_incomplete == 0` clause.
 
 - `m2mcount`: A forward day count starting from each menses onset (day
   of onset = 0).
@@ -196,7 +208,9 @@ treated as interchangeable with them.
 
 - `cycle_incomplete`: Binary (`0`/`1`); `1` marks a still-open trailing
   cycle with no closing menses yet observed (unless
-  `impute_next_menses = TRUE` closes it – see below).
+  `impute_next_menses = TRUE` closes it – see below). On these rows
+  `mcyclength` is days-observed-so-far, not a cycle length –
+  `mcyclength_complete` is `NA` instead.
 
 - `luteal_length`: The confirmed-ovulation luteal phase length in days,
   only populated when it falls within
@@ -245,8 +259,8 @@ the -15 day imputation approach, see:
 
 - Nagpal et al. (2025). *Studying the Menstrual Cycle as a Continuous
   Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with
-  the `menstrualcycleR` package*.
-  https://doi.org/10.31219/osf.io/hd5xw_v1
+  the `menstrualcycleR` package*. *Psychoneuroendocrinology*, 107584.
+  https://doi.org/10.1016/j.psyneuen.2025.107584
 
 - Schmalenberger et al. (2021). *How to study the menstrual cycle:
   Practical tools and recommendations*. *Psychoneuroendocrinology,
@@ -306,9 +320,10 @@ version of this package (v0.1.0 onward; git history traces the specific
 thresholds back further, to before `cyclic_time` existed at all) until
 they became adjustable arguments in this version. The published Nagpal
 et al. (2025) paper and its supplement do not mention either cap. The
-package's own "Getting Started" vignette discloses the luteal cap only.
-Both caps, and the fixed-vs-adjustable distinction (as it stood before
-this version), were stated at
+package's own "Getting Started" vignette now discloses both caps
+(Section 3, "Cycle Length Inclusion Criteria"). Both caps, and the
+fixed-vs-adjustable distinction (as it stood before this version), were
+stated at
 <https://eisenlohrmoullab.github.io/menstrualcycleR/pacts-explainer.html>
 ("Inclusion defaults") – an automated documentation pass describing the
 code's actual behavior at the time, not a deliberate methods decision
@@ -333,7 +348,7 @@ data_with_scaling <- pacts_scaling(
 
 # View the result
 print(data_with_scaling)
-#> # A tibble: 744 × 22
+#> # A tibble: 744 × 23
 #>       id date       menses ovtoday symptom daterated  m2mcount mcyclength
 #>    <int> <date>      <dbl>   <dbl>   <dbl> <date>        <dbl>      <dbl>
 #>  1     1 2024-01-20      1       0       5 2024-01-20        1         24
@@ -347,10 +362,10 @@ print(data_with_scaling)
 #>  9     1 2024-01-28      0       0       3 2024-01-28        9         24
 #> 10     1 2024-01-29      0       0       4 2024-01-29       10         24
 #> # ℹ 734 more rows
-#> # ℹ 14 more variables: cycle_incomplete <dbl>, cyclenum <int>,
-#> #   ovtoday_impute <int>, scaled_cycleday <dbl>, scaled_cycleday_ov <dbl>,
-#> #   scaled_cycleday_impute <dbl>, scaled_cycleday_imp_ov <dbl>,
-#> #   cyclic_time <dbl>, cyclic_time_impute <dbl>,
+#> # ℹ 15 more variables: cycle_incomplete <dbl>, cyclenum <int>,
+#> #   mcyclength_complete <dbl>, ovtoday_impute <int>, scaled_cycleday <dbl>,
+#> #   scaled_cycleday_ov <dbl>, scaled_cycleday_impute <dbl>,
+#> #   scaled_cycleday_imp_ov <dbl>, cyclic_time <dbl>, cyclic_time_impute <dbl>,
 #> #   cyclic_time_impute_extended_phase <int>, cyclic_time_ov <dbl>,
 #> #   cyclic_time_imp_ov <dbl>, cyclic_time_imp_ov_extended_phase <int>, …
 ```

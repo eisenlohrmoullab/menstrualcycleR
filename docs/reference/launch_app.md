@@ -21,7 +21,7 @@ analysis and interpretation.
 Requires the shinyjs and cpass packages, which are Suggests (not
 installed automatically with menstrualcycleR) because they are only
 needed for this app, not for
-[`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+[`pacts_scaling()`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)
 or any other exported function. Install them with
 `install.packages("shinyjs")` and
 `remotes::install_github("lasy/cpass")`.

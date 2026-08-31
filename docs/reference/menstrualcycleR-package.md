@@ -7,16 +7,16 @@ length and ovulation timing.
 
 ## Where to start
 
-[`pacts_scaling`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+[`pacts_scaling`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)
 is the main entry point – it takes a long-format diary (one row per
 person-day) with menses and ovulation markers and returns the same data
 with `cyclic_time`, `cyclic_time_impute`, `cyclic_time_ov`, and
 `cyclic_time_imp_ov` added (see
-[`?pacts_scaling`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)'s
+[`?pacts_scaling`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)'s
 `@return` for what each means and which to use). For a full worked
 example, including GAMM modeling of the resulting cycle-time variables,
 see the "Getting Started" vignette:
-[`vignette("menstrualcycleR-overview", package = "menstrualcycleR")`](https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.md),
+[`vignette("menstrualcycleR-overview", package = "menstrualcycleR")`](https://menstrualcycler.clearlabresearch.com/articles/menstrualcycleR-overview.md),
 or the hosted copy at
 <https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.html>
 – installing via
@@ -30,22 +30,22 @@ see
 
 ## Other exported functions
 
-- [`cycledata_check`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycledata_check.md):
+- [`cycledata_check`](https://menstrualcycler.clearlabresearch.com/reference/cycledata_check.md):
   summarize per-symptom, per-phase data availability before scaling.
 
-- [`summary_ovulation`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/summary_ovulation.md):
+- [`summary_ovulation`](https://menstrualcycler.clearlabresearch.com/reference/summary_ovulation.md):
   summarize confirmed-vs-imputed ovulation rates after scaling.
 
-- [`cycle_plot`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot.md)
+- [`cycle_plot`](https://menstrualcycler.clearlabresearch.com/reference/cycle_plot.md)
   /
-  [`cycle_plot_individual`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot_individual.md):
+  [`cycle_plot_individual`](https://menstrualcycler.clearlabresearch.com/reference/cycle_plot_individual.md):
   visualize a symptom across phase-aligned cycle time, across the whole
   sample or for one individual.
 
-- [`launch_app`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/launch_app.md):
+- [`launch_app`](https://menstrualcycler.clearlabresearch.com/reference/launch_app.md):
   an interactive Shiny app covering the same workflow (requires the
   shinyjs and cpass packages, installed separately – see
-  [`?launch_app`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/launch_app.md)).
+  [`?launch_app`](https://menstrualcycler.clearlabresearch.com/reference/launch_app.md)).
 
 ## References
 

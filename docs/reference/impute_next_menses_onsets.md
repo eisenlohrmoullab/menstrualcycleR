@@ -32,7 +32,7 @@ impute_next_menses_onsets(
 - id, date, menses, ovtoday:
 
   Unquoted column names, as in
-  [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md).
+  [`pacts_scaling()`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md).
 
 - luteal_days:
 

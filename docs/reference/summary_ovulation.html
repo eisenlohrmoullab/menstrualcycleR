@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">menstrualcycleR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,8 +53,7 @@
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A dataframe containing the input data. Must include columns for scaled cycle day variables and symptoms/dependent variables of interest.
-Scaled cycle day variables are added to your dataframe after applying the <code><a href="pacts_scaling.html">pacts_scaling()</a></code> function. (See examples below)</p></dd>
+<dd><p>A dataframe containing the output of <code><a href="pacts_scaling.html">pacts_scaling()</a></code> – specifically <code>id</code>, <code>cyclenum</code>, <code>ovtoday</code>, <code>ovtoday_impute</code>, and <code>mcyclength_complete</code>. (See examples below)</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -74,7 +73,7 @@ Scaled cycle day variables are added to your dataframe after applying the <code>
 <li><p>Per-individual summaries to support participant-level quality checks and reporting.</p></li>
 </ul><p>This summary is essential for understanding data quality and should be transparently reported in publications. It helps clarify how often ovulation timing was determined using biologically grounded methods versus estimated through assumptions. Whenever possible, biomarker-based confirmation (e.g., LH or BBT) is preferred, as it provides more precise and physiologically valid estimates of ovulation timing. This enhances the accuracy of cycle phase alignment and reduces potential sources of error in time-sensitive analyses.</p>
 <p>When biomarkers are unavailable, imputation via the -15 day backward-count method offers a more biologically valid estimate than assuming ovulation occurs at the cycle midpoint. This method accounts for the relative stability of the luteal phase length and is recommended over midpoint-based estimates (see Nagpal et al., 2025).</p>
-<p>For further guidance on ovulation identification and the rationale for the -15 day imputation method, see:</p><ul><li><p>Nagpal et al. (2025). <em>Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the <code>menstrualcycleR</code> package</em>. https://doi.org/10.31219/osf.io/hd5xw_v1</p></li>
+<p>For further guidance on ovulation identification and the rationale for the -15 day imputation method, see:</p><ul><li><p>Nagpal et al. (2025). <em>Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the <code>menstrualcycleR</code> package</em>. <em>Psychoneuroendocrinology</em>, 107584. https://doi.org/10.1016/j.psyneuen.2025.107584</p></li>
 <li><p>Schmalenberger et al. (2021). <em>How to study the menstrual cycle: Practical tools and recommendations</em>. <em>Psychoneuroendocrinology, 123</em>, 104895. https://doi.org/10.1016/j.psyneuen.2020.104895</p></li>
 </ul></div>
 

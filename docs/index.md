@@ -11,11 +11,11 @@ To install and load the `menstrualcycleR` package, follow these steps:
 
 3.  Load the package
 
-[`library(menstrualcycleR)`](https://eisenlohrmoullab.github.io/menstrualcycleR/)
+[`library(menstrualcycleR)`](https://menstrualcycler.clearlabresearch.com)
 
 ## Quick start
 
-[`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+[`pacts_scaling()`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)
 is the main function: give it a long-format diary (one row per
 person-day) with menses and ovulation markers, and it returns the same
 data with continuous, phase-aligned cycle-time columns added.
@@ -40,28 +40,28 @@ head(scaled[, c("id", "daterated", "cyclic_time", "cyclic_time_impute")])
 
 For the full workflow, including GAMM modeling of the resulting
 cycle-time variables, see the vignette
-([`vignette("menstrualcycleR-overview")`](https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.md)
+([`vignette("menstrualcycleR-overview")`](https://menstrualcycler.clearlabresearch.com/articles/menstrualcycleR-overview.md)
 once installed with `build_vignettes = TRUE` above, or the hosted copy
 linked below) or
-[`?menstrualcycleR`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/menstrualcycleR-package.md)
+[`?menstrualcycleR`](https://menstrualcycler.clearlabresearch.com/reference/menstrualcycleR-package.md)
 for an overview of every exported function.
 
 To utilize the shinyapp, visit:
 <https://menstrualcycledata.shinyapps.io/shiny/>
 
 For a tutorial on using `menstrualcycleR` visit:
-<https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.html>
+<https://menstrualcycler.clearlabresearch.com/articles/menstrualcycleR-overview.html>
 
 For a visual explainer of how PACTS works — why cycle-day counting
 misaligns hormones and how PACTS realigns them — visit:
-<https://eisenlohrmoullab.github.io/menstrualcycleR/pacts-explainer.html>
+<https://menstrualcycler.clearlabresearch.com/pacts-explainer.html>
 
 To browse an auto-generated, annotated bibliography of papers that cite,
 apply, or extend `menstrualcycleR` and PACTS, visit:
 <https://menstrualcycler.base44.app>
 
 For a history of changes by version, see the changelog:
-<https://eisenlohrmoullab.github.io/menstrualcycleR/news/index.html>
+<https://menstrualcycler.clearlabresearch.com/news/index.html>
 
 ## How to cite
 

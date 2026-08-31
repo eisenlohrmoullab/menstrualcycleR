@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">menstrualcycleR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,7 @@ Tory Eisenlohr-Moul</h4>
 <p><strong>New to PACTS?</strong> For a visual, figure-driven
 walkthrough of <em>why</em> forward/backward/combined cycle-day counting
 misaligns hormones across cycles — and how PACTS fixes it, including the
-four PACTS variables and the cyclic property — see the <a href="https://eisenlohrmoullab.github.io/menstrualcycleR/pacts-explainer.html"><strong>PACTS
+four PACTS variables and the cyclic property — see the <a href="https://eisenlohrmoullab.github.io/menstrualcycleR/pacts-explainer.html" class="external-link"><strong>PACTS
 visual explainer</strong></a>.</p>
 </blockquote>
 <div class="section level2">
@@ -285,19 +285,43 @@ rigor.</p>
 <div class="section level3">
 <h3 id="cycle-length-inclusion-criteria">3. <strong>Cycle Length Inclusion Criteria</strong><a class="anchor" aria-label="anchor" href="#cycle-length-inclusion-criteria"></a>
 </h3>
-<p>By default, <code>menstrualcycleR</code> includes only cycles between
-<strong>21 and 35 days</strong> in length for standardized time variable
-computation. Cycles outside this range are excluded because they often
-show:</p>
-<ul>
-<li>Greater variability in timing</li>
-<li>Increased likelihood of anovulation</li>
-</ul>
-<p>This range can be modified by the user
-(<code>lower_cyclength_bound</code> /
-<code>upper_cyclength_bound</code>), especially in cases where ovulation
-is confirmed for all cycles and the study population includes naturally
-shorter or longer cycles.</p>
+<p><code>lower_cyclength_bound</code> /
+<code>upper_cyclength_bound</code> (default <strong>21-35 days</strong>)
+control whether <strong>ovulation is imputed</strong> for a cycle that
+has no confirmed ovulation. Cycles outside the range are not given an
+imputed ovulation, because they show greater variability in timing and
+an increased likelihood of anovulation. For a cycle with no confirmed
+ovulation, this bound is a complete gate, not a partial one: a closed,
+unconfirmed cycle outside the range gets zero coverage in
+<code>cyclic_time_impute</code> (and every other imputed column), not
+reduced coverage – it takes an ovulation marker or a widened bound to
+get any coverage at all.</p>
+<p><strong>These bounds do not decide which cycles get scaled.</strong>
+When a cycle has a <em>confirmed</em> ovulation
+(<code>ovtoday == 1</code>), its cycle length is never consulted: the
+cycle is scaled if its <strong>phase</strong> lengths fit, i.e. luteal
+(ovulation to next menses) within
+<code>luteal_phase_min_days</code>-<code>luteal_phase_max_days</code>
+(7-18) and follicular (menses to ovulation) within
+<code>follicular_phase_min_days</code>-<code>follicular_phase_max_days</code>
+(8-25). A confirmed 45-day cycle whose phases both fit will be scaled at
+the default bounds. Scaling on cycle length alone would discard a valid
+phase bookended by real anchors; the practical consequence is that the
+cycle-length bounds are <strong>not</strong> an inclusion criterion.</p>
+<p><strong>If you want cycles outside a length range excluded, filter
+after scaling.</strong> Use <code>mcyclength_complete</code>, not
+<code>mcyclength</code>:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">scaled</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">mcyclength_complete</span> <span class="op">&gt;=</span> <span class="fl">21</span>, <span class="va">mcyclength_complete</span> <span class="op">&lt;=</span> <span class="fl">35</span><span class="op">)</span></span></code></pre></div>
+<p><code>mcyclength_complete</code> is <code>NA</code> on any
+<code>cycle_incomplete == 1</code> row, so an incomplete cycle can never
+pass a numeric comparison and gets excluded automatically.
+<code>mcyclength</code> itself is still returned for reference, but on
+<code>cycle_incomplete == 1</code> rows it holds days-observed-so-far in
+a still-open trailing cycle, not a true cycle length – filtering on it
+directly (without also filtering <code>cycle_incomplete == 0</code>)
+silently admits those rows whenever the observed-so-far count happens to
+fall in range.</p>
 <p>Additionally, for a <strong>confirmed</strong> ovulation,
 <code>menstrualcycleR</code> will only scale the <strong>luteal
 phase</strong> (ovulation to next menses) if its length is
@@ -377,16 +401,16 @@ Eisenlohr-Moul Lab’s (CLEAR Lab: Clarifying the Endocrinology of Acute
 Risk) GitHub repository.</p>
 <p>To install it from GitHub, install and load the package
 <code>remotes</code> by running:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://remotes.r-lib.org" class="external-link">remotes</a></span><span class="op">)</span></span></code></pre></div>
 <p>then install and load the <code>menstrualcycleR</code> package by
 running:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"eisenlohrmoullab/menstrualcycleR"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://eisenlohrmoullab.github.io/menstrualcycleR/">menstrualcycleR</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"eisenlohrmoullab/menstrualcycleR"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://menstrualcycler.clearlabresearch.com">menstrualcycleR</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; Welcome to the menstrualcycleR package!</span></span>
 <span><span class="co">#&gt; If you use this package, please cite:</span></span>
 <span><span class="co">#&gt; Nagpal, A., Schmalenberger, K. M., Barone, J. C., Mulligan, E., Stumper, A., Knol, L., Failenschmid, J., Kiesner, J., Peters, J. R., &amp; Eisenlohr-Moul, T. A. (2025). Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the `menstrualcycleR` package. Psychoneuroendocrinology, 107584. https://doi.org/10.1016/j.psyneuen.2025.107584</span></span></code></pre></div>
@@ -395,9 +419,9 @@ other packages (mostly packages from the <a href="https://www.tidyverse.org/" cl
 <p>This vignette also uses <code>tidyverse</code> functions so it is
 recommended to install and load the <code>tidyverse</code> suite by
 running:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"tidyverse"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"tidyverse"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Attaching core tidyverse packages</span> ──────────────────────── tidyverse 2.0.0 ──</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr    </span> 1.1.4     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">readr    </span> 2.1.5</span></span>
@@ -410,7 +434,7 @@ running:</p>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #0000BB;">dplyr</span>::<span style="color: #00BB00;">lag()</span>    masks <span style="color: #0000BB;">stats</span>::lag()</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use the conflicted package (<span style="color: #0000BB; font-style: italic;">&lt;http://conflicted.r-lib.org/&gt;</span>) to force all conflicts to become errors</span></span></code></pre></div>
 <p>Alternatively, individual packages can be loaded independently:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
@@ -423,10 +447,10 @@ continuous cycle time measures generated by <code>menstrualcycleR</code>
 in nonlinear multilevel analyses using the <code>mgcv</code> and
 <code>marginaleffects</code> packages. You can install and load these
 packages by running:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"mgcv"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"marginaleffects"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">mgcv</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Loading required package: nlme</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -610,7 +634,7 @@ of any particular outcome you may study across the cycle. The variable
 menses onset. The variable <code>ovtoday</code> has a 1 when indicating
 the day after a positive luteinizing-hormone test, estimating the day of
 ovulation.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_df</span> <span class="op">=</span> <span class="va">cycledata</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">cycle_df</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 619   5</span></span>
@@ -626,18 +650,22 @@ ovulation.</p>
 <div class="section level3">
 <h3 id="applying-pacts">Applying PACTS<a class="anchor" aria-label="anchor" href="#applying-pacts"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_df_scaled</span> <span class="op">=</span> <span class="fu"><a href="../reference/pacts_scaling.html">pacts_scaling</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">cycle_df</span>, id <span class="op">=</span> <span class="va">id</span>, date <span class="op">=</span> <span class="va">daterated</span>, menses <span class="op">=</span> <span class="va">menses</span>, ovtoday <span class="op">=</span> <span class="va">ovtoday</span>, lower_cyclength_bound <span class="op">=</span> <span class="fl">21</span>, upper_cyclength_bound <span class="op">=</span> <span class="fl">35</span><span class="op">)</span></span></code></pre></div>
 <p>For full documentation, type <code>?pacts_scaling()</code> in R
 console. The lower and upper cycle length bounds may be adjusted, but
 the default is 21-35 days as that was what was validated in Nagpal et
-al., (2025). Only cycles between 21 and 35 days will get scaled – with
-the further requirement that, for a confirmed ovulation, the luteal
-phase (ovulation to next menses) is between 7-18 days and the follicular
-phase (menses to ovulation) is between 8-25 days. All four phase-length
-bounds are separately adjustable
+al., (2025). They determine which cycles are eligible for an
+<strong>imputed</strong> ovulation. For a cycle with a
+<strong>confirmed</strong> ovulation, scaling is instead governed by the
+phase lengths – luteal (ovulation to next menses) between 7-18 days and
+follicular (menses to ovulation) between 8-25 days – and the cycle’s
+overall length is not checked. All four phase-length bounds are
+separately adjustable
 (<code>luteal_phase_min_days</code>/<code>max_days</code>,
-<code>follicular_phase_min_days</code>/<code>max_days</code>).</p>
+<code>follicular_phase_min_days</code>/<code>max_days</code>). See
+“Cycle Length Inclusion Criteria” above if you need out-of-range cycles
+excluded.</p>
 <p><code>cycle_df_scaled</code> will now have additional variables as
 well as observations. In this dataset we went from initially having 619
 observations in <code>cycle_df</code> and then having 744 observations
@@ -818,19 +846,20 @@ individuals and cycles.</p>
 <div class="section level4">
 <h4 id="cycle-time-variables-are-added-in-cycle_df_scaled">Cycle time variables are added in cycle_df_scaled<a class="anchor" aria-label="anchor" href="#cycle-time-variables-are-added-in-cycle_df_scaled"></a>
 </h4>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">cycle_df_scaled</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "id"                                "date"                             </span></span>
 <span><span class="co">#&gt;  [3] "menses"                            "ovtoday"                          </span></span>
 <span><span class="co">#&gt;  [5] "symptom"                           "daterated"                        </span></span>
 <span><span class="co">#&gt;  [7] "m2mcount"                          "mcyclength"                       </span></span>
 <span><span class="co">#&gt;  [9] "cycle_incomplete"                  "cyclenum"                         </span></span>
-<span><span class="co">#&gt; [11] "ovtoday_impute"                    "scaled_cycleday"                  </span></span>
-<span><span class="co">#&gt; [13] "scaled_cycleday_ov"                "scaled_cycleday_impute"           </span></span>
-<span><span class="co">#&gt; [15] "scaled_cycleday_imp_ov"            "cyclic_time"                      </span></span>
-<span><span class="co">#&gt; [17] "cyclic_time_impute"                "cyclic_time_impute_extended_phase"</span></span>
-<span><span class="co">#&gt; [19] "cyclic_time_ov"                    "cyclic_time_imp_ov"               </span></span>
-<span><span class="co">#&gt; [21] "cyclic_time_imp_ov_extended_phase" "luteal_length"</span></span></code></pre></div>
+<span><span class="co">#&gt; [11] "mcyclength_complete"               "ovtoday_impute"                   </span></span>
+<span><span class="co">#&gt; [13] "scaled_cycleday"                   "scaled_cycleday_ov"               </span></span>
+<span><span class="co">#&gt; [15] "scaled_cycleday_impute"            "scaled_cycleday_imp_ov"           </span></span>
+<span><span class="co">#&gt; [17] "cyclic_time"                       "cyclic_time_impute"               </span></span>
+<span><span class="co">#&gt; [19] "cyclic_time_impute_extended_phase" "cyclic_time_ov"                   </span></span>
+<span><span class="co">#&gt; [21] "cyclic_time_imp_ov"                "cyclic_time_imp_ov_extended_phase"</span></span>
+<span><span class="co">#&gt; [23] "luteal_length"</span></span></code></pre></div>
 <ul>
 <li><p><code>scaled_cycleday</code>:<br>
 A continuous cycle time variable centered on <strong>menses
@@ -857,13 +886,33 @@ A binary indicator identifying <strong>imputed ovulation days</strong>
 <code>impute_next_menses = TRUE</code>. A binary indicator identifying
 <strong>imputed menses onsets</strong> (value = 1) placed forward from a
 confirmed ovulation (ovulation + 14 days by default).</p></li>
+<li><p><code>m2mcount</code>: A forward day count starting from each
+menses onset (day of onset = 0), reset at every new cycle.</p></li>
+<li><p><code>cyclenum</code>: Which complete menses-to-menses cycle, in
+sequence, this row belongs to, per <code>id</code>. <code>NA</code> on
+<code>cycle_incomplete == 1</code> rows (a still-open trailing cycle
+isn’t a “complete cycle” to number yet).</p></li>
 <li><p><code>mcyclength</code>: Indicates the length of a
-menses-to-menses cycle an observation belongs to.</p></li>
+menses-to-menses cycle an observation belongs to. <strong>On
+<code>cycle_incomplete == 1</code> rows this is not a cycle
+length</strong> – it is the number of days observed so far in a
+still-open trailing cycle. Use <code>mcyclength_complete</code> instead
+if you want to threshold cycle length directly (see Section 3, “Cycle
+Length Inclusion Criteria”, above).</p></li>
+<li><p><code>mcyclength_complete</code>: Same as
+<code>mcyclength</code>, but <code>NA</code> whenever
+<code>cycle_incomplete == 1</code>. Prefer this column for any length
+restriction – an incomplete cycle’s <code>NA</code> here can never
+satisfy a numeric comparison, so it drops out automatically without a
+separate <code>cycle_incomplete == 0</code> filter.</p></li>
 <li><p><code>luteal_length</code>: Indicates the length of the luteal
 phase an observation belongs to, when ovulation was not imputed. This is
 computed only for cycles that meet the criteria to be scaled.</p></li>
 <li><p><code>cycle_incomplete</code> A binary indicator identifying if
-the observation is part of an incomplete menses-to-menses cycle</p></li>
+the observation is part of an incomplete menses-to-menses cycle. On
+these rows <code>mcyclength</code> is days-observed-so-far, not a cycle
+length – <code>mcyclength_complete</code> is <code>NA</code>
+instead.</p></li>
 <li><p><code>cyclic_time</code> A continuous cycle time variable
 centered on <strong>menses onset</strong>
 (<code>menses == 1 → 0</code>), ranging from –1 to +1. Unlike
@@ -874,6 +923,13 @@ same hormonal meaning of <strong>ovulation</strong>. Includes
 cycles with <strong>imputed ovulation</strong> (assigned to day –15
 before next menses). Increases dataset coverage, but with lower
 precision.</p></li>
+<li><p><code>cyclic_time_impute_extended_phase</code>: Binary flag
+(<code>0</code>/<code>1</code>) marking rows where
+<code>cyclic_time_impute</code> was filled by the last-resort phase-cap
+fallback described in Section 3 above (value <code>1</code>), rather
+than by a confirmed or imputed-ovulation anchor (<code>0</code>). Report
+this rate alongside the imputed-ovulation rate for full transparency
+about coverage.</p></li>
 <li><p><code>cyclic_time_ov</code> A cycle time variable centered on
 <strong>ovulation</strong> (<code>ovtoday == 1 → 0</code>), ranging from
 –1 to +1. Unlike <code>scaled_cycleday_ov</code>, -1 and + 1 are
@@ -884,6 +940,9 @@ biomarker-confirmed</strong> ovulation.</p></li>
 <strong>imputed ovulation</strong> (<code>ovtoday_impute == 1</code>)
 for cycles lacking confirmation. Centered on either confirmed or imputed
 ovulation.</p></li>
+<li><p><code>cyclic_time_imp_ov_extended_phase</code>: The same flag as
+<code>cyclic_time_impute_extended_phase</code>, for the
+ovulation-centered <code>cyclic_time_imp_ov</code> column.</p></li>
 </ul>
 <hr>
 </div>
@@ -901,7 +960,7 @@ outcome: <code>symptom</code>. However, if you would like to look at
 more outcomes at once, replace <code>c("symptom")</code> with the
 outcomes of interest:
 e.g.<code>c("symptom1", "symptom2", "symptom3")</code></p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">checkdata</span> <span class="op">=</span> <span class="fu"><a href="../reference/cycledata_check.html">cycledata_check</a></span><span class="op">(</span><span class="va">cycle_df_scaled</span>, symptom_columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"symptom"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: ID number 8 has &lt; 10 observations for symptom</span></span></code></pre></div>
 <p>This function will output a warning if any IDs have less than 10
@@ -910,7 +969,7 @@ observations in a menses-to-menses cycle for the outcome selected.</p>
 each ID has with a corresponding scaled cycle time measure (taking into
 account imputed ovulation) both overall, and by phase (luteal and
 follicular).</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">checkdata</span><span class="op">$</span><span class="va">by_id</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 25 × 4</span></span></span>
 <span><span class="co">#&gt;       id symptom_nonNA symptom_luteal symptom_follicular</span></span>
@@ -928,19 +987,22 @@ follicular).</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 15 more rows</span></span></span></code></pre></div>
 <p>We can also examine this in aggregate, looking at the sample as a
 whole:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">checkdata</span><span class="op">$</span><span class="va">overall</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 3</span></span></span>
 <span><span class="co">#&gt;   symptom_nonNA symptom_luteal symptom_follicular</span></span>
 <span><span class="co">#&gt;           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           575            218                357</span></span></code></pre></div>
-<p>Overall, 574 observations with non-NA or non-missing values for
-<code>symptom</code> were scaled because they existed in
-menses-to-menses cycles between 21 and 35 days, with associated luteal
-phases (for cycles that had a reported value for <code>ovtoday</code>)
-between 7-18 days and follicular phases between 8-25 days. We can also
-visualize non-missing symptom data across the cycle:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<p>Overall, 575 observations with non-NA or non-missing values for
+<code>symptom</code> were scaled. For cycles with a confirmed
+<code>ovtoday</code>, that required luteal phases between 7-18 days and
+follicular phases between 8-25 days; for cycles without one, it required
+a menses-to-menses length of 21-35 days so that ovulation could be
+imputed. (Every complete cycle in <code>cycledata</code> happens to fall
+in 22-35 days, so this dataset cannot illustrate the difference between
+the two rules.) We can also visualize non-missing symptom data across
+the cycle:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">checkdata</span><span class="op">$</span><span class="va">data_symptom_plots</span></span>
 <span><span class="co">#&gt; $symptom</span></span></code></pre></div>
 <p><img src="menstrualcycleR-overview_files/figure-html/cycledata_check_plot-1.png" class="r-plt" width="672"></p>
@@ -948,7 +1010,7 @@ visualize non-missing symptom data across the cycle:</p>
 <div class="section level3">
 <h3 id="checking-ovulation-data-availability">Checking Ovulation Data Availability<a class="anchor" aria-label="anchor" href="#checking-ovulation-data-availability"></a>
 </h3>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ov_summary</span> <span class="op">=</span> <span class="fu"><a href="../reference/summary_ovulation.html">summary_ovulation</a></span><span class="op">(</span><span class="va">cycle_df_scaled</span><span class="op">)</span></span></code></pre></div>
 <p>This function will help you evaluate how many cycles had a confirmed
 ovulation value prior to using <code>menstrualcycleR</code> and how many
@@ -957,14 +1019,14 @@ cycles had an ovulation day imputed via 15-day backward count via the
 Ovulation When Biomarkers Are Unavailable</a> and <a href="#ovulation-assessment-or-imputation">Ovulation Assessment or
 Imputation</a>).</p>
 <p>We can examine this across the entire sample:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ov_summary</span><span class="op">$</span><span class="va">ovstatus_total</span></span>
 <span><span class="co">#&gt;          Total Confirmed Ovulation</span></span>
 <span><span class="co">#&gt; N cycles                        14</span></span>
 <span><span class="co">#&gt;          Total Estimated Ovulation via 15day Backward Count</span></span>
 <span><span class="co">#&gt; N cycles                                                 11</span></span></code></pre></div>
 <p>And also by each id in the dataset:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ov_summary</span><span class="op">$</span><span class="va">ovstatus_id</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 25 × 3</span></span></span>
 <span><span class="co">#&gt;       id `Total cycles with confirmed ovulation` Total cycles with imputed ovu…¹</span></span>
@@ -1000,7 +1062,7 @@ ovulation), person-centered or raw scaling, and optional smoothing via
 rolling averages. Rolling averages are supported by the package
 <code>zoo</code>.</p>
 <p>Let’s take a look at the parameters of <code>cycle_plot</code>:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cycle_plot.html">cycle_plot</a></span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">symptom</span>,</span>
@@ -1063,7 +1125,7 @@ the group mean.</p></li>
 averages are calculated using the <code><a href="https://rdrr.io/pkg/zoo/man/rollapply.html" class="external-link">zoo::rollapply()</a></code>
 function, which applies a moving average over the time series, with the
 settings as:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">zoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/zoo/man/rollapply.html" class="external-link">rollapply</a></span><span class="op">(</span></span>
 <span>  <span class="va">variable</span>,         <span class="co"># vector of values</span></span>
 <span>  <span class="va">rollingavg</span>,       <span class="co"># size of the moving window (default = 5 days)</span></span>
@@ -1083,7 +1145,7 @@ and Irregular Time Series.”<br><em>Journal of Statistical Software</em>, <em>1
 <div class="section level4">
 <h4 id="symptom-menses-centered">Symptom, Menses-centered<a class="anchor" aria-label="anchor" href="#symptom-menses-centered"></a>
 </h4>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_df_menses</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cycle_plot.html">cycle_plot</a></span><span class="op">(</span></span>
 <span>  <span class="va">cycle_df_scaled</span>,</span>
 <span>  <span class="st">"symptom"</span>,</span>
@@ -1124,9 +1186,9 @@ parameters.</p></li>
 <li><p><strong>plot</strong>: A <code>ggplot2</code> object visualizing
 the trajectory of the symptom variable across the cycle.</p></li>
 </ol>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_df_menses</span><span class="op">$</span><span class="va">data</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 744 × 27</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 744 × 28</span></span></span>
 <span><span class="co">#&gt;       id date       menses ovtoday symptom daterated  m2mcount mcyclength</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1 2024-01-20      1       0       5 2024-01-20        1         24</span></span>
@@ -1140,13 +1202,13 @@ the trajectory of the symptom variable across the cycle.</p></li>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     1 2024-01-28      0       0       3 2024-01-28        9         24</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     1 2024-01-29      0       0       4 2024-01-29       10         24</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 734 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 19 more variables: cycle_incomplete &lt;dbl&gt;, cyclenum &lt;int&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   ovtoday_impute &lt;int&gt;, scaled_cycleday &lt;dbl&gt;, scaled_cycleday_ov &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   scaled_cycleday_impute &lt;dbl&gt;, scaled_cycleday_imp_ov &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   cyclic_time &lt;dbl&gt;, cyclic_time_impute &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 20 more variables: cycle_incomplete &lt;dbl&gt;, cyclenum &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   mcyclength_complete &lt;dbl&gt;, ovtoday_impute &lt;int&gt;, scaled_cycleday &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   scaled_cycleday_ov &lt;dbl&gt;, scaled_cycleday_impute &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   scaled_cycleday_imp_ov &lt;dbl&gt;, cyclic_time &lt;dbl&gt;, cyclic_time_impute &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   cyclic_time_impute_extended_phase &lt;int&gt;, cyclic_time_ov &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   cyclic_time_imp_ov &lt;dbl&gt;, cyclic_time_imp_ov_extended_phase &lt;int&gt;, …</span></span></span></code></pre></div>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_df_menses</span><span class="op">$</span><span class="va">summary</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 22 × 3</span></span></span>
 <span><span class="co">#&gt;    cycleday_5perc mean_dev_roll     se</span></span>
@@ -1162,7 +1224,7 @@ the trajectory of the symptom variable across the cycle.</p></li>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>           0.4       -<span style="color: #BB0000;">0.005</span><span style="color: #BB0000; text-decoration: underline;">51</span> 0.146 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>           0.45       0.613   0.122 </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 12 more rows</span></span></span></code></pre></div>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_df_menses</span><span class="op">$</span><span class="va">plot</span></span>
 <span><span class="co">#&gt; Warning: Removed 1 row containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span>
@@ -1177,7 +1239,7 @@ the trajectory of the symptom variable across the cycle.</p></li>
 <h4 id="symptom-ovulation-centered">Symptom, Ovulation-centered<a class="anchor" aria-label="anchor" href="#symptom-ovulation-centered"></a>
 </h4>
 <p>Here is the same data, centered on ovulation.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_df_ov</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cycle_plot.html">cycle_plot</a></span><span class="op">(</span></span>
 <span>  <span class="va">cycle_df_scaled</span>,</span>
 <span>  <span class="st">"symptom"</span>,</span>
@@ -1186,7 +1248,7 @@ the trajectory of the symptom variable across the cycle.</p></li>
 <span>  y_scale <span class="op">=</span> <span class="st">"person-centered_roll"</span>, </span>
 <span>  se <span class="op">=</span> <span class="cn">T</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_df_ov</span><span class="op">$</span><span class="va">plot</span></span>
 <span><span class="co">#&gt; Warning: Removed 1 row containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span>
@@ -1212,7 +1274,7 @@ each. Rolling averages are supported by the package
 <code>zoo</code>.</p>
 <p>Let’s take a look at the parameters of
 <code>cycle_plot_individual</code>:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cycle_plot_individual.html">cycle_plot_individual</a></span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">id</span>,</span>
@@ -1279,7 +1341,7 @@ and Irregular Time Series.”<br><em>Journal of Statistical Software</em>, <em>1
 </h4>
 <p>This is what the raw data of symptom looks like across the first (and
 only cycle) for ID = 2:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_menses_id_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cycle_plot_individual.html">cycle_plot_individual</a></span><span class="op">(</span></span>
 <span>  <span class="va">cycle_df_scaled</span>,</span>
 <span>  id <span class="op">=</span> <span class="fl">2</span>, </span>
@@ -1296,7 +1358,7 @@ only cycle) for ID = 2:</p>
 using <code>y_scale = "roll"</code> or
 <code>y_scale = "person-centered_roll"</code> will help us understand
 what the trajectory looks like for participant ID = 2.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_menses_id_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cycle_plot_individual.html">cycle_plot_individual</a></span><span class="op">(</span></span>
 <span>  <span class="va">cycle_df_scaled</span>,</span>
 <span>  id <span class="op">=</span> <span class="fl">2</span>, </span>
@@ -1314,7 +1376,7 @@ what the trajectory looks like for participant ID = 2.</p>
 <code>y_scale = "roll"</code> is selected, rolling averages are
 calculated using the <code><a href="https://rdrr.io/pkg/zoo/man/rollapply.html" class="external-link">zoo::rollapply()</a></code> function, which
 applies a moving average over the time series, with the settings as:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">zoo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/zoo/man/rollapply.html" class="external-link">rollapply</a></span><span class="op">(</span></span>
 <span>  <span class="va">variable</span>,         <span class="co"># vector of values</span></span>
 <span>  <span class="va">rollingavg</span>,       <span class="co"># size of the moving window (default = 5 days)</span></span>
@@ -1353,7 +1415,7 @@ each menses-to-menses cycle a participant ID has in the dataset.</p>
 <div class="section level4">
 <h4 id="cycle_1-summary-for-id-2">Cycle_1 summary for ID = 2<a class="anchor" aria-label="anchor" href="#cycle_1-summary-for-id-2"></a>
 </h4>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_menses_id_2</span><span class="op">$</span><span class="va">symptom</span><span class="op">$</span><span class="va">Cycle_1</span><span class="op">$</span><span class="va">summary</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 21 × 7</span></span></span>
 <span><span class="co">#&gt;    cycleday_5perc mean_dev mean_dev_roll raw_sx sx_roll cycleday mcyclength</span></span>
@@ -1373,11 +1435,11 @@ each menses-to-menses cycle a participant ID has in the dataset.</p>
 <div class="section level4">
 <h4 id="cycle_1-plot-for-id-2">Cycle_1 plot for ID = 2<a class="anchor" aria-label="anchor" href="#cycle_1-plot-for-id-2"></a>
 </h4>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_menses_id_2</span><span class="op">$</span><span class="va">symptom</span><span class="op">$</span><span class="va">Cycle_1</span><span class="op">$</span><span class="va">plot</span></span></code></pre></div>
 <p><img src="menstrualcycleR-overview_files/figure-html/cycle_plot_menses_id_2_plot_access-1.png" class="r-plt" width="672"></p>
 <p>Cycles can also be examined ovulation-centered.</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_plot_ov_id_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cycle_plot_individual.html">cycle_plot_individual</a></span><span class="op">(</span></span>
 <span>  <span class="va">cycle_df_scaled</span>,</span>
 <span>  id <span class="op">=</span> <span class="fl">2</span>, </span>
@@ -1531,7 +1593,7 @@ Log-transforming these outcomes often results in a distribution that is
 more symmetric and approximately normal. However, you should always
 assess your model for heteroscedasticity and examine the distribution of
 residuals.</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_df_scaled</span><span class="op">$</span><span class="va">symptom_log</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">cycle_df_scaled</span><span class="op">$</span><span class="va">symptom</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span> <span class="co">#log-transforming our outcome variable symptom</span></span></code></pre></div>
 <p>We now create a dataframe called <code>datSX</code> that includes
 only complete cases for the variables <code>cyclic_time_impute</code>
@@ -1543,11 +1605,11 @@ By pre-filtering the dataset using <code><a href="https://rdrr.io/r/stats/comple
 determine exactly how many observations will be included in the model.
 This ensures transparency and avoids confusion when interpreting model
 results.</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">selected_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cyclic_time_impute"</span>, <span class="st">"symptom_log"</span> <span class="op">)</span></span>
 <span><span class="va">datSX</span> <span class="op">&lt;-</span> <span class="va">cycle_df_scaled</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/stats/complete.cases.html" class="external-link">complete.cases</a></span><span class="op">(</span><span class="va">cycle_df_scaled</span><span class="op">[</span><span class="va">selected_vars</span><span class="op">]</span><span class="op">)</span>, <span class="op">]</span></span></code></pre></div>
 <p>Let’s run the GAMM!</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">datSX</span><span class="op">$</span><span class="va">id</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">datSX</span><span class="op">$</span><span class="va">id</span><span class="op">)</span> <span class="co"># ALWAYS factor id before putting it in a gam formula</span></span>
 <span></span>
 <span><span class="va">gamm1</span> <span class="op">&lt;-</span> <span class="fu">mgcv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">gam</a></span><span class="op">(</span></span>
@@ -1602,7 +1664,7 @@ presence of random effects.</p></li>
 </h3>
 <p>After fitting the model with <code><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">gam()</a></code>, we can view the
 summary with:</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">gamm1</span><span class="op">)</span></span></code></pre></div>
 <p>This returns several important components:</p>
 <div class="section level4">
@@ -1644,7 +1706,7 @@ nonlinear shape per person).</li>
 <h4 id="parametric-coefficients">
 <strong>Parametric Coefficients</strong><a class="anchor" aria-label="anchor" href="#parametric-coefficients"></a>
 </h4>
-<pre><code>(Intercept)  1.30722    0.01806   72.36   &lt;2e-16 ***</code></pre>
+<pre><code>(Intercept)  1.30963    0.01801   72.72   &lt;2e-16 ***</code></pre>
 <ul>
 <li>The <strong>intercept</strong> represents the average value of the
 log-transformed symptom when all smooth terms are at their reference
@@ -1656,18 +1718,18 @@ level.</li>
 <h4 id="smooth-terms">
 <strong>Smooth Terms</strong><a class="anchor" aria-label="anchor" href="#smooth-terms"></a>
 </h4>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a><span class="fu">s</span>(cyclic_time_impute)     edf <span class="ot">=</span> <span class="fl">7.43</span>   F <span class="ot">=</span> <span class="fl">79.04</span>   p <span class="sc">&lt;</span> <span class="fl">2e-16</span> <span class="sc">**</span><span class="er">*</span></span>
-<span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a><span class="fu">s</span>(id)                     edf <span class="ot">=</span> <span class="fl">12.53</span>  F <span class="ot">=</span> <span class="fl">1.31</span>    p <span class="ot">=</span> <span class="fl">0.00106</span> <span class="sc">**</span></span>
-<span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a><span class="fu">s</span>(cyclic_time_impute,id)  edf <span class="ot">=</span> <span class="fl">15.89</span>  F <span class="ot">=</span> <span class="fl">1.83</span>    p <span class="ot">=</span> <span class="fl">8.36e-05</span> <span class="sc">**</span><span class="er">*</span></span></code></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" tabindex="-1"></a><span class="fu">s</span>(cyclic_time_impute)     edf <span class="ot">=</span> <span class="fl">7.47</span>   F <span class="ot">=</span> <span class="fl">81.60</span>   p <span class="sc">&lt;</span> <span class="fl">2e-16</span> <span class="sc">**</span><span class="er">*</span></span>
+<span id="cb43-2"><a href="#cb43-2" tabindex="-1"></a><span class="fu">s</span>(id)                     edf <span class="ot">=</span> <span class="fl">13.71</span>  F <span class="ot">=</span> <span class="fl">1.52</span>    p <span class="ot">=</span> <span class="fl">0.00022</span> <span class="sc">**</span><span class="er">*</span></span>
+<span id="cb43-3"><a href="#cb43-3" tabindex="-1"></a><span class="fu">s</span>(cyclic_time_impute,id)  edf <span class="ot">=</span> <span class="fl">14.75</span>  F <span class="ot">=</span> <span class="fl">1.51</span>    p <span class="ot">=</span> <span class="fl">0.000375</span> <span class="sc">**</span><span class="er">*</span></span></code></pre></div>
 <p>Each smooth term contributes to explaining nonlinear or hierarchical
 effects:</p>
 <ul>
 <li>
-<strong><code>s(cyclic_time_impute)</code></strong>:<br>
-Captures the <strong>overall nonlinear trend</strong> in symptom
-expression across the standardized cycle.
+<strong><code>s(cyclic_time_impute)</code></strong>: Captures the
+<strong>overall nonlinear trend</strong> in symptom expression across
+the standardized cycle.
 <ul>
-<li>The <strong>high edf</strong> (≈7.4) reflects flexibility in the
+<li>The <strong>high edf</strong> (≈7.5) reflects flexibility in the
 shape of the curve. Higher edf indicates more “wiggles” and complexity
 in the nonlinear pattern.</li>
 <li>The <strong>very small p-value</strong> suggests this
@@ -1676,11 +1738,11 @@ nonlinearity</li>
 </ul>
 </li>
 <li>
-<strong><code>s(id, bs = "re")</code></strong>:<br>
-Models <strong>random intercept</strong> to account for <strong>baseline
+<strong><code>s(id, bs = "re")</code></strong>: Models
+<strong>random intercept</strong> to account for <strong>baseline
 differences</strong> across individuals.
 <ul>
-<li>The significant p-value (<code>p = 0.001</code>) indicates
+<li>The significant p-value (<code>p = 0.0002</code>) indicates
 meaningful variation in symptom baseline levels.</li>
 </ul>
 </li>
@@ -1691,7 +1753,7 @@ flatter, or reversed) relative to the population-level curve — not a
 separate nonlinear shape per person.
 <ul>
 <li>The effect is <strong>statistically significant</strong>
-(<code>p = 8.36e-05</code>), indicating meaningful
+(<code>p = 0.000375</code>), indicating meaningful
 <strong>heterogeneity</strong> in the linear slope of symptom change
 across individuals, on top of the shared population-level nonlinear
 curve.</li>
@@ -1704,30 +1766,28 @@ curve.</li>
 <h4 id="model-fit">
 <strong>Model Fit</strong><a class="anchor" aria-label="anchor" href="#model-fit"></a>
 </h4>
-<pre><code>R-sq.(adj) =  0.533   
-Deviance explained = 56.2%
--REML = 117.46  
-Scale est. = 0.076068   
-n = 575</code></pre>
+<pre><code>R-sq.(adj) =  0.528
+Deviance explained = 55.5%
+-REML = 125.69
+Scale est. = 0.077082
+n = 611</code></pre>
 <ul>
-<li><p><strong>Adjusted R²</strong> of 0.533:<br>
-The model explains over <strong>53% of the variance</strong> in the
-log-transformed symptom outcome. It is roughly the squared correlation
-between observed and fitted values, adjusted for model complexity. It is
-used to assess overall model fit when working with Gaussian
-models.</p></li>
+<li><p><strong>Adjusted R²</strong> of 0.528: The model explains over
+<strong>52% of the variance</strong> in the log-transformed symptom
+outcome. It is roughly the squared correlation between observed and
+fitted values, adjusted for model complexity. It is used to assess
+overall model fit when working with Gaussian models.</p></li>
 <li><p><strong>Deviance explained</strong>: Another metric showing over
-<strong>56% of outcome variability</strong> is accounted for. Deviance
+<strong>55% of outcome variability</strong> is accounted for. Deviance
 is a likelihood-based measure, more general than R², but comes from
 comparing the model’s deviance (a measure of error) to that of a null
 model. It should be used when comparing models or working with
 non-normal outcomes.</p></li>
-<li><p><strong>REML</strong>:<br>
-Indicates the restricted maximum likelihood used in model
-fitting—important for selecting smoothing parameters in GAMs.</p></li>
-<li><p><strong>n = 575</strong>:<br>
-The number of complete observations included in the model after listwise
-deletion.</p></li>
+<li><p><strong>REML</strong>: Indicates the restricted maximum
+likelihood used in model fitting—important for selecting smoothing
+parameters in GAMs.</p></li>
+<li><p><strong>n = 611</strong>: The number of complete observations
+included in the model after listwise deletion.</p></li>
 </ul>
 <hr>
 <blockquote>
@@ -1752,7 +1812,7 @@ plotting functions, but for now we will share the code below.</p>
 <div class="section level4">
 <h4 id="first-we-need-to-compute-predicted-or-model-implied-values">First, we need to compute predicted or model-implied values<a class="anchor" aria-label="anchor" href="#first-we-need-to-compute-predicted-or-model-implied-values"></a>
 </h4>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plotdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>cyclic_time_impute <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span>, by <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span>,</span>
 <span>                      id <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="co"># setting id = 0 suppresses random effects, to model just the fixed effect (sample-wide) of your outcome across the cycle</span></span>
 <span></span>
@@ -1765,7 +1825,7 @@ plotting functions, but for now we will share the code below.</p>
 <div class="section level4">
 <h4 id="plotting-model-implied-values">Plotting model-implied values<a class="anchor" aria-label="anchor" href="#plotting-model-implied-values"></a>
 </h4>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plotting</span></span>
 <span><span class="va">gamplot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">plotdat</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">cyclic_time_impute</span>, y <span class="op">=</span> <span class="va">estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span>, by <span class="op">=</span> <span class="fl">0.50</span><span class="op">)</span>, </span>
@@ -1804,11 +1864,12 @@ M., Kiesner, J., Ditzen, B., &amp; Kleinstäuber, M. (2020). <em>Are
 there temporal subtypes of premenstrual dysphoric disorder?: Using
 group-based trajectory modeling to identify individual differences in
 symptom change.</em> <em>Psychological Medicine, 50(6)</em>, 964–972. <a href="https://doi.org/10.1017/S0033291719000849" class="external-link uri">https://doi.org/10.1017/S0033291719000849</a></p></li>
-<li><p>Nagpal, A., Schmalenberger, K. M., Barone, J., Mulligan, E. M.,
-Stumper, A., Knol, L., … Eisenlohr-Moul, T. A., PhD. (2025, May 6).
-<em>Studying the Menstrual Cycle as a Continuous Variable: Implementing
-Phase-Aligned Cycle Time Scaling (PACTS) with the
-<code>menstrualcycleR</code> package</em>. <a href="https://doi.org/10.31219/osf.io/hd5xw_v1" class="external-link uri">https://doi.org/10.31219/osf.io/hd5xw_v1</a></p></li>
+<li><p>Nagpal, A., Schmalenberger, K. M., Barone, J. C., Mulligan, E.,
+Stumper, A., Knol, L., Failenschmid, J., Kiesner, J., Peters, J. R.,
+&amp; Eisenlohr-Moul, T. A. (2025). <em>Studying the Menstrual Cycle as
+a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling
+(PACTS) with the <code>menstrualcycleR</code> package</em>.
+<em>Psychoneuroendocrinology, 181</em>, 107584. <a href="https://doi.org/10.1016/j.psyneuen.2025.107584" class="external-link uri">https://doi.org/10.1016/j.psyneuen.2025.107584</a></p></li>
 <li><p>Reen, E., &amp; Kiesner, J. (2016). Individual differences in
 self-reported difficulty sleeping across the menstrual cycle.
 <em>Archives of Women’s Mental Health, 19</em>(4), 599–608. <a href="https://doi.org/10.1007/s00737-016-0621-9" class="external-link uri">https://doi.org/10.1007/s00737-016-0621-9</a></p></li>

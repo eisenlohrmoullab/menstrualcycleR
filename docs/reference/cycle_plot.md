@@ -28,8 +28,8 @@ cycle_plot(
   A dataframe containing the input data. Must include columns for scaled
   cycle day variables and the symptom variable. Scaled cycle day
   variables are added to your dataframe after applying the
-  calculate_mcyclength() and calculate_cycletime() functions. (See
-  examples below)
+  [`pacts_scaling()`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)
+  function. (See examples below)
 
 - symptom:
 

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">menstrualcycleR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,6 +73,13 @@
 
 <dt id="arg-menses">menses<a class="anchor" aria-label="anchor" href="#arg-menses"></a></dt>
 <dd><p>A column indicating menses (0/1).</p></dd>
+
+
+<dt id="arg-luteal-phase-min-days-luteal-phase-max-days">luteal_phase_min_days, luteal_phase_max_days<a class="anchor" aria-label="anchor" href="#arg-luteal-phase-min-days-luteal-phase-max-days"></a></dt>
+<dd><p>Numeric bounds (days) on how long a
+confirmed ovulation's luteal phase (ovulation to next menses) may be for <code>cyclic_lut</code>/
+<code>cyclic_time</code>/<code>luteal_length</code> to scale it. Defaults <code>7</code> and <code>18</code> (Bull et al. 2019 norms);
+see <code><a href="pacts_scaling.html">?pacts_scaling</a></code>'s "Internal phase-length caps" section.</p></dd>
 
 </dl></div>
     <div class="section level2">

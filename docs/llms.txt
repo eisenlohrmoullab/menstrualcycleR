@@ -11,11 +11,11 @@ To install and load the `menstrualcycleR` package, follow these steps:
 
 3.  Load the package
 
-[`library(menstrualcycleR)`](https://eisenlohrmoullab.github.io/menstrualcycleR/)
+[`library(menstrualcycleR)`](https://menstrualcycler.clearlabresearch.com)
 
 ## Quick start
 
-[`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+[`pacts_scaling()`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)
 is the main function: give it a long-format diary (one row per
 person-day) with menses and ovulation markers, and it returns the same
 data with continuous, phase-aligned cycle-time columns added.
@@ -40,28 +40,28 @@ head(scaled[, c("id", "daterated", "cyclic_time", "cyclic_time_impute")])
 
 For the full workflow, including GAMM modeling of the resulting
 cycle-time variables, see the vignette
-([`vignette("menstrualcycleR-overview")`](https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.md)
+([`vignette("menstrualcycleR-overview")`](https://menstrualcycler.clearlabresearch.com/articles/menstrualcycleR-overview.md)
 once installed with `build_vignettes = TRUE` above, or the hosted copy
 linked below) or
-[`?menstrualcycleR`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/menstrualcycleR-package.md)
+[`?menstrualcycleR`](https://menstrualcycler.clearlabresearch.com/reference/menstrualcycleR-package.md)
 for an overview of every exported function.
 
 To utilize the shinyapp, visit:
 <https://menstrualcycledata.shinyapps.io/shiny/>
 
 For a tutorial on using `menstrualcycleR` visit:
-<https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.html>
+<https://menstrualcycler.clearlabresearch.com/articles/menstrualcycleR-overview.html>
 
 For a visual explainer of how PACTS works — why cycle-day counting
 misaligns hormones and how PACTS realigns them — visit:
-<https://eisenlohrmoullab.github.io/menstrualcycleR/pacts-explainer.html>
+<https://menstrualcycler.clearlabresearch.com/pacts-explainer.html>
 
 To browse an auto-generated, annotated bibliography of papers that cite,
 apply, or extend `menstrualcycleR` and PACTS, visit:
 <https://menstrualcycler.base44.app>
 
 For a history of changes by version, see the changelog:
-<https://eisenlohrmoullab.github.io/menstrualcycleR/news/index.html>
+<https://menstrualcycler.clearlabresearch.com/news/index.html>
 
 ## How to cite
 
@@ -84,19 +84,19 @@ in plain-text and BibTeX form.
 
 ## All functions
 
-- [`cycle_plot()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot.md)
+- [`cycle_plot()`](https://menstrualcycler.clearlabresearch.com/reference/cycle_plot.md)
   : Plot Symptom Data Across the Menstrual Cycle
-- [`cycle_plot_individual()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycle_plot_individual.md)
+- [`cycle_plot_individual()`](https://menstrualcycler.clearlabresearch.com/reference/cycle_plot_individual.md)
   : Generate Cycle-Specific Plots and Summary Data for a Given ID
-- [`cycledata`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycledata.md)
+- [`cycledata`](https://menstrualcycler.clearlabresearch.com/reference/cycledata.md)
   : Example longitudinal daily dataset with cycle measures
-- [`cycledata_check()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/cycledata_check.md)
+- [`cycledata_check()`](https://menstrualcycler.clearlabresearch.com/reference/cycledata_check.md)
   : Analyze Non-Missing Symptom Data by Cycle Phase
-- [`launch_app()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/launch_app.md)
+- [`launch_app()`](https://menstrualcycler.clearlabresearch.com/reference/launch_app.md)
   : Launch the Menstrual Cycle Shiny App
-- [`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+- [`pacts_scaling()`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)
   : Phase-Aligned Cycle Time Scaling (PACTS)
-- [`summary_ovulation()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/summary_ovulation.md)
+- [`summary_ovulation()`](https://menstrualcycler.clearlabresearch.com/reference/summary_ovulation.md)
   : Summarize Ovulation Confirmation and Imputation
 
 # Articles
@@ -105,4 +105,4 @@ in plain-text and BibTeX form.
 
 - [Getting Started with menstrualcycleR and Phase-Aligned Cycle Time
   Scaling
-  (PACTS)](https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.md):
+  (PACTS)](https://menstrualcycler.clearlabresearch.com/articles/menstrualcycleR-overview.md):

@@ -3,7 +3,7 @@
 ## New: optional next-menses imputation
 
 This release adds a single, opt-in capability to
-[`pacts_scaling()`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+[`pacts_scaling()`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)
 and changes nothing else.
 
 ### What it does
@@ -67,5 +67,5 @@ remotes::install_github("eisenlohrmoullab/menstrualcycleR")
 ```
 
 See `NEWS.md` for the full changelog and
-[`?pacts_scaling`](https://eisenlohrmoullab.github.io/menstrualcycleR/reference/pacts_scaling.md)
+[`?pacts_scaling`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)
 for the argument documentation.
