@@ -1,4 +1,4 @@
-# menstrualcycleR (development version)
+# menstrualcycleR 0.1.9
 
 Adds `mcyclength_complete`, returned alongside `mcyclength` from `pacts_scaling()`.
 Situation: on `cycle_incomplete == 1` rows, `mcyclength` is days-observed-so-far in a
@@ -28,6 +28,17 @@ gate a **confirmed**-ovulation cycle, which scales on its phase lengths regardle
 published PACTS paper's summary of this rule (Nagpal et al., 2025, *Psychoneuroendocrinology*
 181:107584, Section 2.1.1) predates the 0.1.8 correction and does not distinguish the
 two cases.
+
+Also corrects several pre-existing documentation errors found while reviewing the above,
+none related to `mcyclength_complete`: the vignette's "Interpreting the GAMM Summary
+Output" section had a pasted model-fit snapshot (n=575, R-sq.(adj)=0.533) that had
+drifted since the 0.1.7 phase-cap fallback and no longer matched a live run of the
+vignette's own code (n=611, R-sq.(adj)=0.528) -- every number in that section is now
+current. A "574" in the data-availability section contradicted "575" from the live chunk
+directly above it. Three citations (`?pacts_scaling`, `?summary_ovulation`, the vignette's
+reference list) pointed at the retired OSF preprint instead of the published paper.
+`process_luteal_phase_base()` was missing two `@param` entries. A couple of smaller
+copy-paste/staleness fixes round it out -- see the git history for the full list.
 
 # menstrualcycleR 0.1.8
 
