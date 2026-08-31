@@ -140,13 +140,18 @@ Imputed ovulation days are recorded in a binary column, `ovtoday_impute`, create
 
 **These bounds do not decide which cycles get scaled.** When a cycle has a *confirmed* ovulation (`ovtoday == 1`), its cycle length is never consulted: the cycle is scaled if its **phase** lengths fit, i.e. luteal (ovulation to next menses) within `luteal_phase_min_days`-`luteal_phase_max_days` (7-18) and follicular (menses to ovulation) within `follicular_phase_min_days`-`follicular_phase_max_days` (8-25). A confirmed 45-day cycle whose phases both fit will be scaled at the default bounds. Scaling on cycle length alone would discard a valid phase bookended by real anchors; the practical consequence is that the cycle-length bounds are **not** an inclusion criterion.
 
-**If you want cycles outside a length range excluded, filter after scaling.** `mcyclength` and `cycle_incomplete` are both returned:
+**If you want cycles outside a length range excluded, filter after scaling.** Use `mcyclength_complete`,
+not `mcyclength`:
 
 ```r
-scaled |> dplyr::filter(cycle_incomplete == 0, mcyclength >= 21, mcyclength <= 35)
+scaled |> dplyr::filter(mcyclength_complete >= 21, mcyclength_complete <= 35)
 ```
 
-Note that on `cycle_incomplete == 1` rows `mcyclength` is days-observed-so-far, not a cycle length.
+`mcyclength_complete` is `NA` on any `cycle_incomplete == 1` row, so an incomplete cycle can never pass
+a numeric comparison and gets excluded automatically. `mcyclength` itself is still returned for
+reference, but on `cycle_incomplete == 1` rows it holds days-observed-so-far in a still-open trailing
+cycle, not a true cycle length -- filtering on it directly (without also filtering `cycle_incomplete
+== 0`) silently admits those rows whenever the observed-so-far count happens to fall in range.
 
 Additionally, for a **confirmed** ovulation, `menstrualcycleR` will only scale the **luteal phase** (ovulation to next menses) if its length is **between 7 and 18 days** (`luteal_phase_min_days` / `luteal_phase_max_days`), and only scale the **follicular phase** (menses to ovulation) if its length is **between 8 and 25 days** (`follicular_phase_min_days` / `follicular_phase_max_days`). Both judgements are based on norms from over 600,000 ovulatory cycles reported in Bull et al., (2019).
 
@@ -429,14 +434,17 @@ names(cycle_df_scaled)
 - `menses_impute`:
   Present only when `impute_next_menses = TRUE`. A binary indicator identifying **imputed menses onsets** (value = 1) placed forward from a confirmed ovulation (ovulation + 14 days by default).
 
-- `mcyclength`: 
-  Indicates the length of a menses-to-menses cycle an observation belongs to. 
-  
-- `luteal_length`: 
-  Indicates the length of the luteal phase an observation belongs to, when ovulation was not imputed. This is computed only for cycles that meet the criteria to be scaled. 
-  
+- `mcyclength`:
+  Indicates the length of a menses-to-menses cycle an observation belongs to. **On `cycle_incomplete == 1` rows this is not a cycle length** -- it is the number of days observed so far in a still-open trailing cycle. Use `mcyclength_complete` instead if you want to threshold cycle length directly (see Section 3, "Cycle Length Inclusion Criteria", above).
+
+- `mcyclength_complete`:
+  Same as `mcyclength`, but `NA` whenever `cycle_incomplete == 1`. Prefer this column for any length restriction -- an incomplete cycle's `NA` here can never satisfy a numeric comparison, so it drops out automatically without a separate `cycle_incomplete == 0` filter.
+
+- `luteal_length`:
+  Indicates the length of the luteal phase an observation belongs to, when ovulation was not imputed. This is computed only for cycles that meet the criteria to be scaled.
+
 - `cycle_incomplete`
-  A binary indicator identifying if the observation is part of an incomplete menses-to-menses cycle 
+  A binary indicator identifying if the observation is part of an incomplete menses-to-menses cycle. On these rows `mcyclength` is days-observed-so-far, not a cycle length -- `mcyclength_complete` is `NA` instead.
   
 - `cyclic_time`
  A continuous cycle time variable centered on **menses onset** (`menses == 1 → 0`), ranging from –1 to +1. Unlike `scaled_cycleday`, -1 and + 1 are parameterized to have the same hormonal meaning of **ovulation**.  Includes **only biomarker-confirmed** ovulation cycles.

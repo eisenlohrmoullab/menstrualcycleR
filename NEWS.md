@@ -1,3 +1,28 @@
+# menstrualcycleR (development version)
+
+Adds `mcyclength_complete`, returned alongside `mcyclength` from `pacts_scaling()`.
+Situation: on `cycle_incomplete == 1` rows, `mcyclength` is days-observed-so-far in a
+still-open trailing cycle, not a cycle length. Filtering on `mcyclength` alone, without
+a separate `cycle_incomplete == 0` clause, silently admits those rows whenever the
+observed-so-far count happens to land in range. Before: getting this right required
+remembering that second clause every time (documented since 0.1.8, but easy to miss --
+a downstream analysis filtered on `mcyclength` alone and admitted 263 person-days from
+a still-open cycle before the omission was caught). Now: `mcyclength_complete` is `NA`
+whenever `cycle_incomplete == 1`, so `filter(mcyclength_complete >= 21, mcyclength_complete
+<= 35)` excludes those rows automatically, with no second clause needed.
+`mcyclength` itself is unchanged.
+
+One clarification while documenting this, since it is easy to over-read the 0.1.8
+correction as "the length bound never matters": `lower_cyclength_bound`/
+`upper_cyclength_bound` fully gate cycle-time computation for a cycle with **no**
+confirmed ovulation -- a closed cycle outside the bound gets zero `cyclic_time_impute`
+coverage, not partial, until the bound is widened to include it. The bound does not
+gate a **confirmed**-ovulation cycle, which scales on its phase lengths regardless of
+`mcyclength` (see the vignette's "Cycle Length Inclusion Criteria" section). The
+published PACTS paper's summary of this rule (Nagpal et al., 2025, *Psychoneuroendocrinology*
+181:107584, Section 2.1.1) predates the 0.1.8 correction and does not distinguish the
+two cases.
+
 # menstrualcycleR 0.1.8
 
 Corrects some errors in the vignette and fixes a few small bugs. No scaled

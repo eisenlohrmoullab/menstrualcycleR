@@ -46,9 +46,17 @@
 #'   \item \code{cyclic_time_impute_extended_phase}: Binary column (`0`/`1`) marking rows where \code{cyclic_time_impute} was filled by the phase-cap fallback described below (value `1`), versus the normal confirmed or imputed-ovulation paths (`0`). Report this rate alongside the imputed-ovulation rate for full transparency about coverage.
 #'   \item \code{cyclic_time_imp_ov_extended_phase}: The same flag as \code{cyclic_time_impute_extended_phase}, for the ovulation-centered \code{cyclic_time_imp_ov} column.
 #'   \item \code{mcyclength}: The length, in days, of the menses-to-menses cycle this row belongs to.
+#'   \strong{On \code{cycle_incomplete == 1} rows this is not a cycle length} -- it is the number of
+#'   days observed so far in a still-open trailing cycle (see \code{cycle_incomplete} below). Use
+#'   \code{mcyclength_complete} instead if you want to threshold cycle length directly.
+#'   \item \code{mcyclength_complete}: Same as \code{mcyclength}, but \code{NA} whenever
+#'   \code{cycle_incomplete == 1}. \strong{Prefer this column for any length restriction} -- e.g.
+#'   \code{mcyclength_complete >= 21 \& mcyclength_complete <= 35} -- since an incomplete cycle's
+#'   \code{NA} here can never satisfy a numeric comparison, so it is excluded automatically without
+#'   a separate \code{cycle_incomplete == 0} clause.
 #'   \item \code{m2mcount}: A forward day count starting from each menses onset (day of onset = 0).
 #'   \item \code{cyclenum}: Which complete menses-to-menses cycle, in sequence, this row belongs to, per \code{id}.
-#'   \item \code{cycle_incomplete}: Binary (`0`/`1`); `1` marks a still-open trailing cycle with no closing menses yet observed (unless \code{impute_next_menses = TRUE} closes it -- see below).
+#'   \item \code{cycle_incomplete}: Binary (`0`/`1`); `1` marks a still-open trailing cycle with no closing menses yet observed (unless \code{impute_next_menses = TRUE} closes it -- see below). On these rows \code{mcyclength} is days-observed-so-far, not a cycle length -- \code{mcyclength_complete} is \code{NA} instead.
 #'   \item \code{luteal_length}: The confirmed-ovulation luteal phase length in days, only populated when it falls within \code{[luteal_phase_min_days, luteal_phase_max_days]} (\code{NA} otherwise, including for imputed-ovulation or incomplete cycles).
 #'   \item \code{menses_impute}: Present only when `impute_next_menses = TRUE`. A binary column marking menses onsets that were *imputed forward* from a confirmed ovulation (value `1`) versus observed onsets (`0`). Report the imputed-versus-observed onset rate for transparency, just as you would for imputed ovulation.
 #'   \item \code{scaled_cycleday}, \code{scaled_cycleday_impute}, \code{scaled_cycleday_ov}, \code{scaled_cycleday_imp_ov}: Legacy variables -- see note above. Same conceptual meaning as their \code{cyclic_time*} counterparts (confirmed-only / imputed-inclusive, x menses-anchored / ovulation-anchored) but computed independently; do not mix the two families within one analysis.

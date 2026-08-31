@@ -16,7 +16,13 @@
 #' @param ovtoday A binary column (`0`/`1`) indicating the estimated day of ovulation, where `1` represents ovulation day.
 #'
 #' @return The input data frame with the additional following variables:
-#' - **`mcyclength`**: The length of a consecutive menses-to-menses cycle, measured in days.
+#' - **`mcyclength`**: The length of a consecutive menses-to-menses cycle, measured in days. On
+#'   `cycle_incomplete == 1` rows this is days-observed-so-far in a still-open trailing cycle, not
+#'   a true cycle length -- see `mcyclength_complete` for a version that is `NA` there instead.
+#' - **`mcyclength_complete`**: Same as `mcyclength`, but `NA` whenever `cycle_incomplete == 1`.
+#'   Safe to threshold directly (e.g. `mcyclength_complete >= 21 & mcyclength_complete <= 35`)
+#'   without an explicit `cycle_incomplete == 0` filter, since an incomplete cycle's `NA` here
+#'   can never satisfy a numeric comparison.
 #' - **`m2mcount`**: A forward count starting from each menses onset.
 #' - **`cyclenum`**: The number of complete menses-to-menses cycles for each individual (`id`).
 #' - **`cycle_incomplete`**: A binary variable (`0`/`1`), where `1` indicates that the row is not part of a complete cycle.
@@ -219,7 +225,7 @@ calculate_mcyclength <- function(data, id, date, menses, ovtoday) {
       cumsum(!is.na(m2mcount) & m2mcount == 1 & cycle_incomplete == 0)
     )) %>%
     dplyr::ungroup()
-  # #If mcyclength = -inf, turn to NA 
+  # #If mcyclength = -inf, turn to NA
   data <- data %>%
     dplyr::mutate(
       mcyclength = dplyr::case_when(
@@ -227,7 +233,18 @@ calculate_mcyclength <- function(data, id, date, menses, ovtoday) {
         TRUE ~ mcyclength
       )
     )
-  
-  
+
+  # mcyclength_complete: mcyclength, but NA on cycle_incomplete == 1 rows (and on rows where
+  # cycle_incomplete is itself NA, e.g. days before a person's first menses onset). mcyclength
+  # alone is days-observed-so-far on an incomplete trailing cycle, not a true cycle length -- a
+  # caller filtering directly on mcyclength_complete (e.g. `mcyclength_complete >= 21 &
+  # mcyclength_complete <= 35`) gets that exclusion for free, without needing a separate
+  # `cycle_incomplete == 0` clause.
+  data <- data %>%
+    dplyr::mutate(
+      mcyclength_complete = ifelse(cycle_incomplete == 0, mcyclength, NA_real_)
+    )
+
+
   return(data)
 }
