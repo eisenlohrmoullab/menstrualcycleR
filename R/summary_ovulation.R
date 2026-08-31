@@ -85,8 +85,16 @@ summary_ovulation <- function(data){
       # is a descriptive flag, and it does NOT correspond to which cycles get
       # scaled (see ?pacts_scaling: cycle length gates ovulation IMPUTATION,
       # while a confirmed-ovulation cycle is gated by its phase lengths).
-      cycles_outside_norm = ifelse(all(.data$mcyclength < 21 |
-                                         .data$mcyclength > 35), 1, 0),
+      # Reads mcyclength_complete, not mcyclength: on an incomplete cycle
+      # mcyclength is days-observed-so-far, not a length, so comparing it to
+      # the norm here would silently mislabel an unknowable cycle as inside
+      # or outside [21,35]. mcyclength_complete is NA on those rows, so the
+      # flag comes out NA too -- correctly "not yet determinable" rather than
+      # a wrong 0/1. (Currently dead code -- this column is dropped before
+      # ovstatus_id is returned below -- but fixed so a future caller who
+      # re-enables it inherits correct values, not a silent landmine.)
+      cycles_outside_norm = ifelse(all(.data$mcyclength_complete < 21 |
+                                         .data$mcyclength_complete > 35), 1, 0),
       # Total confirmed ovulation: ovtoday == 1 and ovtoday_impute == 0
       confirmed_ovulation = ifelse(
         any(.data$ovtoday == 1) &
