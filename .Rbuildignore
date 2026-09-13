@@ -23,3 +23,6 @@
 ^_WORKFLOW_MAP\.svg$
 ^\.github$
 ^dev$
+^cran-comments\.md$
+^\.RData$
+^\.Rprofile$

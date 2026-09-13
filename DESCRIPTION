@@ -1,22 +1,22 @@
 Package: menstrualcycleR
 Title: Tools for Phase-Aligned Cycle Time Scaling (PACTS) and Menstrual Cycle Analysis
-Version: 0.1.9
+Version: 1.0.0
 Authors@R:
     c(person(given = "Anisha", family = "Nagpal", email ="anagpa7@uic.edu", role = "aut",
            comment = c(ORCID = "0000-0001-7111-9322")),
     person(given = "Tory", family = "Eisenlohr-Moul", email = "temo@uchicago.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-9231-3105")))
-Description: The menstrualcycleR package provides tools for Phase-Aligned Cycle Time Scaling (PACTS),
-    enabling precise and dynamic analysis of menstrual cycle data by standardizing events across
-    cycles onto a continuous timeline while accounting for variability in ovulation timing and
-    cycle lengths. 
+Description: Implements Phase-Aligned Cycle Time Scaling (PACTS) for menstrual cycle
+    data, placing observations from cycles of differing length onto a common continuous
+    timeline that accounts for variability in ovulation timing. Provides cycle time
+    variables anchored on either menses onset or ovulation, summaries of how ovulation
+    was determined in each cycle, and plotting functions for cycle-aligned outcomes.
+    Methods are described in Nagpal et al. (2025) <doi:10.1016/j.psyneuen.2025.107584>.
 URL: https://menstrualcycler.clearlabresearch.com, https://github.com/eisenlohrmoullab/menstrualcycleR
 BugReports: https://github.com/eisenlohrmoullab/menstrualcycleR/issues
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
-Remotes: lasy/cpass
 Imports:
     dplyr,
     ggplot2,
@@ -35,11 +35,11 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    tidyverse,
     marginaleffects,
     mgcv,
     shinyjs,
-    cpass
+    writexl
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 LazyData: true
+Config/roxygen2/version: 8.1.0

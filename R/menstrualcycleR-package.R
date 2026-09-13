@@ -13,12 +13,12 @@
 #' of the resulting cycle-time variables, see the "Getting Started" vignette:
 #' `vignette("menstrualcycleR-overview", package = "menstrualcycleR")`, or the
 #' hosted copy at
-#' \url{https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.html}
+#' \url{https://menstrualcycler.clearlabresearch.com/articles/menstrualcycleR-overview.html}
 #' -- installing via `remotes::install_github()` does not build vignettes
 #' locally unless you pass `build_vignettes = TRUE`.
 #'
 #' For a visual explainer of *why* PACTS realigns cycles the way it does, see
-#' \url{https://eisenlohrmoullab.github.io/menstrualcycleR/pacts-explainer.html}.
+#' \url{https://menstrualcycler.clearlabresearch.com/pacts-explainer.html}.
 #'
 #' @section Other exported functions:
 #' \itemize{

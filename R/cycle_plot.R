@@ -79,7 +79,7 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
             function(x) mean(x, na.rm = TRUE), 
             align = align_val,
             fill = NA, # Use NA instead of "extend" to avoid interpolation
-            partial = T
+            partial = TRUE
           )
         }
       ) %>%

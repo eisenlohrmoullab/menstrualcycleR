@@ -20,12 +20,12 @@ means and which to use). For a full worked example, including GAMM modeling
 of the resulting cycle-time variables, see the "Getting Started" vignette:
 \code{vignette("menstrualcycleR-overview", package = "menstrualcycleR")}, or the
 hosted copy at
-\url{https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.html}
+\url{https://menstrualcycler.clearlabresearch.com/articles/menstrualcycleR-overview.html}
 -- installing via \code{remotes::install_github()} does not build vignettes
 locally unless you pass \code{build_vignettes = TRUE}.
 
 For a visual explainer of \emph{why} PACTS realigns cycles the way it does, see
-\url{https://eisenlohrmoullab.github.io/menstrualcycleR/pacts-explainer.html}.
+\url{https://menstrualcycler.clearlabresearch.com/pacts-explainer.html}.
 }
 
 \section{Other exported functions}{
@@ -48,7 +48,7 @@ Phase-Aligned Cycle Time Scaling (PACTS) with the \code{menstrualcycleR} package
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://eisenlohrmoullab.github.io/menstrualcycleR/}
+  \item \url{https://menstrualcycler.clearlabresearch.com}
   \item \url{https://github.com/eisenlohrmoullab/menstrualcycleR}
   \item Report bugs at \url{https://github.com/eisenlohrmoullab/menstrualcycleR/issues}
 }
@@ -59,6 +59,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Tory Eisenlohr-Moul \email{temo@uchicago.edu} (\href{https://orcid.org/0000-0002-9231-3105}{ORCID})
   \item Anisha Nagpal \email{anagpa7@uic.edu} (\href{https://orcid.org/0000-0001-7111-9322}{ORCID})
 }
 

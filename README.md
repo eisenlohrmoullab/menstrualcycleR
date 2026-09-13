@@ -41,6 +41,13 @@ scaled <- pacts_scaling(
 head(scaled[, c("id", "daterated", "cyclic_time", "cyclic_time_impute")])
 ```
 
+One default worth knowing before you interpret results. The 21–35 day
+`lower_cyclength_bound` / `upper_cyclength_bound` gate **ovulation imputation**, not which
+cycles get scaled: a cycle with a confirmed ovulation is scaled whatever its length, gated by
+its phase lengths instead. This differs from how Nagpal et al. (2025) Section 2.1.1 describes
+it. `summary_ovulation()` reports how many of your cycles fall outside 21–35 days, and
+`?pacts_scaling` explains the behavior in full.
+
 For the full workflow, including GAMM modeling of the resulting cycle-time
 variables, see the vignette (`vignette("menstrualcycleR-overview")` once
 installed with `build_vignettes = TRUE` above, or the hosted copy linked
@@ -63,6 +70,26 @@ If you use `menstrualcycleR` in your research, please cite:
 > Nagpal, A., Schmalenberger, K. M., Barone, J. C., Mulligan, E., Stumper, A., Knol, L., Failenschmid, J., Kiesner, J., Peters, J. R., & Eisenlohr-Moul, T. A. (2025). Studying the menstrual cycle as a continuous variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the `menstrualcycleR` package. *Psychoneuroendocrinology*, 107584. https://doi.org/10.1016/j.psyneuen.2025.107584
 
 You can also run `citation("menstrualcycleR")` in R to get the citation in plain-text and BibTeX form.
+
+## Use of AI coding tools
+
+`menstrualcycleR` was created by Anisha Nagpal and Tory Eisenlohr-Moul, and the PACTS
+method is theirs and their co-authors'. **No AI coding tool was used in the package's
+initial development**, which began in January 2025 and produced the scaling engine, the
+exported functions, and the original documentation.
+
+**Anisha Nagpal's contributions predate all AI tool use, and she had no part in it.** Her
+final commit is dated 18 March 2026. The first AI-assisted commit is dated 30 May 2026.
+
+The decision to use AI coding tools was made by **Dr. Tory Eisenlohr-Moul**, the package
+maintainer, and it applies only to work after that date: debugging, documentation, and
+release preparation. Two tools appear in the history, each marked in the commits it
+touched — GitHub Copilot's coding agent, which updated the citation files in May 2026, and
+Claude Code, used from June 2026 onward and carrying a `Co-Authored-By` trailer.
+
+Neither tool is an author, and neither is listed in `Authors@R`. Dr. Eisenlohr-Moul
+reviewed and approved every AI-assisted change and is responsible for the code and for
+every claim in the documentation.
 
 
 <img src="https://github.com/user-attachments/assets/0502430c-75d9-4fdb-9b59-f3bafd16bb9c" width="300">

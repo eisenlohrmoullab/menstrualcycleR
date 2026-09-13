@@ -1,3 +1,178 @@
+# menstrualcycleR 1.0.0
+
+First CRAN release. No scaled cycle-time values change and no exported function changes
+behavior -- the major version marks the move to CRAN, not a break with 0.1.9. Code
+written against 0.1.9 runs unchanged.
+
+## Packaging for CRAN
+
+`cpass` is no longer listed in `Suggests`, and the `Remotes: lasy/cpass` field is gone.
+CRAN does not accept a `Remotes` field, and does not accept a suggested package that is
+not in a mainstream repository. `launch_app()` is unchanged: it still checks for both
+`shinyjs` and `cpass` with `requireNamespace()` and reports whichever is missing, so the
+app's CPASS tab behaves exactly as before for anyone who installed `cpass` from GitHub.
+`requireNamespace()` does not require a package to be declared, so dropping the
+declaration costs nothing at run time. Only the documentation wording changed, to say
+that `shinyjs` comes from CRAN and `cpass` from GitHub.
+
+The `Description` field is rewritten. It no longer opens with the package name, which
+CRAN policy disallows, and it now cites the PACTS paper by DOI.
+
+Three documentation links pointed at the retired `eisenlohrmoullab.github.io` domain and
+now point at `menstrualcycler.clearlabresearch.com` directly rather than relying on the
+redirect. Documentation is regenerated with roxygen2 8.1.0, which replaces the
+`RoxygenNote` field with `Config/roxygen2/version`.
+
+## New vignette: Preparing Your Data for PACTS
+
+`vignette("preparing-your-data")` covers getting data into the shape `pacts_scaling()`
+expects, and choosing among the four cycle-time variables it returns. It starts from the
+case the overview vignette assumes away: a period-tracker export listing period start
+dates, a separate table of daily measurements, and no ovulation biomarker anywhere. It
+gives the join that turns the first into a daily `menses` flag, notes on reshaping Oura,
+Apple Health and Fitbit exports, a pre-scaling check list, and the reporting that belongs
+in a methods section.
+
+Two points in it are not stated elsewhere in the documentation.
+
+* **Switching anchor changes no row's inclusion.** `cyclic_time` and `cyclic_time_ov`
+  scale the same rows as each other, and so do `cyclic_time_impute` and
+  `cyclic_time_imp_ov`. This held on `cycledata` and on a copy chopped to create a
+  left-censored opening tail and an open trailing cycle. Switching between confirmed-only
+  and imputation-inclusive does change coverage: 358 of 744 rows against 735 in
+  `cycledata`, and 0 against 744 in a copy with `ovtoday` zeroed throughout.
+
+* **Each variable places one anchor at zero and the other at the wrap.** On `cyclic_time`
+  menses onset is at zero and ovulation is at `-1`/`+1`; on `cyclic_time_ov` the reverse.
+  A feature at the wrap is split across the two ends of the plotted axis, so an arithmetic
+  mean of its position is meaningless and the summary has to be circular.
+
+The vignette states what the published paper does not: no confirmation rate has been
+established below which ovulation-anchored questions become unanswerable. In its place it
+gives the sensitivity analysis Nagpal et al. (2025) ran on their own 44 cycles -- fit on
+confirmed cycles only and on the full set, and report both.
+
+## `ovtoday = NULL` for studies with no ovulation biomarker
+
+`pacts_scaling()` previously required an `ovtoday` column even when none had been measured,
+and the documentation told such users to fabricate a column of zeros. Read as a hard
+requirement, that turned the most common wearable-study situation into a wall.
+
+`ovtoday` now defaults to `NULL`, meaning "no ovulation biomarker was collected". The column
+is created as all-`NA`, every cycle takes the imputed-ovulation path, and a message says so
+and points at `summary_ovulation()`. Results are identical to supplying the column by hand.
+
+Three states are kept deliberately distinct, and the distinction is the point:
+
+* **Omitted** is an error, with a message naming both ways forward. Someone who has ovulation
+  data and simply forgot the argument must not silently receive an all-imputed analysis.
+* **`NULL`** takes the imputed path described above.
+* **A column name that is not in `data`** still errors and lists the available columns, so a
+  typo cannot be mistaken for "no biomarker".
+
+Passing `NULL` when an `ovtoday` column exists warns, and honors the `NULL`.
+
+Previously, omitting the argument produced `argument "x" is missing, with no default`, which
+named an internal helper's parameter rather than `ovtoday`.
+
+Covered by `tests/testthat/test_ovtoday_null_path.R`, which exists mainly to hold the three
+states apart. The first implementation collapsed omitted into `NULL`, because giving the
+argument a default makes `rlang::quo_is_missing()` permanently `FALSE`; only `base::missing()`,
+read before `enquo()` rebinds the name, separates them.
+
+## Fixes found in a pre-submission review
+
+* **`launch_app()` did not check for `writexl`.** The Shiny app calls
+  `writexl::write_xlsx()` for its download buttons and loads the package at startup, but
+  `writexl` was declared nowhere and the dependency gate checked only `shinyjs` and `cpass`.
+  A user holding both gated packages got a clean pass from `launch_app()` and then hit an
+  error before the app rendered. `writexl` is now a suggested dependency and is checked
+  alongside the other two.
+
+* **`launch_app()` now documents its return value**, as CRAN requires of exported functions.
+
+* **The vignettes required R 4.1 while `DESCRIPTION` declared 3.5.** Nine uses of the native
+  `|>` pipe have been replaced with `%>%`. The package's own code was already free of 4.1-only
+  syntax, so only vignette building was affected, and only on R 4.0 or older.
+
+* **`tidyverse` is no longer a suggested dependency.** The overview vignette loaded the whole
+  suite but used only `dplyr` and `ggplot2`, both already in `Imports`. It now loads those two,
+  and mentions `tidyverse` as an alternative for readers who have it.
+
+* `cycle_plot()` used `partial = T` rather than `TRUE`.
+
+## Documentation corrections
+
+An audit of all package documentation against Nagpal et al. (2025) produced the following.
+
+* **Ovulation-biomarker precision.** `?summary_ovulation` and `?pacts_scaling` said biomarker
+  confirmation gives "more precise" or "greater precision" estimates. Section 2.1.2 of the paper
+  says a positive LH-surge test and a BBT nadir do *not* pinpoint the day of ovulation, which
+  would need ultrasound; they place it within 24 to 36 hours, and the window depends on the
+  method. Both files now say that instead.
+
+* **Statistical significance is not effect size.** The overview vignette read two significant
+  random-effects p-values as indicating "meaningful" variation and heterogeneity. They indicate
+  *detectable* variation at this sample size. Corrected in both places, since that section
+  exists to teach GAMM output interpretation.
+
+* **What a smoothing penalty does.** The vignette said the wiggliness penalty ensures the model
+  "captures important trends without overfitting noise." It now says the penalty trades bias for
+  variance and can oversmooth a real feature at small n.
+
+* **Quantified two vague claims** using the paper's own figures: the day -15 backward count
+  differs from hormone-confirmed ovulation by a mean absolute 0.97 days (SD 0.88) across
+  33 cycles, with error growing with cycle length (*r* = 0.395).
+
+* **"biomarker" is now "ovulation biomarker"** in the 18 places it stood alone as a noun,
+  matching the paper's own usage in Sections 1.3 and 2.1.1. Compound forms such as
+  "biomarker-confirmed ovulation" are unchanged, since the noun already names what is measured.
+  One section heading changed with its cross-reference.
+
+Verified unchanged: every pasted statistic in the overview vignette still matches a live knit
+(n = 611, R-sq.(adj) = 0.528, deviance explained 55.5%, and both p-values).
+
+## New section: Outstanding Questions
+
+The overview vignette gains a section naming four unresolved areas, so that defaults are not
+read as validated thresholds: statistical power for PACTS designs, cyclical clustering and
+subgroup identification, the reliability of timing features read off per-person smooths, and how
+much cycle coverage a person needs before their data support an estimate. `cycledata_check()`
+reports coverage and deliberately sets no threshold.
+
+## `summary_ovulation()` reports cycles outside 21-35 days
+
+`ovstatus_id` gains a column, `Total cycles with cycle length < 21 or > 35`. The per-cycle
+flag behind it has existed since 0.1.9 but the roll-up line was commented out, so the value
+was computed and discarded.
+
+Enabling it needed one fix. The flag is `NA` on a still-open trailing cycle, where
+`mcyclength_complete` is `NA` and the cycle's length is not yet knowable, and the roll-up used
+a bare `sum()`. Every participant in `cycledata` has such a cycle, so the column would have
+come back `NA` for all 25 of them. The roll-up now passes `na.rm = TRUE`.
+
+The column is descriptive, not an inclusion criterion. A confirmed-ovulation cycle outside
+21-35 days is still scaled, gated by its phase lengths. It is reported so that this divergence
+from Nagpal et al. (2025) Section 2.1.1 is visible in output rather than only in prose --
+see the `lower_cyclength_bound` documentation in `?pacts_scaling`, which now states the
+divergence explicitly, as do both vignettes and the README quick start at the point where
+`pacts_scaling()` is called.
+
+## Use of AI coding tools
+
+Claude Code was used for this release: the CRAN packaging changes above, the new vignette,
+and this entry. The decision to use it was made by Dr. Tory Eisenlohr-Moul, the package
+maintainer, who reviewed and approved every change.
+
+No AI coding tool was used in the package's initial development, which began in January
+2025. Anisha Nagpal's contributions predate all AI tool use -- her final commit is dated
+18 March 2026, and the first AI-assisted commit is dated 30 May 2026 -- and she had no
+part in it. Of 567 commits at the time of this release, 49 carry a Claude Code
+`Co-Authored-By` trailer (from June 2026) and 2 are from GitHub Copilot's coding agent
+(May 2026, updating `inst/CITATION` and the startup citation in `R/zzzz.R`).
+
+The README carries this statement permanently. No AI system is listed in `Authors@R`.
+
 # menstrualcycleR 0.1.9
 
 Adds `mcyclength_complete`, returned alongside `mcyclength` from `pacts_scaling()`.

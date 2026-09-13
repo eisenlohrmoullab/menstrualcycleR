@@ -1,18 +1,18 @@
 #' Summarize Ovulation Confirmation and Imputation
 #'
-#' This function provides a summary of how ovulation was identified across the dataset—either through direct confirmation using biomarkers or via imputation based on menstrual cycle timing.
+#' This function provides a summary of how ovulation was identified across the dataset—either through direct confirmation using an ovulation biomarker or via imputation based on menstrual cycle timing.
 #'
 #' Specifically, it counts the number of cycles in which ovulation was:
-#' - **Confirmed** using objective biomarkers (i.e., a `1` in the `ovtoday` column), such as urinary LH surge tests or basal body temperature (BBT).
+#' - **Confirmed** using an ovulation biomarker (i.e., a `1` in the `ovtoday` column), such as urinary LH surge tests or basal body temperature (BBT).
 #' - **Imputed** using the backward-count method, which estimates ovulation as 15 days before the subsequent menses onset (`ovtoday_impute == 1`), based on the typical length of the luteal phase.
 #'
 #' The output includes both:
 #' - Overall summary counts across the entire dataset.
 #' - Per-individual summaries to support participant-level quality checks and reporting.
 #'
-#' This summary is essential for understanding data quality and should be transparently reported in publications. It helps clarify how often ovulation timing was determined using biologically grounded methods versus estimated through assumptions. Whenever possible, biomarker-based confirmation (e.g., LH or BBT) is preferred, as it provides more precise and physiologically valid estimates of ovulation timing. This enhances the accuracy of cycle phase alignment and reduces potential sources of error in time-sensitive analyses.
+#' Report this summary in publications: it states how often ovulation timing was measured versus estimated. Ovulation-biomarker confirmation is preferred where available. Note that a positive LH-surge test or a basal body temperature (BBT) nadir does not pinpoint the day of ovulation, which would require ultrasound; it indicates that ovulation occurred within 24 to 36 hours (Nagpal et al., 2025, Section 2.1.2), and the width of that window depends on the detection method.
 #'
-#' When biomarkers are unavailable, imputation via the -15 day backward-count method offers a more biologically valid estimate than assuming ovulation occurs at the cycle midpoint. This method accounts for the relative stability of the luteal phase length and is recommended over midpoint-based estimates (see Nagpal et al., 2025).
+#' When ovulation biomarkers are unavailable, the -15 day backward count is recommended over a cycle-midpoint assumption, because the luteal phase varies less in length than the follicular phase. Against 33 hormone-confirmed cycles it was off by a mean absolute 0.97 days (SD 0.88; Nagpal et al., 2025, Section 3.2).
 #'
 #' For further guidance on ovulation identification and the rationale for the -15 day imputation method, see:
 #' - Nagpal et al. (2025). *Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the `menstrualcycleR` package*. *Psychoneuroendocrinology*, 107584. https://doi.org/10.1016/j.psyneuen.2025.107584
@@ -89,9 +89,10 @@ summary_ovulation <- function(data){
       # the norm here would silently mislabel an unknowable cycle as inside
       # or outside [21,35]. mcyclength_complete is NA on those rows, so the
       # flag comes out NA too -- correctly "not yet determinable" rather than
-      # a wrong 0/1. (Currently dead code -- this column is dropped before
-      # ovstatus_id is returned below -- but fixed so a future caller who
-      # re-enables it inherits correct values, not a silent landmine.)
+      # a wrong 0/1. Those NAs are dropped by the na.rm = TRUE in the roll-up
+      # below; without it a single incomplete trailing cycle would turn a
+      # participant's whole count into NA, which is what happened on the first
+      # attempt to enable this column (every id in `cycledata` has one).
       cycles_outside_norm = ifelse(all(.data$mcyclength_complete < 21 |
                                          .data$mcyclength_complete > 35), 1, 0),
       # Total confirmed ovulation: ovtoday == 1 and ovtoday_impute == 0
@@ -110,7 +111,12 @@ summary_ovulation <- function(data){
     ) %>%
     dplyr::group_by(id) %>%
     dplyr::summarise(
-      #`Total cycles with cycle length < 21 or > 35` = sum(cycles_outside_norm),
+      # Descriptive only. 21/35 is the package's reference norm, NOT the set of
+      # cycles that get scaled: a confirmed-ovulation cycle outside this range is
+      # still scaled, gated by its phase lengths instead (see ?pacts_scaling).
+      # Reported so that divergence is visible in output rather than only in prose.
+      `Total cycles with cycle length < 21 or > 35` =
+        sum(cycles_outside_norm, na.rm = TRUE),
       `Total cycles with confirmed ovulation` = sum(confirmed_ovulation),
       `Total cycles with imputed ovulation via 15day Backward Count` = sum(imputed_ovulation),
       .groups = "drop"

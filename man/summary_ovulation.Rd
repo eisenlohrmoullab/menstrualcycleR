@@ -26,12 +26,12 @@ A list with two data frames:
 }
 }
 \description{
-This function provides a summary of how ovulation was identified across the dataset—either through direct confirmation using biomarkers or via imputation based on menstrual cycle timing.
+This function provides a summary of how ovulation was identified across the dataset—either through direct confirmation using an ovulation biomarker or via imputation based on menstrual cycle timing.
 }
 \details{
 Specifically, it counts the number of cycles in which ovulation was:
 \itemize{
-\item \strong{Confirmed} using objective biomarkers (i.e., a \code{1} in the \code{ovtoday} column), such as urinary LH surge tests or basal body temperature (BBT).
+\item \strong{Confirmed} using an ovulation biomarker (i.e., a \code{1} in the \code{ovtoday} column), such as urinary LH surge tests or basal body temperature (BBT).
 \item \strong{Imputed} using the backward-count method, which estimates ovulation as 15 days before the subsequent menses onset (\code{ovtoday_impute == 1}), based on the typical length of the luteal phase.
 }
 
@@ -41,9 +41,9 @@ The output includes both:
 \item Per-individual summaries to support participant-level quality checks and reporting.
 }
 
-This summary is essential for understanding data quality and should be transparently reported in publications. It helps clarify how often ovulation timing was determined using biologically grounded methods versus estimated through assumptions. Whenever possible, biomarker-based confirmation (e.g., LH or BBT) is preferred, as it provides more precise and physiologically valid estimates of ovulation timing. This enhances the accuracy of cycle phase alignment and reduces potential sources of error in time-sensitive analyses.
+Report this summary in publications: it states how often ovulation timing was measured versus estimated. Ovulation-biomarker confirmation is preferred where available. Note that a positive LH-surge test or a basal body temperature (BBT) nadir does not pinpoint the day of ovulation, which would require ultrasound; it indicates that ovulation occurred within 24 to 36 hours (Nagpal et al., 2025, Section 2.1.2), and the width of that window depends on the detection method.
 
-When biomarkers are unavailable, imputation via the -15 day backward-count method offers a more biologically valid estimate than assuming ovulation occurs at the cycle midpoint. This method accounts for the relative stability of the luteal phase length and is recommended over midpoint-based estimates (see Nagpal et al., 2025).
+When ovulation biomarkers are unavailable, the -15 day backward count is recommended over a cycle-midpoint assumption, because the luteal phase varies less in length than the follicular phase. Against 33 hormone-confirmed cycles it was off by a mean absolute 0.97 days (SD 0.88; Nagpal et al., 2025, Section 3.2).
 
 For further guidance on ovulation identification and the rationale for the -15 day imputation method, see:
 \itemize{
