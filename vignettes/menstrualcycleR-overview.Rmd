@@ -130,7 +130,9 @@ The estimated day of ovulation (EDO) is required for analyses centered on the ov
   
 - **Imputed**, if no ovulation biomarker is available, based on the assumption of a 14–15 day luteal phase. In this case, ovulation is assigned as **15 days before the next menses onset** by `menstrualcycleR`
 
-Imputed ovulation days are recorded in a binary column, `ovtoday_impute`, created when using `menstrualcycleR` distinguishing them from confirmed values. Researchers are strongly encouraged to report the proportion of confirmed versus imputed ovulation days for transparency and scientific rigor.
+Imputed ovulation days are recorded in a binary column, `ovtoday_impute`, created when using `menstrualcycleR` distinguishing them from confirmed values. The per-id table also reports how many of each participant's cycles fall outside 21-35 days. That column is descriptive only: a cycle with a confirmed ovulation is still scaled whatever its length, gated by its phase lengths instead (see "Cycle Length Inclusion Criteria" above). Still-open trailing cycles, whose length is not yet knowable, are not counted.
+
+Researchers are strongly encouraged to report the proportion of confirmed versus imputed ovulation days for transparency and scientific rigor.
 
 ---
 

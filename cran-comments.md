@@ -13,7 +13,8 @@ DESCRIPTION Description field.
 
 0 errors | 0 warnings | 1 note
 
-Checked with `R CMD check --as-cran` on macOS (aarch64), R 4.5.1.
+Checked with `R CMD check --as-cran` on macOS 26.6 (aarch64), R 4.5.1, with pandoc
+3.11 installed. Also checked on R 4.6.1 (Ubuntu 24.04) via GitHub Actions.
 
 ### Note
 
@@ -29,12 +30,13 @@ This is expected for a first submission.
 ## Notes for the reviewer
 
 * **`launch_app()` and its optional dependencies.** The package ships a Shiny
-  app under `inst/shiny`. `launch_app()` requires `shinyjs` (a suggested
-  dependency, on CRAN) and `cpass` (not on CRAN; installed from GitHub). Neither
-  is needed by `pacts_scaling()` or any other exported function. `launch_app()`
-  checks for both with `requireNamespace()` and returns an informative error
-  naming any that are missing, rather than failing part-way through. `cpass` is
-  deliberately **not** declared in `Suggests`, and no `Remotes` field is present.
+  app under `inst/shiny`. `launch_app()` requires `shinyjs` and `writexl` (both
+  suggested dependencies, both on CRAN) and `cpass` (not on CRAN; installed from
+  GitHub). None is needed by `pacts_scaling()` or any other exported function.
+  `launch_app()` checks for all three with `requireNamespace()` and returns an
+  informative error naming any that are missing, rather than failing part-way
+  through. `cpass` is deliberately **not** declared in `Suggests`, and no
+  `Remotes` field is present.
 
 * **Examples and vignettes.** All examples and both vignettes run against
   `cycledata`, a small example dataset bundled with the package. Nothing

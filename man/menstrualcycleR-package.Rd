@@ -48,7 +48,7 @@ Phase-Aligned Cycle Time Scaling (PACTS) with the \code{menstrualcycleR} package
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://menstrualcycler.clearlabresearch.com}
+  \item \url{https://menstrualcycler.clearlabresearch.com/}
   \item \url{https://github.com/eisenlohrmoullab/menstrualcycleR}
   \item Report bugs at \url{https://github.com/eisenlohrmoullab/menstrualcycleR/issues}
 }

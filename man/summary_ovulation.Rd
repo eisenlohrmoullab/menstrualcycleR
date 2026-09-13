@@ -20,13 +20,17 @@ A list with two data frames:
 
 \item \code{ovstatus_id}: A participant-level summary showing, for each unique ID:
 \enumerate{
+\item The number of cycles whose length falls outside 21-35 days. Descriptive only:
+a confirmed-ovulation cycle outside that range is still scaled, gated by its phase
+lengths instead (see \code{lower_cyclength_bound} in \code{?pacts_scaling}).
+Still-open trailing cycles, whose length is not yet knowable, are not counted.
 \item The number of cycles with confirmed ovulation.
 \item The number of cycles with imputed ovulation.
 }
 }
 }
 \description{
-This function provides a summary of how ovulation was identified across the dataset—either through direct confirmation using an ovulation biomarker or via imputation based on menstrual cycle timing.
+This function provides a summary of how ovulation was identified across the dataset -- either through direct confirmation using an ovulation biomarker or via imputation based on menstrual cycle timing.
 }
 \details{
 Specifically, it counts the number of cycles in which ovulation was:

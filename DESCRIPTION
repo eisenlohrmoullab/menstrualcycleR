@@ -12,7 +12,7 @@ Description: Implements Phase-Aligned Cycle Time Scaling (PACTS) for menstrual c
     variables anchored on either menses onset or ovulation, summaries of how ovulation
     was determined in each cycle, and plotting functions for cycle-aligned outcomes.
     Methods are described in Nagpal et al. (2025) <doi:10.1016/j.psyneuen.2025.107584>.
-URL: https://menstrualcycler.clearlabresearch.com, https://github.com/eisenlohrmoullab/menstrualcycleR
+URL: https://menstrualcycler.clearlabresearch.com/, https://github.com/eisenlohrmoullab/menstrualcycleR
 BugReports: https://github.com/eisenlohrmoullab/menstrualcycleR/issues
 License: GPL (>= 3)
 Encoding: UTF-8
