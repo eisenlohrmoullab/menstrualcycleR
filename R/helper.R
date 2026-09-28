@@ -250,12 +250,18 @@ process_follicular_phase_base <- function(data, id, date, menses,
       } else if (!is.na(foldaycount)) {
         foldaycount <- foldaycount + 1
       }
+      # Close the follicular run the day after an ovulation -- but only when that ovulation
+      # belongs to THIS participant. Without the id check, a participant whose predecessor's
+      # rows end on an ovulation day had the run closed on their own first row, and their
+      # entire first follicular phase was never scaled (BUG FIX 1.1.0; found on the CLEAR Lab
+      # ADHD-Cycle data, 3 of 125 participants, 43 person-days).
       if (
         !is.na(foldaycount) &&
         i >= 3 &&
         !is.na(data$ovtoday[i]) &&
         i > 1 && !is.na(data$ovtoday[i - 1]) &&
-        data$ovtoday[i - 1] == 1
+        data$ovtoday[i - 1] == 1 &&
+        data[[id_col]][i - 1] == data[[id_col]][i]
       ) {
         # Stop counting one row after ovtoday == 1
         foldaycount <- NA
@@ -591,10 +597,18 @@ process_luteal_phase_impute <- function(data, id, date, menses) {
     dplyr::mutate(lutmax_impute = dplyr::case_when(!is.na(lutdaycount_impute) ~ 14, TRUE ~ NA))
   
   
+  # A leading luteal tail (opt-in impute_leading_ovulation at pacts_scaling()) sits BEFORE the
+  # participant's first menses onset, so it has no menses-to-menses cycle: cycle_incomplete and
+  # mcyclength are NA there by construction. Those rows are the only ones with a luteal day count
+  # and no cycle number, so admit them explicitly; nothing else changes.
+  leading_lut <- if ("ovtoday_leading_impute" %in% names(data)) {
+    is.na(data$cycle_incomplete) & !is.na(data$lutdaycount_impute)
+  } else rep(FALSE, nrow(data))
   data <- data %>%
     dplyr::mutate(lutperc_impute = 
                     dplyr::if_else(
-                      !is.na(lutmax_impute) & cycle_incomplete != 1 & mcyclength >= lower_cyclength_bound & mcyclength <= upper_cyclength_bound,
+                      (!is.na(lutmax_impute) & cycle_incomplete != 1 & mcyclength >= lower_cyclength_bound & mcyclength <= upper_cyclength_bound) %in% TRUE |
+                        leading_lut,
                       lutdaycount_impute / lutmax_impute,
                       NA
                     )

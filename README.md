@@ -78,8 +78,8 @@ method is theirs and their co-authors'. **No AI coding tool was used in the pack
 initial development**, which began in January 2025 and produced the scaling engine, the
 exported functions, and the original documentation.
 
-**Anisha Nagpal's contributions predate all AI tool use, and she had no part in it.** Her
-final commit is dated 18 March 2026. The first AI-assisted commit is dated 30 May 2026.
+**Anisha Nagpal's contributions predate all AI tool use.** Her final commit is dated
+18 March 2026. The first AI-assisted commit is dated 30 May 2026.
 
 The decision to use AI coding tools was made by **Dr. Tory Eisenlohr-Moul**, the package
 maintainer, and it applies only to work after that date: debugging, documentation, and

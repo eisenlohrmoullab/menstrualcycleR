@@ -106,6 +106,15 @@ calculate_cycletime <- function(data, id, date, menses, ovtoday, lower_cyclength
                                          follicular_phase_min_days = follicular_phase_min_days,
                                          follicular_phase_max_days = follicular_phase_max_days)
   data <- calculate_ovtoday_impute(data, id, date, menses)
+  # Leading-ovulation imputation (opt-in at pacts_scaling()): fold the pre-marked anchor into
+  # ovtoday_impute so the imputed luteal / follicular passes below treat it like any other
+  # imputed ovulation. calculate_ovtoday_impute() rebuilds ovtoday_impute from scratch, so the
+  # flag must be merged AFTER it, not before.
+  if ("ovtoday_leading_impute" %in% names(data)) {
+    data <- data %>% dplyr::mutate(
+      ovtoday_leading_impute = dplyr::if_else(is.na(ovtoday_leading_impute), 0L, as.integer(ovtoday_leading_impute)),  # calendar-filled rows
+      ovtoday_impute = dplyr::if_else(ovtoday_leading_impute == 1L, 1L, as.integer(ovtoday_impute)))
+  }
   data <- process_luteal_phase_impute(data, id, date, menses)
   data <- process_follicular_phase_impute(data, id, date, menses)
   data <- create_scaled_cycleday(data, id, date, menses)

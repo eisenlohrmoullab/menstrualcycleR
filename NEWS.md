@@ -1,3 +1,30 @@
+# menstrualcycleR 1.1.0 (development)
+
+## Bug fix: first follicular phase lost at a participant boundary
+
+The follicular-phase pass closed a participant's run on their FIRST row whenever the row before
+it -- the previous participant's last row -- was an ovulation day; the check looked at row i-1
+without confirming it belonged to the same participant. That participant's whole first
+follicular phase was then never scaled (in every column). Present in every prior release; on
+a 125-participant study dataset it affected 3 participants and 43 person-days. Fixed by
+requiring the previous row to belong to the same participant. Results for everyone else are
+unchanged (tested against the existing suite).
+
+## New opt-in rule: `impute_leading_ovulation`
+
+`pacts_scaling()` gains `impute_leading_ovulation = FALSE` (with `leading_ovulation_luteal_days = 15`).
+When `TRUE`, days a participant was observed BEFORE their first recorded menses onset -- the
+left-censored start of participation, which previously could never be scaled because the luteal
+phase they belong to had a closing menses but no ovulation -- get an ovulation imputed at the
+first onset minus 15 days, the same backward count the package uses inside observed cycles. The
+leading days then scale as the end of a luteal phase in `cyclic_time_impute` / `cyclic_time_imp_ov`
+only; the confirmed-only columns are untouched. The imputed anchor is marked in a new column
+`ovtoday_leading_impute`, and a blank row is added when the imputed day precedes the first
+observed row (as `impute_next_menses` does for an imputed onset). Nothing is imputed when a
+confirmed ovulation already lies before the first onset. The default `FALSE` keeps every
+existing result byte-for-byte identical (tested). Requested by the CLEAR Lab ADHD-Cycle
+analysis (2026-09-27), where roughly a third of participants began the diary in a luteal phase.
+
 # menstrualcycleR 1.0.0
 
 First CRAN release. No scaled cycle-time values change and no exported function changes
@@ -165,9 +192,9 @@ and this entry. The decision to use it was made by Dr. Tory Eisenlohr-Moul, the 
 maintainer, who reviewed and approved every change.
 
 No AI coding tool was used in the package's initial development, which began in January
-2025. Anisha Nagpal's contributions predate all AI tool use -- her final commit is dated
-18 March 2026, and the first AI-assisted commit is dated 30 May 2026 -- and she had no
-part in it. Of 567 commits at the time of this release, 49 carry a Claude Code
+2025. Anisha Nagpal's contributions predate all AI tool use: her final commit is dated
+18 March 2026, and the first AI-assisted commit is dated 30 May 2026. Of 567 commits at
+the time of this release, 49 carry a Claude Code
 `Co-Authored-By` trailer (from June 2026) and 2 are from GitHub Copilot's coding agent
 (May 2026, updating `inst/CITATION` and the startup citation in `R/zzzz.R`).
 

@@ -27,6 +27,8 @@
 #' @param impute_next_menses Logical; default `FALSE`. When `TRUE`, opt in to imputing a *next-menses onset* from a biomarker-confirmed ovulation that has no recorded closing menses, so that cycle becomes scalable instead of being dropped for a missing anchor. This is the mirror image of the built-in ovulation imputation (which imputes ovulation *backward* from an observed menses at menses minus 15): here a menses onset is imputed *forward* from a confirmed ovulation, at `ovulation + next_menses_luteal_days`. Leaving `FALSE` keeps all previous behavior byte-for-byte identical. Only the general rule is applied; any study-specific gating (for example, blocking imputation across treatment phases or documented off-study breaks, or trust-ordered de-duplication of anchors) is the caller's responsibility to apply on top.
 #' @param next_menses_luteal_days Numeric; days after a confirmed ovulation at which to place the imputed next-menses onset when `impute_next_menses = TRUE`. Default `14` (the population-average luteal length; ovulation + 14 is the last follicular day, i.e. the "LH+15" convention).
 #' @param next_menses_max_window Not currently used -- kept for argument-signature stability, has no effect on the result. See `?impute_next_menses_onsets`, the `max_window` entry, for why: through 0.1.6 this bounded the search for a closing menses, which was a real bug (a genuine luteal phase just past the window got a fabricated onset that overwrote actually-observed data). As of 0.1.7 a real closing menses at any distance always prevents imputation. Passing this argument explicitly (any value) triggers a warning, since it would otherwise be a silent no-op for a caller relying on the old behavior.
+#' @param impute_leading_ovulation Logical; default `FALSE`. When `TRUE`, opt in to imputing an ovulation for the days a participant was observed BEFORE their first recorded menses onset (the left-censored start of participation): ovulation is placed `leading_ovulation_luteal_days` days before that first onset, so those leading days scale as the end of a luteal phase in `cyclic_time_impute` / `cyclic_time_imp_ov` (never in the confirmed-only columns). Marked in the new column `ovtoday_leading_impute`; a blank row is added when the imputed day precedes the first observed row. Nothing is imputed when a confirmed ovulation already lies before the first onset. Leaving `FALSE` keeps all previous behavior identical. See `?impute_leading_ovulation_anchors`.
+#' @param leading_ovulation_luteal_days Numeric; days before the first menses onset at which the leading ovulation is placed when `impute_leading_ovulation = TRUE`. Default `15` (the package's backward-count convention).
 #' @param luteal_phase_min_days,luteal_phase_max_days Numeric bounds (days) on how long a **confirmed** ovulation's luteal phase (ovulation to next menses) may be for `cyclic_lut`/`cyclic_time`/`luteal_length` to scale it. Defaults `7` and `18`, from Bull et al. (2019) norms in 21-35 day cycles. Independent of `lower_cyclength_bound`/`upper_cyclength_bound`, which bound the *whole cycle*, not this one phase -- widen these directly if your study population has longer or shorter luteal phases than the default norms assume. See the "Internal phase-length caps" section below.
 #' @param follicular_phase_min_days,follicular_phase_max_days Numeric bounds (days) on how long a **confirmed** ovulation's follicular phase (menses to ovulation) may be for `cyclic_fol`/`cyclic_time` to scale it. Defaults `8` and `25`, from Bull et al. (2019) norms in 21-35 day cycles. Same independence from `lower_cyclength_bound`/`upper_cyclength_bound` as the luteal pair above. See the "Internal phase-length caps" section below.
 #'
@@ -90,6 +92,7 @@
 
 pacts_scaling <- function(data, id, date, menses, ovtoday = NULL, lower_cyclength_bound = 21, upper_cyclength_bound = 35,
                           impute_next_menses = FALSE, next_menses_luteal_days = 14, next_menses_max_window = 20,
+                          impute_leading_ovulation = FALSE, leading_ovulation_luteal_days = 15,
                           luteal_phase_min_days = 7, luteal_phase_max_days = 18,
                           follicular_phase_min_days = 8, follicular_phase_max_days = 25) {
   `%>%` <- magrittr::`%>%`
@@ -199,6 +202,14 @@ pacts_scaling <- function(data, id, date, menses, ovtoday = NULL, lower_cyclengt
                                       max_window  = next_menses_max_window)
   }
 
+  # OPT-IN leading-ovulation imputation (default FALSE keeps published behavior identical).
+  # Days observed before a participant's first menses onset get an imputed ovulation at
+  # first onset - leading_ovulation_luteal_days, so that leading stretch scales as the end of
+  # a luteal phase in the *_impute columns. See ?impute_leading_ovulation_anchors.
+  if (isTRUE(impute_leading_ovulation)) {
+    data <- impute_leading_ovulation_anchors(data, !!id, !!date, !!menses, !!ovtoday,
+                                             luteal_days = leading_ovulation_luteal_days)
+  }
   data = data %>%
    dplyr:: mutate(
       id = !!id,
