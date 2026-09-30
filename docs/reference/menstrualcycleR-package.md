@@ -18,15 +18,14 @@ example, including GAMM modeling of the resulting cycle-time variables,
 see the "Getting Started" vignette:
 [`vignette("menstrualcycleR-overview", package = "menstrualcycleR")`](https://menstrualcycler.clearlabresearch.com/articles/menstrualcycleR-overview.md),
 or the hosted copy at
-<https://eisenlohrmoullab.github.io/menstrualcycleR/articles/menstrualcycleR-overview.html>
+<https://menstrualcycler.clearlabresearch.com/articles/menstrualcycleR-overview.html>
 – installing via
 [`remotes::install_github()`](https://remotes.r-lib.org/reference/install_github.html)
 does not build vignettes locally unless you pass
 `build_vignettes = TRUE`.
 
 For a visual explainer of *why* PACTS realigns cycles the way it does,
-see
-<https://eisenlohrmoullab.github.io/menstrualcycleR/pacts-explainer.html>.
+see <https://menstrualcycler.clearlabresearch.com/pacts-explainer.html>.
 
 ## Other exported functions
 
@@ -61,7 +60,7 @@ Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling
 
 Useful links:
 
-- <https://eisenlohrmoullab.github.io/menstrualcycleR/>
+- <https://menstrualcycler.clearlabresearch.com/>
 
 - <https://github.com/eisenlohrmoullab/menstrualcycleR>
 
@@ -74,6 +73,9 @@ Useful links:
 ([ORCID](https://orcid.org/0000-0002-9231-3105))
 
 Authors:
+
+- Tory Eisenlohr-Moul <temo@uchicago.edu>
+  ([ORCID](https://orcid.org/0000-0002-9231-3105))
 
 - Anisha Nagpal <anagpa7@uic.edu>
   ([ORCID](https://orcid.org/0000-0001-7111-9322))

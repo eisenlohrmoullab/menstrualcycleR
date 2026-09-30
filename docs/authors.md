@@ -19,11 +19,11 @@ Cycle Time Scaling (PACTS) with the menstrualcycleR package.”
 *Psychoneuroendocrinology*, 107584.
 [doi:10.1016/j.psyneuen.2025.107584](https://doi.org/10.1016/j.psyneuen.2025.107584).
 
-    @Article{,
-      title = {Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the menstrualcycleR package},
-      author = {Anisha Nagpal and Katja M. Schmalenberger and Jordan C. Barone and Elizabeth Mulligan and Allison Stumper and Loran Knol and Jan Failenschmid and Jeff Kiesner and Jessica R. Peters and Tory A. Eisenlohr-Moul},
-      journal = {Psychoneuroendocrinology},
-      year = {2025},
-      pages = {107584},
-      doi = {10.1016/j.psyneuen.2025.107584},
-    }
+@Article{,\
+  title = {Studying the Menstrual Cycle as a Continuous Variable: Implementing Phase-Aligned Cycle Time Scaling (PACTS) with the menstrualcycleR package},\
+  author = {Anisha Nagpal and Katja M. Schmalenberger and Jordan C. Barone and Elizabeth Mulligan and Allison Stumper and Loran Knol and Jan Failenschmid and Jeff Kiesner and Jessica R. Peters and Tory A. Eisenlohr-Moul},\
+  journal = {Psychoneuroendocrinology},\
+  year = {2025},\
+  pages = {107584},\
+  doi = {10.1016/j.psyneuen.2025.107584},\
+}

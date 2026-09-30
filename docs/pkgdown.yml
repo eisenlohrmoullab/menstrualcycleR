@@ -1,9 +1,10 @@
-pandoc: '3.10'
-pkgdown: 2.2.0
+pandoc: '3.11'
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   menstrualcycleR-overview: menstrualcycleR-overview.html
-last_built: 2026-08-31T04:28Z
+  preparing-your-data: preparing-your-data.html
+last_built: 2026-09-30T04:23Z
 urls:
   reference: https://menstrualcycler.clearlabresearch.com/reference
   article: https://menstrualcycler.clearlabresearch.com/articles

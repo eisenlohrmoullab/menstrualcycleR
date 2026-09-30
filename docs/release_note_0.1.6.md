@@ -18,13 +18,11 @@ menses onset forward from the ovulation.
 
 Set `impute_next_menses = TRUE`:
 
-``` r
-
-pacts_scaling(
-  data, id, date, menses, ovtoday,
-  impute_next_menses = TRUE
-)
-```
+\
+[`pacts_scaling`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)`(`\
+`  ``data``, ``id``, ``date``, ``menses``, ``ovtoday``,`\
+`  impute_next_menses ``=`` ``TRUE`\
+`)`
 
 The imputed onset is placed at ovulation plus 14 days (the
 population-average luteal length, i.e. the last follicular day, the
@@ -60,11 +58,9 @@ top of this option.
 
 ### How to update
 
-``` r
-
-# from GitHub
-remotes::install_github("eisenlohrmoullab/menstrualcycleR")
-```
+\
+`# from GitHub`\
+`remotes``::`[`install_github`](https://remotes.r-lib.org/reference/install_github.html)`(``"eisenlohrmoullab/menstrualcycleR"``)`
 
 See `NEWS.md` for the full changelog and
 [`?pacts_scaling`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)

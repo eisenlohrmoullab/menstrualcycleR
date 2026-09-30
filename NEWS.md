@@ -1,4 +1,4 @@
-# menstrualcycleR 1.1.0 (development)
+# menstrualcycleR 1.1.0
 
 ## New practice dataset: `cycledata_special`
 

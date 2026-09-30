@@ -1,5 +1,372 @@
 # Changelog
 
+## menstrualcycleR 1.1.0
+
+### New practice dataset: `cycledata_special`
+
+A second practice dataset ships alongside `cycledata`, built for one
+job: showing what each of
+[`pacts_scaling()`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)’s
+settings actually does. It holds 15 people and 998 rows, and every
+person is one special case, named in words in a new `case` column.
+
+The dataset exists because `cycledata` cannot do this. All 25 of its
+people have every cycle inside 21-35 days, not one was observed before
+their first recorded menses onset, none has a confirmed ovulation with
+no closing onset, and none has a calendar gap – so the settings added in
+this version and in 0.1.7 change nothing at all when run on it. A
+dataset in which nothing unusual happens can neither demonstrate a
+setting working nor catch a claim about one that is wrong. That blind
+spot is what let the ovulation-imputation behaviour of the cycle-length
+bounds go undocumented for as long as it did.
+
+The fifteen: an ordinary three-cycle record, to compare against; 8 and
+then 30 rated days before a first recorded onset (the first fabricates 7
+rows, the second shows how far the setting reaches); a confirmed
+ovulation among the leading days, which scales with no setting at all
+and makes `impute_leading_ovulation` correctly decline; a confirmed
+ovulation at the end of the diary with no closing onset; an 18-day and a
+42-day cycle with ovulation unconfirmed, on the wrong side of
+`lower_cyclength_bound` and `upper_cyclength_bound`; a luteal phase past
+`luteal_phase_max_days` and a follicular phase past
+`follicular_phase_max_days`, both recovered by the phase-cap fallback
+and flagged; a luteal phase under `luteal_phase_min_days`, recovered by
+nothing, which is the asymmetry between the phase floors and the phase
+ceilings; an eleven-day hole in a diary, to show the filled rows coming
+back with no rating on them; a person with ovulation confirmed on no
+day; a person with no anchor of any kind, whose columns are empty for a
+reason; and a person with one confirmed ovulation and no onset ever
+recorded, whose single day scales pinned at `cyclic_time = 1` and whose
+whole luteal phase scales once `impute_next_menses` closes the cycle;
+and a person with leading days AND an unclosed trailing ovulation, who
+is the only one both opt-in rules act on at once.
+
+Every one of those claims is checked by an automatic test rather than
+only written down (`tests/testthat/test_cycledata_special.R`, 94
+checks), so a change to a default that stops a person demonstrating
+their setting fails a test instead of leaving a false sentence in the
+help page. The dataset is generated, not real and not derived from any
+real record, and the script that builds it – asserting each case’s
+arithmetic as it runs – ships in the package sources at
+`data-raw/cycledata_special.R`.
+
+Both vignettes now point at it. “Preparing Your Data” gains a section,
+“When your data is awkward”, that works through four of the cases with
+live output: how far apart a setting’s recovered ROWS and recovered DATA
+are (45 days gained, 31 of them carrying a rating, 12 rows fabricated),
+that `leading_ovulation_luteal_days` scales linearly with whatever it is
+passed, which person no combination of settings can reach and why, and
+what the `NA`s in the `case` column are for. The overview vignette
+introduces the dataset where it introduces `cycledata`.
+
+#### Two things building it established about existing behaviour
+
+Neither is a code change; both are corrections to what the documentation
+said.
+
+**`leading_ovulation_luteal_days` has no upper bound of any kind.** The
+15 is where the ovulation is placed by default, not a cap on how far
+back the rule reaches, and the documentation added with the setting in
+this version implied otherwise. Setting it to 25 scales 25 leading days;
+setting it to 40 scales 40 and fabricates rows before the diary begins.
+The cycle-length bounds cannot gate it (a left-censored tail has no
+cycle length to test, which is the reason the default declines to scale
+it at all) and the phase-length caps do not: a 25-day imputed luteal
+phase scales with `luteal_phase_max_days` left at 18. A value above the
+default is a methods decision to record, not a recovery dial. The help
+page for the new dataset now says so, and person 3 demonstrates it.
+
+**The two opt-in rules are applied in a fixed order, and it does not
+matter.** `impute_next_menses` runs first and `impute_leading_ovulation`
+second, so the leading rule can see an imputed onset. On a person who
+has both – person 15 of the new dataset – the days gained together are
+exactly the sum of the days each gains alone. And an imputed onset can
+never become a leading-day anchor, structurally: `impute_next_menses`
+only imputes an onset forward from a confirmed ovulation, so whenever
+that onset is a person’s first, a confirmed ovulation necessarily
+precedes it, which is the condition on which the leading rule declines.
+
+### Packaging fixes
+
+[`pacts_scaling()`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)’s
+help page had not been regenerated after this version’s new settings
+were added, so the help page and the function disagreed about which
+settings exist. `R CMD check --as-cran` reports that as a WARNING, and a
+warning is a rejection.
+
+`ovtoday_leading_impute` was missing from the list of column names the
+package declares it expects, which R flags when checking the code.
+
+Two files the testing tool writes when a check fails
+(`tests/testthat/testthat-problems.rds` and `tests/testthat/_problems/`)
+had been committed and would have shipped inside the package. Removed,
+and excluded from future builds.
+
+### Bug fix: first follicular phase lost at a participant boundary
+
+The follicular-phase pass closed a participant’s run on their FIRST row
+whenever the row before it – the previous participant’s last row – was
+an ovulation day; the check looked at row i-1 without confirming it
+belonged to the same participant. That participant’s whole first
+follicular phase was then never scaled (in every column). Present in
+every prior release; on a 125-participant study dataset it affected 3
+participants and 43 person-days. Fixed by requiring the previous row to
+belong to the same participant. Results for everyone else are unchanged
+(tested against the existing suite).
+
+### New opt-in rule: `impute_leading_ovulation`
+
+[`pacts_scaling()`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)
+gains `impute_leading_ovulation = FALSE` (with
+`leading_ovulation_luteal_days = 15`). When `TRUE`, days a participant
+was observed BEFORE their first recorded menses onset – the
+left-censored start of participation, which previously could never be
+scaled because the luteal phase they belong to had a closing menses but
+no ovulation – get an ovulation imputed at the first onset minus 15
+days, the same backward count the package uses inside observed cycles.
+The leading days then scale as the end of a luteal phase in
+`cyclic_time_impute` / `cyclic_time_imp_ov` only; the confirmed-only
+columns are untouched. The imputed anchor is marked in a new column
+`ovtoday_leading_impute`, and a blank row is added when the imputed day
+precedes the first observed row (as `impute_next_menses` does for an
+imputed onset). Nothing is imputed when a confirmed ovulation already
+lies before the first onset. The default `FALSE` keeps every existing
+result byte-for-byte identical (tested). Requested by the CLEAR Lab
+ADHD-Cycle analysis (2026-09-27), where roughly a third of participants
+began the diary in a luteal phase.
+
+## menstrualcycleR 1.0.0
+
+First CRAN release. No scaled cycle-time values change and no exported
+function changes behavior – the major version marks the move to CRAN,
+not a break with 0.1.9. Code written against 0.1.9 runs unchanged.
+
+### Packaging for CRAN
+
+`cpass` is no longer listed in `Suggests`, and the `Remotes: lasy/cpass`
+field is gone. CRAN does not accept a `Remotes` field, and does not
+accept a suggested package that is not in a mainstream repository.
+[`launch_app()`](https://menstrualcycler.clearlabresearch.com/reference/launch_app.md)
+is unchanged: it still checks for both `shinyjs` and `cpass` with
+[`requireNamespace()`](https://rdrr.io/r/base/ns-load.html) and reports
+whichever is missing, so the app’s CPASS tab behaves exactly as before
+for anyone who installed `cpass` from GitHub.
+[`requireNamespace()`](https://rdrr.io/r/base/ns-load.html) does not
+require a package to be declared, so dropping the declaration costs
+nothing at run time. Only the documentation wording changed, to say that
+`shinyjs` comes from CRAN and `cpass` from GitHub.
+
+The `Description` field is rewritten. It no longer opens with the
+package name, which CRAN policy disallows, and it now cites the PACTS
+paper by DOI.
+
+Three documentation links pointed at the retired
+`eisenlohrmoullab.github.io` domain and now point at
+`menstrualcycler.clearlabresearch.com` directly rather than relying on
+the redirect. Documentation is regenerated with roxygen2 8.1.0, which
+replaces the `RoxygenNote` field with `Config/roxygen2/version`.
+
+### New vignette: Preparing Your Data for PACTS
+
+[`vignette("preparing-your-data")`](https://menstrualcycler.clearlabresearch.com/articles/preparing-your-data.md)
+covers getting data into the shape
+[`pacts_scaling()`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)
+expects, and choosing among the four cycle-time variables it returns. It
+starts from the case the overview vignette assumes away: a
+period-tracker export listing period start dates, a separate table of
+daily measurements, and no ovulation biomarker anywhere. It gives the
+join that turns the first into a daily `menses` flag, notes on reshaping
+Oura, Apple Health and Fitbit exports, a pre-scaling check list, and the
+reporting that belongs in a methods section.
+
+Two points in it are not stated elsewhere in the documentation.
+
+- **Switching anchor changes no row’s inclusion.** `cyclic_time` and
+  `cyclic_time_ov` scale the same rows as each other, and so do
+  `cyclic_time_impute` and `cyclic_time_imp_ov`. This held on
+  `cycledata` and on a copy chopped to create a left-censored opening
+  tail and an open trailing cycle. Switching between confirmed-only and
+  imputation-inclusive does change coverage: 358 of 744 rows against 735
+  in `cycledata`, and 0 against 744 in a copy with `ovtoday` zeroed
+  throughout.
+
+- **Each variable places one anchor at zero and the other at the wrap.**
+  On `cyclic_time` menses onset is at zero and ovulation is at
+  `-1`/`+1`; on `cyclic_time_ov` the reverse. A feature at the wrap is
+  split across the two ends of the plotted axis, so an arithmetic mean
+  of its position is meaningless and the summary has to be circular.
+
+The vignette states what the published paper does not: no confirmation
+rate has been established below which ovulation-anchored questions
+become unanswerable. In its place it gives the sensitivity analysis
+Nagpal et al. (2025) ran on their own 44 cycles – fit on confirmed
+cycles only and on the full set, and report both.
+
+### `ovtoday = NULL` for studies with no ovulation biomarker
+
+[`pacts_scaling()`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)
+previously required an `ovtoday` column even when none had been
+measured, and the documentation told such users to fabricate a column of
+zeros. Read as a hard requirement, that turned the most common
+wearable-study situation into a wall.
+
+`ovtoday` now defaults to `NULL`, meaning “no ovulation biomarker was
+collected”. The column is created as all-`NA`, every cycle takes the
+imputed-ovulation path, and a message says so and points at
+[`summary_ovulation()`](https://menstrualcycler.clearlabresearch.com/reference/summary_ovulation.md).
+Results are identical to supplying the column by hand.
+
+Three states are kept deliberately distinct, and the distinction is the
+point:
+
+- **Omitted** is an error, with a message naming both ways forward.
+  Someone who has ovulation data and simply forgot the argument must not
+  silently receive an all-imputed analysis.
+- **`NULL`** takes the imputed path described above.
+- **A column name that is not in `data`** still errors and lists the
+  available columns, so a typo cannot be mistaken for “no biomarker”.
+
+Passing `NULL` when an `ovtoday` column exists warns, and honors the
+`NULL`.
+
+Previously, omitting the argument produced
+`argument "x" is missing, with no default`, which named an internal
+helper’s parameter rather than `ovtoday`.
+
+Covered by `tests/testthat/test_ovtoday_null_path.R`, which exists
+mainly to hold the three states apart. The first implementation
+collapsed omitted into `NULL`, because giving the argument a default
+makes
+[`rlang::quo_is_missing()`](https://rlang.r-lib.org/reference/quosure-tools.html)
+permanently `FALSE`; only
+[`base::missing()`](https://rdrr.io/r/base/missing.html), read before
+[`enquo()`](https://rlang.r-lib.org/reference/enquo.html) rebinds the
+name, separates them.
+
+### Fixes found in a pre-submission review
+
+- **[`launch_app()`](https://menstrualcycler.clearlabresearch.com/reference/launch_app.md)
+  did not check for `writexl`.** The Shiny app calls
+  [`writexl::write_xlsx()`](https://docs.ropensci.org/writexl//reference/write_xlsx.html)
+  for its download buttons and loads the package at startup, but
+  `writexl` was declared nowhere and the dependency gate checked only
+  `shinyjs` and `cpass`. A user holding both gated packages got a clean
+  pass from
+  [`launch_app()`](https://menstrualcycler.clearlabresearch.com/reference/launch_app.md)
+  and then hit an error before the app rendered. `writexl` is now a
+  suggested dependency and is checked alongside the other two.
+
+- **[`launch_app()`](https://menstrualcycler.clearlabresearch.com/reference/launch_app.md)
+  now documents its return value**, as CRAN requires of exported
+  functions.
+
+- **The vignettes required R 4.1 while `DESCRIPTION` declared 3.5.**
+  Nine uses of the native `|>` pipe have been replaced with `%>%`. The
+  package’s own code was already free of 4.1-only syntax, so only
+  vignette building was affected, and only on R 4.0 or older.
+
+- **`tidyverse` is no longer a suggested dependency.** The overview
+  vignette loaded the whole suite but used only `dplyr` and `ggplot2`,
+  both already in `Imports`. It now loads those two, and mentions
+  `tidyverse` as an alternative for readers who have it.
+
+- [`cycle_plot()`](https://menstrualcycler.clearlabresearch.com/reference/cycle_plot.md)
+  used `partial = T` rather than `TRUE`.
+
+### Documentation corrections
+
+An audit of all package documentation against Nagpal et al. (2025)
+produced the following.
+
+- **Ovulation-biomarker precision.**
+  [`?summary_ovulation`](https://menstrualcycler.clearlabresearch.com/reference/summary_ovulation.md)
+  and
+  [`?pacts_scaling`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)
+  said biomarker confirmation gives “more precise” or “greater
+  precision” estimates. Section 2.1.2 of the paper says a positive
+  LH-surge test and a BBT nadir do *not* pinpoint the day of ovulation,
+  which would need ultrasound; they place it within 24 to 36 hours, and
+  the window depends on the method. Both files now say that instead.
+
+- **Statistical significance is not effect size.** The overview vignette
+  read two significant random-effects p-values as indicating
+  “meaningful” variation and heterogeneity. They indicate *detectable*
+  variation at this sample size. Corrected in both places, since that
+  section exists to teach GAMM output interpretation.
+
+- **What a smoothing penalty does.** The vignette said the wiggliness
+  penalty ensures the model “captures important trends without
+  overfitting noise.” It now says the penalty trades bias for variance
+  and can oversmooth a real feature at small n.
+
+- **Quantified two vague claims** using the paper’s own figures: the day
+  -15 backward count differs from hormone-confirmed ovulation by a mean
+  absolute 0.97 days (SD 0.88) across 33 cycles, with error growing with
+  cycle length (*r* = 0.395).
+
+- **“biomarker” is now “ovulation biomarker”** in the 18 places it stood
+  alone as a noun, matching the paper’s own usage in Sections 1.3 and
+  2.1.1. Compound forms such as “biomarker-confirmed ovulation” are
+  unchanged, since the noun already names what is measured. One section
+  heading changed with its cross-reference.
+
+Verified unchanged: every pasted statistic in the overview vignette
+still matches a live knit (n = 611, R-sq.(adj) = 0.528, deviance
+explained 55.5%, and both p-values).
+
+### New section: Outstanding Questions
+
+The overview vignette gains a section naming four unresolved areas, so
+that defaults are not read as validated thresholds: statistical power
+for PACTS designs, cyclical clustering and subgroup identification, the
+reliability of timing features read off per-person smooths, and how much
+cycle coverage a person needs before their data support an estimate.
+[`cycledata_check()`](https://menstrualcycler.clearlabresearch.com/reference/cycledata_check.md)
+reports coverage and deliberately sets no threshold.
+
+### `summary_ovulation()` reports cycles outside 21-35 days
+
+`ovstatus_id` gains a column,
+`Total cycles with cycle length < 21 or > 35`. The per-cycle flag behind
+it has existed since 0.1.9 but the roll-up line was commented out, so
+the value was computed and discarded.
+
+Enabling it needed one fix. The flag is `NA` on a still-open trailing
+cycle, where `mcyclength_complete` is `NA` and the cycle’s length is not
+yet knowable, and the roll-up used a bare
+[`sum()`](https://rdrr.io/r/base/sum.html). Every participant in
+`cycledata` has such a cycle, so the column would have come back `NA`
+for all 25 of them. The roll-up now passes `na.rm = TRUE`.
+
+The column is descriptive, not an inclusion criterion. A
+confirmed-ovulation cycle outside 21-35 days is still scaled, gated by
+its phase lengths. It is reported so that this divergence from Nagpal et
+al. (2025) Section 2.1.1 is visible in output rather than only in prose
+– see the `lower_cyclength_bound` documentation in
+[`?pacts_scaling`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md),
+which now states the divergence explicitly, as do both vignettes and the
+README quick start at the point where
+[`pacts_scaling()`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)
+is called.
+
+### Use of AI coding tools
+
+Claude Code was used for this release: the CRAN packaging changes above,
+the new vignette, and this entry. The decision to use it was made by
+Dr. Tory Eisenlohr-Moul, the package maintainer, who reviewed and
+approved every change.
+
+No AI coding tool was used in the package’s initial development, which
+began in January 2025. Anisha Nagpal’s contributions predate all AI tool
+use: her final commit is dated 18 March 2026, and the first AI-assisted
+commit is dated 30 May 2026. Of 567 commits at the time of this release,
+49 carry a Claude Code `Co-Authored-By` trailer (from June 2026) and 2
+are from GitHub Copilot’s coding agent (May 2026, updating
+`inst/CITATION` and the startup citation in `R/zzzz.R`).
+
+The README carries this statement permanently. No AI system is listed in
+`Authors@R`.
+
 ## menstrualcycleR 0.1.9
 
 Adds `mcyclength_complete`, returned alongside `mcyclength` from
@@ -287,11 +654,11 @@ updates. Each fix states the situation it applies to.
   calls to dplyr verbs
   ([`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html),
   [`filter()`](https://dplyr.tidyverse.org/reference/filter.html),
-  [`case_when()`](https://dplyr.tidyverse.org/reference/case_when.html),
+  [`case_when()`](https://dplyr.tidyverse.org/reference/case-and-replace-when.html),
   [`first()`](https://dplyr.tidyverse.org/reference/nth.html)) and to
   [`rlang::sym()`](https://rlang.r-lib.org/reference/sym.html) were not
   namespace-qualified, so a bare
-  [`library(menstrualcycleR)`](https://menstrualcycler.clearlabresearch.com)
+  [`library(menstrualcycleR)`](https://menstrualcycler.clearlabresearch.com/)
   produced `Error: could not find function "ungroup"`. All such calls
   are now qualified (`dplyr::`/`rlang::`), and every exported function
   works with the package loaded on its own.

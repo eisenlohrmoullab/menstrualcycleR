@@ -10,6 +10,8 @@
   : Example longitudinal daily dataset with cycle measures
 - [`cycledata_check()`](https://menstrualcycler.clearlabresearch.com/reference/cycledata_check.md)
   : Analyze Non-Missing Symptom Data by Cycle Phase
+- [`cycledata_special`](https://menstrualcycler.clearlabresearch.com/reference/cycledata_special.md)
+  : Practice dataset of special cases: one person per setting
 - [`launch_app()`](https://menstrualcycler.clearlabresearch.com/reference/launch_app.md)
   : Launch the Menstrual Cycle Shiny App
 - [`pacts_scaling()`](https://menstrualcycler.clearlabresearch.com/reference/pacts_scaling.md)

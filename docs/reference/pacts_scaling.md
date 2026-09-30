@@ -14,12 +14,14 @@ pacts_scaling(
   id,
   date,
   menses,
-  ovtoday,
+  ovtoday = NULL,
   lower_cyclength_bound = 21,
   upper_cyclength_bound = 35,
   impute_next_menses = FALSE,
   next_menses_luteal_days = 14,
   next_menses_max_window = 20,
+  impute_leading_ovulation = FALSE,
+  leading_ovulation_luteal_days = 15,
   luteal_phase_min_days = 7,
   luteal_phase_max_days = 18,
   follicular_phase_min_days = 8,
@@ -54,9 +56,15 @@ pacts_scaling(
 - ovtoday:
 
   A binary column (`0`/`1`) indicating the day of estimated ovulation.
-  Required even if biomarkers were not collected—use a column of all
-  `0`s or `NA`s in that case. Accepted ovulation determination methods
-  include:
+  Pass the bare column name. If no ovulation biomarker was collected,
+  pass `ovtoday = NULL`: the column is created as all-`NA` for you,
+  every cycle takes the imputed-ovulation path, and a message says so.
+  Omitting the argument entirely is an error rather than a silent
+  fallback, so that forgetting it when you do have ovulation data cannot
+  quietly produce an all-imputed analysis. Passing a column name that is
+  not in `data` is also an error. Equivalently you may supply your own
+  column of all `0`s or `NA`s – use a column of all `0`s or `NA`s in
+  that case. Accepted ovulation determination methods include:
 
   - **Urinary LH surge tests**: Code `ovtoday == 1` on the day *after*
     the first positive test (LH +1). Specify the brand and threshold
@@ -69,13 +77,26 @@ pacts_scaling(
 
 - lower_cyclength_bound:
 
-  Numeric lower bound of cycle lengths to include in scaling. Default is
-  21.
+  Numeric lower bound of cycle lengths eligible for ovulation
+  IMPUTATION. Default is 21. Despite the historical argument name, this
+  does not bound which cycles are scaled: a cycle with a confirmed
+  ovulation is scaled whatever its length, gated by its phase lengths
+  instead (see "Internal phase-length caps" below). **This differs from
+  Nagpal et al. (2025) Section 2.1.1**, which states that cycle time "is
+  computed only for 21-35 day cycles"; that sentence describes the
+  imputation gate, and the package applies the carve-out named in the
+  section's next sentence ("If ovulation is confirmed, users may modify
+  this range") automatically rather than on request.
+  [`summary_ovulation()`](https://menstrualcycler.clearlabresearch.com/reference/summary_ovulation.md)
+  reports how many cycles fall outside 21-35 days. To exclude
+  out-of-range cycles from an analysis, filter on `mcyclength_complete`
+  after scaling.
 
 - upper_cyclength_bound:
 
-  Numeric upper bound of cycle lengths to include in scaling. Default is
-  35.
+  Numeric upper bound of cycle lengths eligible for ovulation
+  imputation. Default is 35. See `lower_cyclength_bound` for why this
+  does not decide which cycles are scaled.
 
 - impute_next_menses:
 
@@ -112,6 +133,27 @@ pacts_scaling(
   distance always prevents imputation. Passing this argument explicitly
   (any value) triggers a warning, since it would otherwise be a silent
   no-op for a caller relying on the old behavior.
+
+- impute_leading_ovulation:
+
+  Logical; default `FALSE`. When `TRUE`, opt in to imputing an ovulation
+  for the days a participant was observed BEFORE their first recorded
+  menses onset (the left-censored start of participation): ovulation is
+  placed `leading_ovulation_luteal_days` days before that first onset,
+  so those leading days scale as the end of a luteal phase in
+  `cyclic_time_impute` / `cyclic_time_imp_ov` (never in the
+  confirmed-only columns). Marked in the new column
+  `ovtoday_leading_impute`; a blank row is added when the imputed day
+  precedes the first observed row. Nothing is imputed when a confirmed
+  ovulation already lies before the first onset. Leaving `FALSE` keeps
+  all previous behavior identical. See
+  [`?impute_leading_ovulation_anchors`](https://menstrualcycler.clearlabresearch.com/reference/impute_leading_ovulation_anchors.md).
+
+- leading_ovulation_luteal_days:
+
+  Numeric; days before the first menses onset at which the leading
+  ovulation is placed when `impute_leading_ovulation = TRUE`. Default
+  `15` (the package's backward-count convention).
 
 - luteal_phase_min_days, luteal_phase_max_days:
 
@@ -195,7 +237,7 @@ treated as interchangeable with them.
 - `mcyclength_complete`: Same as `mcyclength`, but `NA` whenever
   `cycle_incomplete == 1`. **Prefer this column for any length
   restriction** – e.g.
-  `mcyclength_complete >= 21 & mcyclength_complete <= 35` – since an
+  `mcyclength_complete >= 21 \& mcyclength_complete <= 35` – since an
   incomplete cycle's `NA` here can never satisfy a numeric comparison,
   so it is excluded automatically without a separate
   `cycle_incomplete == 0` clause.
@@ -234,11 +276,13 @@ treated as interchangeable with them.
 
 The PACTS method aligns observations across cycles by centering time
 either on menses onset or ovulation. This allows researchers to model
-menstrual cycle dynamics as continuous functions of time, improving
-sensitivity and interpretability. The function requires identification
-of menses onset (`menses`) and the estimated day of ovulation
-(`ovtoday`), which may be determined via biomarker (preferred) or
-imputed based on typical luteal phase length when unavailable.
+menstrual cycle dynamics as continuous functions of time. Continuous
+cycle measurement increases statistical precision and power relative to
+categorical phase coding (Nagpal et al., 2025, Section 1.1). The
+function requires identification of menses onset (`menses`) and the
+estimated day of ovulation (`ovtoday`), which may be determined via an
+ovulation biomarker (preferred) or imputed based on typical luteal phase
+length when unavailable.
 
 When ovulation is not directly assessed, the function imputes ovulation
 as 15 days prior to the next menses onset (i.e., the last day of the
@@ -246,13 +290,15 @@ follicular phase), based on the population-average luteal phase length.
 Imputed ovulation days are recorded in a new binary column,
 `ovtoday_impute`.
 
-Reporting how often ovulation was confirmed using biomarkers versus
-imputed is important for transparency and scientific rigor. Whenever
-possible, researchers should use objective biomarkers such as LH tests
-or basal body temperature (BBT) to identify ovulation, as these methods
-provide greater precision. This function supports both confirmed and
-imputed ovulation, allowing analyses to flexibly account for variable
-data availability across participants and cycles.
+Reporting how often ovulation was confirmed using an ovulation biomarker
+versus imputed is important for transparency and scientific rigor.
+Whenever possible, researchers should use ovulation biomarkers such as
+LH tests or basal body temperature (BBT). Neither pinpoints the day of
+ovulation, which would require ultrasound; both indicate that ovulation
+occurred within 24 to 36 hours (Nagpal et al., 2025, Section 2.1.2).
+This function supports both confirmed and imputed ovulation, allowing
+analyses to flexibly account for variable data availability across
+participants and cycles.
 
 For further guidance on ovulation identification and justification of
 the -15 day imputation approach, see:
@@ -324,7 +370,7 @@ package's own "Getting Started" vignette now discloses both caps
 (Section 3, "Cycle Length Inclusion Criteria"). Both caps, and the
 fixed-vs-adjustable distinction (as it stood before this version), were
 stated at
-<https://eisenlohrmoullab.github.io/menstrualcycleR/pacts-explainer.html>
+<https://menstrualcycler.clearlabresearch.com/pacts-explainer.html>
 ("Inclusion defaults") – an automated documentation pass describing the
 code's actual behavior at the time, not a deliberate methods decision
 recorded anywhere else. See `NEWS.md` for the full history.
