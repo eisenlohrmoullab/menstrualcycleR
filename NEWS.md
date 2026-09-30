@@ -1,5 +1,72 @@
 # menstrualcycleR 1.1.0 (development)
 
+## New practice dataset: `cycledata_special`
+
+A second practice dataset ships alongside `cycledata`, built for one job: showing what
+each of `pacts_scaling()`'s settings actually does. It holds 15 people and 998 rows, and
+every person is one special case, named in words in a new `case` column.
+
+The dataset exists because `cycledata` cannot do this. All 25 of its people have every
+cycle inside 21-35 days, not one was observed before their first recorded menses onset,
+none has a confirmed ovulation with no closing onset, and none has a calendar gap -- so
+the settings added in this version and in 0.1.7 change nothing at all when run on it. A
+dataset in which nothing unusual happens can neither demonstrate a setting working nor
+catch a claim about one that is wrong. That blind spot is what let the ovulation-imputation
+behaviour of the cycle-length bounds go undocumented for as long as it did.
+
+The fifteen: an ordinary three-cycle record, to compare against; 8 and then 30 rated days
+before a first recorded onset (the first fabricates 7 rows, the second shows how far the
+setting reaches); a confirmed ovulation among the leading days, which scales with no setting
+at all and makes `impute_leading_ovulation` correctly decline; a confirmed ovulation at the end
+of the diary with no closing onset; an 18-day and a 42-day cycle with ovulation unconfirmed, on
+the wrong side of `lower_cyclength_bound` and `upper_cyclength_bound`; a luteal phase past
+`luteal_phase_max_days` and a follicular phase past `follicular_phase_max_days`, both
+recovered by the phase-cap fallback and flagged; a luteal phase under
+`luteal_phase_min_days`, recovered by nothing, which is the asymmetry between the phase
+floors and the phase ceilings; an eleven-day hole in a diary, to show the filled rows coming
+back with no rating on them; a person with ovulation confirmed on no day; a person with no
+anchor of any kind, whose columns are empty for a reason; and a person with one confirmed
+ovulation and no onset ever recorded, whose single day scales pinned at `cyclic_time = 1`
+and whose whole luteal phase scales once `impute_next_menses` closes the cycle; and a person
+with leading days AND an unclosed trailing ovulation, who is the only one both opt-in rules
+act on at once.
+
+Every one of those claims is checked by an automatic test rather than only written down
+(`tests/testthat/test_cycledata_special.R`, 94 checks), so a change to a default that stops
+a person demonstrating their setting fails a test instead of leaving a false sentence in the
+help page. The dataset is generated, not real and not derived from any real record, and the
+script that builds it -- asserting each case's arithmetic as it runs -- ships in the package
+sources at `data-raw/cycledata_special.R`.
+
+Both vignettes now point at it. "Preparing Your Data" gains a section, "When your data is
+awkward", that works through four of the cases with live output: how far apart a setting's
+recovered ROWS and recovered DATA are (45 days gained, 31 of them carrying a rating, 12 rows
+fabricated), that `leading_ovulation_luteal_days` scales linearly with whatever it is passed,
+which person no combination of settings can reach and why, and what the `NA`s in the `case`
+column are for. The overview vignette introduces the dataset where it introduces `cycledata`.
+
+### Two things building it established about existing behaviour
+
+Neither is a code change; both are corrections to what the documentation said.
+
+**`leading_ovulation_luteal_days` has no upper bound of any kind.** The 15 is where the
+ovulation is placed by default, not a cap on how far back the rule reaches, and the
+documentation added with the setting in this version implied otherwise. Setting it to 25
+scales 25 leading days; setting it to 40 scales 40 and fabricates rows before the diary
+begins. The cycle-length bounds cannot gate it (a left-censored tail has no cycle length to
+test, which is the reason the default declines to scale it at all) and the phase-length caps
+do not: a 25-day imputed luteal phase scales with `luteal_phase_max_days` left at 18. A value
+above the default is a methods decision to record, not a recovery dial. The help page for
+the new dataset now says so, and person 3 demonstrates it.
+
+**The two opt-in rules are applied in a fixed order, and it does not matter.**
+`impute_next_menses` runs first and `impute_leading_ovulation` second, so the leading rule can
+see an imputed onset. On a person who has both -- person 15 of the new dataset -- the days
+gained together are exactly the sum of the days each gains alone. And an imputed onset can
+never become a leading-day anchor, structurally: `impute_next_menses` only imputes an onset
+forward from a confirmed ovulation, so whenever that onset is a person's first, a confirmed
+ovulation necessarily precedes it, which is the condition on which the leading rule declines.
+
 ## Packaging fixes
 
 `pacts_scaling()`'s help page had not been regenerated after this version's new settings

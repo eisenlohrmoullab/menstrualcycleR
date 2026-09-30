@@ -313,6 +313,105 @@ In `cycledata` this flag is set on 5.4% of scaled rows. The fallback only adds c
 and has no argument that disables it, so filter after scaling if you do not want those
 rows.
 
+# When your data is awkward
+
+Everything above assumes a diary that behaves: a first period onset before the first
+rating, a closing onset after the last one, every cycle of a plausible length. Real
+diaries break all three, and `pacts_scaling()` has a setting for most of the ways they
+break. The package ships a second practice dataset for exactly this, in which every
+person is one awkward case, named in a `case` column.
+
+```{r special-cases}
+cases <- unique(cycledata_special[, c("id", "case")])
+writeLines(sprintf("%2d  %s", cases$id, cases$case))
+```
+
+Run your own settings against it before switching them on for your data. The point is
+not that these people are unusual -- in the CLEAR lab's merged research data, 57% of
+participants have rated days before their first recorded period -- but that in
+`cycledata` none of them occur, so nothing there shows a setting working or failing.
+
+## A setting recovers rows and data at different rates
+
+An imputed anchor can fall earlier than a participant's first rating, and the package
+then fills the calendar up to it. Those extra rows are output rows with no outcome on
+them, so "days recovered" and "data recovered" are two numbers, and the smaller one is
+the one to report.
+
+```{r special-leading}
+off <- pacts_scaling(cycledata_special, id = id, date = daterated,
+                     menses = menses, ovtoday = ovtoday)
+
+on <- pacts_scaling(cycledata_special, id = id, date = daterated,
+                    menses = menses, ovtoday = ovtoday,
+                    impute_leading_ovulation = TRUE)
+
+covered <- function(x) !is.na(x$cyclic_time_impute)
+
+c(days_gained     = sum(covered(on)) - sum(covered(off)),
+  with_a_rating   = sum(covered(on) & !is.na(on$symptom)) -
+                    sum(covered(off) & !is.na(off$symptom)),
+  rows_fabricated = nrow(on) - nrow(off))
+```
+
+The same holds for `impute_next_menses`, which closes a cycle forward from a confirmed
+ovulation that never got a closing period.
+
+## `leading_ovulation_luteal_days` is a placement, not a cap
+
+The 15 is where the ovulation is put by default. It is not a ceiling on how far back the
+rule reaches, and nothing else bounds it either: the cycle-length bounds cannot, because
+a tail with no opening onset has no cycle length to test, and the phase-length caps are
+not consulted on this path at all.
+
+```{r special-placement}
+sapply(c(5, 15, 25, 40), function(k) {
+  x <- pacts_scaling(cycledata_special, id = id, date = daterated,
+                     menses = menses, ovtoday = ovtoday,
+                     impute_leading_ovulation = TRUE,
+                     leading_ovulation_luteal_days = k)
+  sum(covered(x)) - sum(covered(off))
+})
+```
+
+Every extra day you ask for is scaled, in a straight line, with no gate anywhere. Treat a
+value above the default as a methods decision to write down, not a coverage dial to turn
+up.
+
+## Some people cannot be recovered, and it is worth knowing which
+
+Turn on both opt-in rules, widen the cycle-length bounds to the CLEAR lab's `[20, 43]`,
+and drop the luteal floor, and one person in fifteen still has no cycle time at all.
+
+```{r special-floor}
+most <- pacts_scaling(cycledata_special, id = id, date = daterated,
+                      menses = menses, ovtoday = ovtoday,
+                      impute_leading_ovulation = TRUE, impute_next_menses = TRUE,
+                      lower_cyclength_bound = 20, upper_cyclength_bound = 43,
+                      luteal_phase_min_days = 4)
+
+unique(most$case[!is.na(most$id) & is.na(most$cyclic_time_impute) &
+                   !most$id %in% most$id[covered(most)]])
+```
+
+That person has no menses onset and no confirmed ovulation, so there is nothing to anchor
+to and no setting can invent one. Empty cycle-time columns for a participant like this
+are the correct answer, not a bug -- and `?cycledata_special` lists which of the other
+fourteen are recoverable, by which setting, and at what cost.
+
+## The `case` column disappears on fabricated rows, deliberately
+
+`case` is a per-person label, so it reads `NA` on exactly the rows the package added --
+calendar-filled gaps and imputed anchors. That makes it the cheapest possible check of
+which rows in your own output nobody rated. Carry it across those rows when you want it
+for grouping.
+
+```{r special-fill, eval = FALSE}
+library(dplyr)
+library(tidyr)
+most |> group_by(id) |> fill(case, .direction = "downup") |> ungroup()
+```
+
 # What to report
 
 **How ovulation was determined.** `summary_ovulation()` splits cycles into

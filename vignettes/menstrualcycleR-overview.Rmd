@@ -348,6 +348,19 @@ dim(cycle_df)
 head(cycle_df)
 ```
 
+#### A second dataset, for awkward cases
+
+`cycledata` is an ordinary diary: every cycle falls inside 21-35 days, every participant's first recorded period comes before their first rating, and no cycle is left open at the end. That makes it a clean demonstration of PACTS, but it also means the package's *optional* settings -- imputing an ovulation before a first recorded period, or a next menses onset from a confirmed ovulation, or widening the phase-length bounds -- change nothing at all when run on it.
+
+A second demo dataset exists for those. It holds 15 participants, each one a different awkward case, named in words in a `case` column.
+
+```{r demo dataset special}
+cases = unique(cycledata_special[, c("id", "case")])
+writeLines(sprintf("%2d  %s", cases$id, cases$case))
+```
+
+Use it to see what an optional setting actually does before applying it to your own data. `?cycledata_special` documents each case, including which are recoverable and by which setting, and the "Preparing Your Data" vignette works through several of them. Like `cycledata`, it is simulated and represents no particular outcome or population.
+
 
 ### Applying PACTS
 

@@ -28,3 +28,4 @@
 ^\.Rprofile$
 ^tests/testthat/testthat-problems\.rds$
 ^tests/testthat/_problems$
+^data-raw$
