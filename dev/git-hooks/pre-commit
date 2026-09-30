@@ -1,12 +1,26 @@
 #!/bin/sh
 #
-# pre-commit guard: refuse to commit any staged file under docs/ that references "claude".
+# pre-commit guard: refuse to commit a staged docs/ file that IS, or POINTS AT, a rendered
+# CLAUDE*.md page.
 #
 # The pkgdown site auto-renders root CLAUDE*.md files (CLAUDE.md and the private, gitignored
-# CLAUDE.local.md) into docs/ -- as docs/CLAUDE*.html AND inside search.json / llms.txt /
+# CLAUDE.local.md) into docs/ -- as docs/CLAUDE*.html AND as entries in search.json /
 # sitemap.xml -- and docs/ is published to GitHub Pages. This catches that leak even when a
 # human rebuilds the site in RStudio / GitHub Desktop (which won't use dev/build_docs.R's
 # hide-wrapper). Belt-and-suspenders with dev/build_docs.R's own post-build leak check.
+#
+# WHAT COUNTS AS A LEAK (narrowed 2026-09-29, in step with check_docs_clean() in
+# dev/build_docs.R -- keep the two rules identical):
+#   1. NAME      -- a staged docs/ file whose own name contains "claude".
+#   2. REFERENCE -- a staged docs/ file whose content names a claude page: "claude.html",
+#                   "claude.md" or "claude.local".
+#
+# Deliberately NOT a leak: the bare word "claude" in a page's prose. The package's AI-tool
+# disclosures (the README's "Use of AI coding tools" section, two sentences in the 1.0.0
+# changelog, the preparing-your-data vignette footer, the explainer's author byline) all name
+# Claude Code on purpose and all render into docs/, so the old word-scan blocked every site
+# commit. See the long note in check_docs_clean() for why allowlisting those sentences was
+# rejected in favour of keying on the leak's structure.
 #
 # This hook is TRACKED at dev/git-hooks/pre-commit. Install it into .git/hooks (once per clone)
 # with dev/install-hooks.sh. Edit the tracked copy, then re-run the installer to sync.
@@ -14,31 +28,26 @@
 # Scope is docs/ ONLY, so the legitimate root CLAUDE.md / CLAUDE.local.md are never blocked.
 # To bypass intentionally: git commit --no-verify.
 
-# Offending staged files: path under docs/ whose NAME contains "claude", OR whose staged
-# (indexed) text content contains "claude" (case-insensitive; -I skips binary like PNGs).
 offenders=$(
   {
-    # path-based: staged docs/ files whose NAME contains claude
+    # 1. NAME: staged docs/ files whose own name contains claude
     git diff --cached --name-only --diff-filter=ACM -z -- docs/ \
       | while IFS= read -r -d '' f; do
           printf '%s' "$f" | grep -qi 'claude' && printf '%s\n' "$f"
         done
-    # content-based: staged docs/ files whose INDEXED content contains claude.
-    # Allowlist the intentional author byline in docs/pacts-explainer.html
-    # ("...PhD with Claude Code") by stripping that exact line before scanning; any
-    # OTHER "claude" (a real CLAUDE*.md leak) still trips.
+    # 2. REFERENCE: staged docs/ files whose INDEXED content names a claude PAGE.
+    #    -I skips binary (PNGs etc.); -i for case; the dots are escaped so they are literal.
     git diff --cached --name-only --diff-filter=ACM -z -- docs/ \
       | while IFS= read -r -d '' f; do
           git show ":$f" 2>/dev/null \
-            | grep -vF 'Created by Tory Eisenlohr-Moul, PhD with Claude Code' \
-            | grep -Iqi 'claude' && printf '%s\n' "$f"
+            | grep -IqiE 'claude\.(html|md)|claude\.local' && printf '%s\n' "$f"
         done
   } | sort -u
 )
 
 if [ -n "$offenders" ]; then
   echo "" >&2
-  echo "COMMIT BLOCKED: staged docs/ contains 'claude' -- likely a CLAUDE*.md pkgdown leak." >&2
+  echo "COMMIT BLOCKED: staged docs/ is, or points at, a rendered CLAUDE*.md page." >&2
   echo "" >&2
   echo "Offending staged file(s):" >&2
   printf '  %s\n' $offenders >&2
@@ -46,7 +55,9 @@ if [ -n "$offenders" ]; then
   echo "Fix: rebuild the site with CLAUDE*.md hidden, then re-stage docs/. From the repo root:" >&2
   echo "  Rscript --vanilla dev/build_docs.R" >&2
   echo "  (it hides CLAUDE*.md, rebuilds, and fails if any leak lands in docs/)" >&2
-  echo "Then verify clean:  grep -rIil claude docs/   # must print nothing" >&2
+  echo "Then verify clean:" >&2
+  echo "  find docs -iname '*claude*'                         # must print nothing" >&2
+  echo "  grep -rIilE 'claude\.(html|md)|claude\.local' docs/  # must print nothing" >&2
   echo "" >&2
   echo "To bypass intentionally (NOT recommended): git commit --no-verify" >&2
   echo "" >&2

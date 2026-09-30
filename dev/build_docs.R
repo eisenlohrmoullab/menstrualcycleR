@@ -12,8 +12,10 @@
 #   This script makes the machine catch that failure instead of a person:
 #     1. hides every root CLAUDE*.md for the duration of the build (restored even on error), then
 #     2. rebuilds the whole site, then
-#     3. scans docs/ for the string "claude" and STOPS WITH AN ERROR (non-zero exit) if any
-#        survives -- so a slipped leak can never be silently committed/published.
+#     3. scans docs/ for a LEAKED PAGE -- a file named claude*, or any file referencing one by
+#        filename -- and STOPS WITH AN ERROR (non-zero exit) if it finds one, so a slipped leak
+#        can never be silently committed/published. See check_docs_clean() for why the scan keys
+#        on the leak's structure rather than on the word "claude" (narrowed 2026-09-29).
 #
 # USAGE  (run from the package root -- the MAIN checkout, not a worktree; CLAUDE.local.md
 #         lives in the main checkout):
@@ -39,42 +41,65 @@ if (!nzchar(Sys.getenv("RSTUDIO_PANDOC")) && dir.exists(default_pandoc)) {
 }
 
 ## ---- the guard: scan a rendered site for a CLAUDE*.md leak ----------------------------------
-## Errors (so Rscript exits non-zero) if any file under `docs_dir` is NAMED with or CONTAINS
-## "claude" (case-insensitive). Binary files (PNGs etc.) are skipped via a NUL-byte test.
+## WHAT COUNTS AS A LEAK (narrowed 2026-09-29 -- see the note below):
+##   1. NAME -- any file under `docs_dir` whose own name contains "claude". This is the leak
+##      itself: the rendered page is the thing GitHub Pages would publish.
+##   2. REFERENCE -- any file whose text names a claude page ("claude.html", "claude.md",
+##      "claude.local"). That is how a leaked page reaches the indexes, and each leg is verified
+##      against real pkgdown output: sitemap.xml lists EVERY page by filename, search.json
+##      carries a "path" per page that has prose, and llms.txt link-lists use the same paths.
+## Binary files (PNGs etc.) are skipped via a NUL-byte test.
+##
+## DELIBERATELY NOT A LEAK: the bare word "claude" in a page's prose.
+## Until 2026-09-29 this scan tripped on that word anywhere, with one hard-coded allowlisted
+## sentence (the explainer's author byline). That rule stopped being usable once the package
+## added its AI-tool disclosures: the README's "Use of AI coding tools" section, two sentences in
+## the 1.0.0 changelog entry, and the preparing-your-data vignette footer all name Claude Code
+## ON PURPOSE, and all three render into docs/. The word-scan therefore blocked EVERY site
+## rebuild, on the package's own transparency statements. Allowlisting those sentences was the
+## obvious repair and was rejected: pkgdown also writes stop-word-stripped copies of them into
+## search.json ("vignette drafted Claude Code reviewed package authors"), so the allowlist would
+## have had to carry mangled twins that change whenever pkgdown changes its search index. The two
+## checks above key on the leak's STRUCTURE instead, so they neither false-positive on a
+## deliberate disclosure nor depend on how pkgdown handles prose. The trade-off, stated plainly:
+## internal text pasted by hand into an otherwise legitimate page is no longer caught here. That
+## was never this guard's job -- it exists for the pkgdown root-*.md render leak.
 check_docs_clean <- function(docs_dir = "docs") {
   if (!dir.exists(docs_dir)) {
     stop(sprintf("check_docs_clean(): '%s' not found -- run from the package root.", docs_dir))
   }
+  ## A reference to a RENDERED claude page. Matched case-insensitively and literally, so there is
+  ## no regex to mis-escape; "claude.local" covers CLAUDE.local.md/.html in either rendering.
+  page_refs <- c("claude.html", "claude.md", "claude.local")
   files <- list.files(docs_dir, recursive = TRUE, full.names = TRUE,
                       all.files = TRUE, no.. = TRUE)
   hits <- character(0)
   for (f in files) {
     if (dir.exists(f)) next
-    ## 1) name-based leak: docs/CLAUDE.html, docs/CLAUDE.local.html, ...
+    ## 1) the leaked page itself: docs/CLAUDE.html, docs/CLAUDE.local.html, ...
     if (grepl("claude", basename(f), ignore.case = TRUE)) {
       hits <- c(hits, f)
       next
     }
-    ## 2) content-based leak: search.json / llms.txt / sitemap.xml carry the rendered prose
+    ## 2) an index pointing at one: sitemap.xml / search.json / llms.txt
     sz <- file.info(f)$size
     if (is.na(sz) || sz == 0) next
     raw <- readBin(f, what = "raw", n = sz)
     if (any(raw == as.raw(0L))) next            # NUL byte => binary asset, skip
-    txt <- tryCatch(rawToChar(raw), error = function(e) "")
-    ## Allowlist: docs/pacts-explainer.html carries an intentional author byline
-    ## ("...PhD with Claude Code"). Strip that EXACT string before scanning so the byline
-    ## is not mistaken for a CLAUDE*.md leak -- any OTHER "claude" in the file still trips.
-    txt <- gsub("Created by Tory Eisenlohr-Moul, PhD with Claude Code", "", txt, fixed = TRUE)
-    if (grepl("claude", txt, ignore.case = TRUE)) hits <- c(hits, f)
+    txt <- tolower(tryCatch(rawToChar(raw), error = function(e) ""))
+    if (any(vapply(page_refs, function(p) grepl(p, txt, fixed = TRUE), logical(1)))) {
+      hits <- c(hits, f)
+    }
   }
   if (length(hits)) {
     stop(sprintf(
-      paste0("DOCS LEAK BLOCKED: %d file(s) under '%s' reference \"claude\" -- a CLAUDE*.md ",
-             "pkgdown leak:\n%s\nThe hide-during-build failed. Rebuild via ",
+      paste0("DOCS LEAK BLOCKED: %d file(s) under '%s' are, or point at, a rendered CLAUDE*.md ",
+             "page:\n%s\nThe hide-during-build failed. Rebuild via ",
              "`Rscript --vanilla dev/build_docs.R` and re-check."),
       length(hits), docs_dir, paste0("  ", hits, collapse = "\n")))
   }
-  message(sprintf("OK: no 'claude' leak in '%s' (%d files scanned).", docs_dir, length(files)))
+  message(sprintf("OK: no CLAUDE*.md page leak in '%s' (%d files scanned).",
+                  docs_dir, length(files)))
   invisible(TRUE)
 }
 
@@ -114,16 +139,29 @@ build_docs <- function() {
 
 ## ---- self-test: prove the guard blocks a simulated leak, without a 30s build ----------------
 selftest <- function() {
-  ## (a) scanner must ERROR on a planted leak (both name-based and content-based)
+  ## (a) scanner must ERROR on a planted leak: the page itself, and each index that points at it
+  ##     (fixtures copy the shapes real pkgdown output uses -- see check_docs_clean()).
   leak <- file.path(tempdir(), "docs_leaktest")
   unlink(leak, recursive = TRUE); dir.create(leak)
   on.exit(unlink(leak, recursive = TRUE), add = TRUE)
-  writeLines("<html>clean page</html>",           file.path(leak, "index.html"))
-  writeLines("<html>rendered CLAUDE.md</html>",    file.path(leak, "CLAUDE.html"))    # name leak
-  writeLines("{\"text\": \"internal claude notes\"}", file.path(leak, "search.json")) # content leak
+  writeLines("<html>clean page</html>",        file.path(leak, "index.html"))
+  writeLines("<html>rendered CLAUDE.md</html>", file.path(leak, "CLAUDE.html"))      # the page
+  writeLines("<urlset><loc>https://x/CLAUDE.html</loc></urlset>",
+             file.path(leak, "sitemap.xml"))                                          # sitemap ref
+  writeLines("[{\"path\": \"https://x/CLAUDE.html\", \"text\": \"notes\"}]",
+             file.path(leak, "search.json"))                                          # search ref
   caught <- tryCatch({ check_docs_clean(leak); FALSE },
                      error = function(e) { message("  scanner reported: ", conditionMessage(e)); TRUE })
   if (!caught) stop("SELFTEST FAILED: scanner did NOT catch a planted leak.")
+  ## each of the three must trip on its own, so no one check is carrying the others
+  for (one in c("CLAUDE.html", "sitemap.xml", "search.json")) {
+    solo <- file.path(tempdir(), "docs_solotest")
+    unlink(solo, recursive = TRUE); dir.create(solo)
+    file.copy(file.path(leak, one), file.path(solo, one))
+    if (!tryCatch({ check_docs_clean(solo); FALSE }, error = function(e) TRUE))
+      stop(sprintf("SELFTEST FAILED: '%s' alone did not trip the scanner.", one))
+    unlink(solo, recursive = TRUE)
+  }
 
   ## (b) scanner must PASS on a clean site
   clean <- file.path(tempdir(), "docs_cleantest")
@@ -133,6 +171,29 @@ selftest <- function() {
   writeBin(as.raw(c(0x89, 0x50, 0x4e, 0x47, 0x00, 0x01)), file.path(clean, "logo.png")) # binary w/ NUL
   ok <- tryCatch({ check_docs_clean(clean); TRUE }, error = function(e) FALSE)
   if (!ok) stop("SELFTEST FAILED: scanner flagged a clean site.")
+
+  ## (b2) REGRESSION, 2026-09-29: the package's own AI-tool disclosures must NOT trip the
+  ## scanner. Each string below is copied from the real rendered site -- the README section, the
+  ## 1.0.0 changelog, the vignette footer, the explainer byline that used to need a hard-coded
+  ## allowlist, and the stop-word-stripped shape pkgdown writes into search.json. Before the
+  ## 2026-09-29 narrowing, every one of these blocked the build.
+  disc <- file.path(tempdir(), "docs_disclosuretest")
+  unlink(disc, recursive = TRUE); dir.create(disc)
+  on.exit(unlink(disc, recursive = TRUE), add = TRUE)
+  writeLines(c("<p>and Claude Code, used from June 2026 onward and carrying a",
+               "<code>Co-Authored-By</code> trailer.</p>"), file.path(disc, "index.html"))
+  writeLines(c("<p>Claude Code was used for this release: the CRAN packaging changes above,",
+               "the new vignette, and 49 carry a Claude Code Co-Authored-By trailer.</p>"),
+             file.path(disc, "news.html"))
+  writeLines("<p>This vignette was drafted with Claude Code and reviewed by the authors.</p>",
+             file.path(disc, "article.html"))
+  writeLines("<p>Created by Tory Eisenlohr-Moul, PhD with Claude Code</p>",
+             file.path(disc, "pacts-explainer.html"))
+  writeLines("[{\"text\": \"vignette drafted Claude Code reviewed package authors\"}]",
+             file.path(disc, "search.json"))
+  ok2 <- tryCatch({ check_docs_clean(disc); TRUE },
+                  error = function(e) { message("  ", conditionMessage(e)); FALSE })
+  if (!ok2) stop("SELFTEST FAILED: scanner flagged the package's deliberate AI-tool disclosures.")
 
   ## (c) with_claude_md_hidden() must restore CLAUDE*.md EVEN WHEN the build throws -- the
   ## whole safety guarantee. Run it in a throwaway dir so the real CLAUDE.md is untouched.
@@ -154,8 +215,9 @@ selftest <- function() {
   if (!all(file.exists(file.path(sandbox, c("CLAUDE.md", "CLAUDE.local.md")))))
     stop("SELFTEST FAILED: CLAUDE*.md were NOT restored after a build error.")
 
-  message("SELFTEST PASSED: guard catches planted leaks, passes clean sites, and ",
-          "restores CLAUDE*.md even when the build errors.")
+  message("SELFTEST PASSED: guard catches a leaked page and every index that points at it, ",
+          "passes clean sites AND the package's own AI-tool disclosures, and restores ",
+          "CLAUDE*.md even when the build errors.")
   invisible(TRUE)
 }
 
