@@ -2,19 +2,24 @@
 
 ## Submission
 
-This is a new release. `menstrualcycleR` implements Phase-Aligned Cycle Time
+This is a new submission. `menstrualcycleR` implements Phase-Aligned Cycle Time
 Scaling (PACTS), a method for placing menstrual cycle observations onto a
 continuous, phase-aligned timeline. The method is published in
 Nagpal et al. (2025), *Psychoneuroendocrinology*,
 <https://doi.org/10.1016/j.psyneuen.2025.107584>, and the DOI is cited in the
 DESCRIPTION Description field.
 
+No earlier version of this package has been on CRAN. It has been distributed from
+GitHub since January 2025; version numbers below 1.1.0 in `NEWS.md` are that
+history, not CRAN releases.
+
 ## R CMD check results
 
 0 errors | 0 warnings | 1 note
 
-Checked with `R CMD check --as-cran` on macOS 26.6 (aarch64), R 4.5.1, with pandoc
-3.11 installed. Also checked on R 4.6.1 (Ubuntu 24.04) via GitHub Actions.
+Checked with `R CMD check --as-cran` on macOS 27.0 (aarch64), R 4.5.1, with pandoc
+3.11 and TinyTeX installed, so the PDF manual is built rather than skipped. Also
+checked on Ubuntu 24.04 with the current release of R via GitHub Actions.
 
 ### Note
 
@@ -38,15 +43,19 @@ This is expected for a first submission.
   through. `cpass` is deliberately **not** declared in `Suggests`, and no
   `Remotes` field is present.
 
-* **Examples and vignettes.** All examples and both vignettes run against
-  `cycledata`, a small example dataset bundled with the package. Nothing
-  downloads data, writes outside `tempdir()`, or requires network access.
+* **Examples and vignettes.** All examples and both vignettes run against the two
+  example datasets bundled with the package: `cycledata` (619 rows, 25 people) and
+  `cycledata_special` (998 rows, 15 people, each one an edge case used to document
+  what the optional arguments to `pacts_scaling()` do). Both are generated data,
+  not human-subjects data. Nothing downloads data, writes outside `tempdir()`, or
+  requires network access.
 
 * **Spelling.** "PACTS", "menses", "ovulation", "periovulatory", "follicular",
   "luteal" and "cyclicity" are domain terms, spelled as intended.
 
 * **AI coding tools.** Claude Code was used for parts of this release, including the
-  packaging changes and the new "Preparing Your Data for PACTS" vignette. No AI tool was
+  packaging changes, the new "Preparing Your Data for PACTS" vignette, and the
+  `cycledata_special` example dataset with its tests. No AI tool was
   used in the package's initial development. The decision to use these tools was made by
   the maintainer, Dr. Tory Eisenlohr-Moul, who reviewed and approved every AI-assisted
   change; the co-author's contributions predate all such use. This is disclosed in the

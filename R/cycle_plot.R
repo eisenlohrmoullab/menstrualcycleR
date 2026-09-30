@@ -157,7 +157,7 @@ cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRU
       ggplot2::aes(xmin = ifelse(centering == "ovulation", 0, 0.96), xmax = ifelse(centering == "ovulation", 0.04, 1), ymin = -Inf, ymax = Inf),
       fill = "grey70", alpha = 0.2, color = "white"
     ) +
-    ggplot2::geom_line(size = 0.7) +
+    ggplot2::geom_line(linewidth = 0.7) +
     ggplot2::labs(
       x = "Percentage of Phase Elapsed",
       y = paste("Mean", y_scale)

@@ -64,11 +64,21 @@ cycle_plot_individual <- function(data, id, symptoms, centering = "menses",
   data_filtered = as.data.frame(data_filtered)
   #data_filtered <- data_filtered %>% dplyr::filter(!is.na(cyclenum))
   #data_filtered <- data_filtered %>% dplyr::filter(!is.na(.data$cyclenum))
+  # Count the rows this id has BEFORE dropping the unscaled ones, so the two very
+  # different reasons for an empty result can be told apart in the message below.
+  n_rows_for_id <- nrow(data_filtered)
   data_filtered <- data_filtered[!is.na(data_filtered$cyclenum), ]
   
   # Ensure data is still a dataframe after filtering
   if (nrow(data_filtered) == 0) {
-    stop(paste("Error: No data found for ID", id))
+    if (n_rows_for_id == 0) {
+      stop("cycle_plot_individual(): no rows in `data` have id == ", id, ".", call. = FALSE)
+    }
+    stop("cycle_plot_individual(): id ", id, " has ", n_rows_for_id, " row(s) in `data`, but ",
+         "`cyclenum` is NA on all of them -- none belongs to a numbered menses-to-menses ",
+         "cycle, so there is nothing to plot per cycle. A participant with no recorded menses ",
+         "onset, or none that closes a cycle, looks like this; see `?cycledata_special` for ",
+         "worked examples of both.", call. = FALSE)
   }
   
   # Function to process cycle data for each symptom
@@ -174,7 +184,7 @@ cycle_plot_individual <- function(data, id, symptoms, centering = "menses",
         ggplot2::aes(xmin = ifelse(centering == "ovulation", 0, 0.96), xmax = ifelse(centering == "ovulation", 0.04, 1), ymin = -Inf, ymax = Inf),
         fill = "grey70", alpha = 0.2, color = "white"
       ) +
-      ggplot2::geom_line(size = 0.7) +
+      ggplot2::geom_line(linewidth = 0.7) +
       ggplot2::labs(
         title = paste("Cycle", cycle, "for", symptom, "ID:", id),
         x = "Percentage of Phase Elapsed",

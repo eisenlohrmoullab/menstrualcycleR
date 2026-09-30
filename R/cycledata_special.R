@@ -158,6 +158,10 @@
 #'   person demonstrating their setting fails a test instead of passing
 #'   silently.
 #'
+#' @note This dataset, its documentation and its automatic checks were drafted with
+#'   Claude Code and reviewed by the package authors, who are responsible for their
+#'   content. See the README for the package's full statement on AI tool use.
+#'
 #' @seealso [cycledata] for the ordinary practice dataset, [pacts_scaling()]
 #'   for the settings each person exercises.
 #'

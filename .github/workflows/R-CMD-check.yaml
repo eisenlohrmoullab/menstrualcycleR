@@ -52,8 +52,12 @@ jobs:
 
       - uses: r-lib/actions/check-r-package@v2
         with:
-          # Full check INCLUDING the vignette. The vignette's build-time deps
-          # (tidyverse, marginaleffects) are now declared in DESCRIPTION Suggests,
-          # so menstrualcycleR-overview.Rmd builds in a clean environment.
+          # Full check INCLUDING the vignettes. Every package the vignettes actually
+          # EVALUATE is declared in DESCRIPTION (marginaleffects and mgcv in Suggests,
+          # the rest in Imports), so both build in a clean environment. `tidyverse` and
+          # `remotes` appear in menstrualcycleR-overview.Rmd only inside `eval = FALSE`
+          # chunks showing a reader what to install, so they are deliberately NOT
+          # declared -- `tidyverse` was dropped from Suggests for CRAN. Corrected
+          # 2026-09-29: this comment used to claim tidyverse was declared here.
           error-on: '"warning"'
           upload-snapshots: true

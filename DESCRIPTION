@@ -19,7 +19,7 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Imports:
     dplyr,
-    ggplot2,
+    ggplot2 (>= 3.4.0),
     magrittr,
     purrr,
     rlang,

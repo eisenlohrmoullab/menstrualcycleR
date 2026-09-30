@@ -49,6 +49,11 @@ a right-censored luteal phase, and none has a calendar gap. A dataset in
 which nothing unusual happens cannot show a setting working, and cannot
 catch a claim about one that is wrong.
 }
+\note{
+This dataset, its documentation and its automatic checks were drafted with
+Claude Code and reviewed by the package authors, who are responsible for their
+content. See the README for the package's full statement on AI tool use.
+}
 \section{The fifteen cases}{
 
 Figures are from a run at the default settings unless a setting is named.

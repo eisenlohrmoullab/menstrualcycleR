@@ -67,6 +67,29 @@ never become a leading-day anchor, structurally: `impute_next_menses` only imput
 forward from a confirmed ovulation, so whenever that onset is a person's first, a confirmed
 ovulation necessarily precedes it, which is the condition on which the leading rule declines.
 
+## Smaller fixes
+
+`cycle_plot()` and `cycle_plot_individual()` passed `size` to their line layer, which
+ggplot2 deprecated in 3.4.0. Every call therefore printed a deprecation warning telling
+the user to report an issue against this package. Both now pass `linewidth`, and
+DESCRIPTION records the `ggplot2 (>= 3.4.0)` floor that `linewidth` needs. These were the
+only two `size` arguments in the plotting code, so nothing that legitimately still takes
+`size` (point and text sizes) is touched.
+
+`cycle_plot_individual()` stopped with "No data found for ID x" in two quite different
+situations: when no row had that id at all, and when the participant had plenty of rows
+but none belonging to a numbered menses-to-menses cycle. The second is not missing data --
+it is a participant with no recorded menses onset, or none that closes a cycle -- and the
+old message sent a reader looking for a data problem that was not there. The two cases now
+have separate messages, and the second names `?cycledata_special`, which ships worked
+examples of both.
+
+The comment in `.github/workflows/R-CMD-check.yaml` claimed the vignettes' build-time
+dependencies including `tidyverse` were declared in `Suggests`. `tidyverse` was dropped
+from `Suggests` for CRAN and is not needed: the vignette loads it only inside an
+`eval = FALSE` chunk that shows a reader what to install. Comment corrected; no
+configuration change.
+
 ## Packaging fixes
 
 `pacts_scaling()`'s help page had not been regenerated after this version's new settings
@@ -107,9 +130,12 @@ analysis (2026-09-27), where roughly a third of participants began the diary in 
 
 # menstrualcycleR 1.0.0
 
-First CRAN release. No scaled cycle-time values change and no exported function changes
-behavior -- the major version marks the move to CRAN, not a break with 0.1.9. Code
-written against 0.1.9 runs unchanged.
+Prepared for CRAN, but **never submitted**: the packaging work below cleared the
+blockers, and 1.1.0 superseded this version before a submission was made, so CRAN has
+never carried 1.0.0. (Recorded here because this entry read "First CRAN release" until
+2026-09-29, which was never true.) No scaled cycle-time values change and no exported
+function changes behavior -- the major version marks readiness for CRAN, not a break with
+0.1.9. Code written against 0.1.9 runs unchanged.
 
 ## Packaging for CRAN
 
