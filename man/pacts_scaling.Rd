@@ -15,6 +15,8 @@ pacts_scaling(
   impute_next_menses = FALSE,
   next_menses_luteal_days = 14,
   next_menses_max_window = 20,
+  impute_leading_ovulation = FALSE,
+  leading_ovulation_luteal_days = 15,
   luteal_phase_min_days = 7,
   luteal_phase_max_days = 18,
   follicular_phase_min_days = 8,
@@ -46,6 +48,10 @@ pacts_scaling(
 \item{next_menses_luteal_days}{Numeric; days after a confirmed ovulation at which to place the imputed next-menses onset when \code{impute_next_menses = TRUE}. Default \code{14} (the population-average luteal length; ovulation + 14 is the last follicular day, i.e. the "LH+15" convention).}
 
 \item{next_menses_max_window}{Not currently used -- kept for argument-signature stability, has no effect on the result. See \code{?impute_next_menses_onsets}, the \code{max_window} entry, for why: through 0.1.6 this bounded the search for a closing menses, which was a real bug (a genuine luteal phase just past the window got a fabricated onset that overwrote actually-observed data). As of 0.1.7 a real closing menses at any distance always prevents imputation. Passing this argument explicitly (any value) triggers a warning, since it would otherwise be a silent no-op for a caller relying on the old behavior.}
+
+\item{impute_leading_ovulation}{Logical; default \code{FALSE}. When \code{TRUE}, opt in to imputing an ovulation for the days a participant was observed BEFORE their first recorded menses onset (the left-censored start of participation): ovulation is placed \code{leading_ovulation_luteal_days} days before that first onset, so those leading days scale as the end of a luteal phase in \code{cyclic_time_impute} / \code{cyclic_time_imp_ov} (never in the confirmed-only columns). Marked in the new column \code{ovtoday_leading_impute}; a blank row is added when the imputed day precedes the first observed row. Nothing is imputed when a confirmed ovulation already lies before the first onset. Leaving \code{FALSE} keeps all previous behavior identical. See \code{?impute_leading_ovulation_anchors}.}
+
+\item{leading_ovulation_luteal_days}{Numeric; days before the first menses onset at which the leading ovulation is placed when \code{impute_leading_ovulation = TRUE}. Default \code{15} (the package's backward-count convention).}
 
 \item{luteal_phase_min_days, luteal_phase_max_days}{Numeric bounds (days) on how long a \strong{confirmed} ovulation's luteal phase (ovulation to next menses) may be for \code{cyclic_lut}/\code{cyclic_time}/\code{luteal_length} to scale it. Defaults \code{7} and \code{18}, from Bull et al. (2019) norms in 21-35 day cycles. Independent of \code{lower_cyclength_bound}/\code{upper_cyclength_bound}, which bound the \emph{whole cycle}, not this one phase -- widen these directly if your study population has longer or shorter luteal phases than the default norms assume. See the "Internal phase-length caps" section below.}
 

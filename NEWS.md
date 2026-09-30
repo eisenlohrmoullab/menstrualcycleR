@@ -1,5 +1,18 @@
 # menstrualcycleR 1.1.0 (development)
 
+## Packaging fixes
+
+`pacts_scaling()`'s help page had not been regenerated after this version's new settings
+were added, so the help page and the function disagreed about which settings exist.
+`R CMD check --as-cran` reports that as a WARNING, and a warning is a rejection.
+
+`ovtoday_leading_impute` was missing from the list of column names the package declares it
+expects, which R flags when checking the code.
+
+Two files the testing tool writes when a check fails
+(`tests/testthat/testthat-problems.rds` and `tests/testthat/_problems/`) had been committed
+and would have shipped inside the package. Removed, and excluded from future builds.
+
 ## Bug fix: first follicular phase lost at a participant boundary
 
 The follicular-phase pass closed a participant's run on their FIRST row whenever the row before
