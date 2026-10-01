@@ -61,8 +61,11 @@ This is expected for a first submission.
   not human-subjects data. Nothing downloads data, writes outside `tempdir()`, or
   requires network access.
 
-* **Spelling.** "PACTS", "menses", "ovulation", "periovulatory", "follicular",
-  "luteal" and "cyclicity" are domain terms, spelled as intended.
+* **Spelling.** The incoming check flags "Nagpal" in the Description field as possibly
+  misspelled. It is the surname of the package's first author and of the first author of
+  the cited paper (Anisha Nagpal, ORCID 0000-0001-7111-9322, listed in `Authors@R`), and it
+  is spelled correctly. Likewise "PACTS", "menses", "ovulation", "periovulatory",
+  "follicular", "luteal" and "cyclicity" are domain terms, spelled as intended.
 
 * **AI coding tools.** Claude Code was used for parts of this release, including the
   packaging changes, the new "Preparing Your Data for PACTS" vignette, and the
