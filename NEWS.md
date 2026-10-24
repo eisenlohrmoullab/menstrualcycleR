@@ -1,3 +1,25 @@
+# menstrualcycleR 1.1.1
+
+CRAN resubmission. Three changes, all requested by the CRAN reviewer on
+2026-10-10; no scaled cycle-time value changes and no exported function changes
+behaviour.
+
+**The title no longer opens with "Tools for".** `Title` is now "Phase-Aligned
+Cycle Time Scaling (PACTS) and Menstrual Cycle Analysis". CRAN treats a leading
+"Tools for" as redundant, since every package is a set of tools.
+
+**`T` and `F` are written out as `TRUE` and `FALSE`.** `cycle_plot()`'s `se`
+argument defaulted to `F`, which is what the reviewer saw in the help page, and
+`cycle_plot_individual()` passed `partial = T` to `zoo::rollapply()` in three
+places. `T` and `F` are ordinary variable names in R, not reserved words, so
+code that relies on them breaks for anyone who happens to have assigned them --
+which is why CRAN asks for the spelled-out forms. The "Getting Started"
+vignette's `se = T` calls and its chunk options are spelled out too, since they
+are the code a reader copies.
+
+**No other change.** The default of `se` is still `FALSE` and every result is
+identical.
+
 # menstrualcycleR 1.1.0
 
 ## New practice dataset: `cycledata_special`

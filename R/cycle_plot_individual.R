@@ -116,17 +116,17 @@ cycle_plot_individual <- function(data, id, symptoms, centering = "menses",
         !!paste0(symptom, ".d.roll") := if (sum(!is.na(!!rlang::sym(paste0(symptom, ".d")))) < 2) {
           NA_real_
         } else {
-          zoo::rollapply(!!rlang::sym(paste0(symptom, ".d")), rollingavg, FUN = function(x) mean(x, na.rm = TRUE), align = "center", fill = NA, partial = T)
+          zoo::rollapply(!!rlang::sym(paste0(symptom, ".d")), rollingavg, FUN = function(x) mean(x, na.rm = TRUE), align = "center", fill = NA, partial = TRUE)
         },
         !!paste0(symptom, ".m.roll") := if (sum(!is.na(!!rlang::sym(paste0(symptom, ".m")))) < 2) {
           NA_real_
         } else {
-          zoo::rollapply(!!rlang::sym(paste0(symptom, ".m")), rollingavg, FUN = function(x) mean(x, na.rm = TRUE), align = "center", fill = NA, partial = T)
+          zoo::rollapply(!!rlang::sym(paste0(symptom, ".m")), rollingavg, FUN = function(x) mean(x, na.rm = TRUE), align = "center", fill = NA, partial = TRUE)
         },
         !!paste0(symptom, ".roll") := if (sum(!is.na(!!rlang::sym(symptom))) < 2) {
           NA_real_
         } else {
-          zoo::rollapply(!!rlang::sym(symptom), rollingavg, FUN = function(x) mean(x, na.rm = TRUE), align = "center", fill = NA, partial = T)
+          zoo::rollapply(!!rlang::sym(symptom), rollingavg, FUN = function(x) mean(x, na.rm = TRUE), align = "center", fill = NA, partial = TRUE)
         }
       ) %>%
       dplyr::ungroup()

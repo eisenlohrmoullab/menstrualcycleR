@@ -1,5 +1,30 @@
 # CRAN submission comments
 
+## Resubmission
+
+This is a resubmission of a new package. Thank you for the review of 1.1.0 on
+2026-10-10. All three points are addressed in 1.1.1:
+
+* **"Please omit the redundant 'Tools for' at the start of your title."** Done.
+  `Title` is now "Phase-Aligned Cycle Time Scaling (PACTS) and Menstrual Cycle
+  Analysis".
+
+* **"Please write TRUE and FALSE instead of T and F."** Done, and swept across
+  the whole package rather than only the instance named. `cycle_plot()`'s `se`
+  argument defaulted to `F` (the occurrence shown in `man/cycle_plot.Rd`), and
+  `cycle_plot_individual()` passed `partial = T` to `zoo::rollapply()` in three
+  places. All are now `FALSE` / `TRUE`. The "Getting Started" vignette's `se = T`
+  calls, the prose that quotes them, and its chunk options are spelled out too,
+  since that is the code a reader copies. `grep` for a standalone `T` or `F` used
+  as a value now returns nothing in `R/`, `vignettes/`, `tests/` or `inst/`.
+
+* **"Please don't use 'T' or 'F' as vector names."** No object named `T` or `F`
+  is created anywhere in the package; the occurrences above were all uses of the
+  abbreviations as values.
+
+No scaled cycle-time value changes and no exported function changes behaviour.
+`se` still defaults to `FALSE`.
+
 ## Submission
 
 This is a new submission. `menstrualcycleR` implements Phase-Aligned Cycle Time

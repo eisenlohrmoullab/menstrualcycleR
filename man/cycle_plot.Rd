@@ -12,7 +12,7 @@ cycle_plot(
   y_scale = "person-centered_roll",
   rollingavg = 5,
   align_val = "center",
-  se = F
+  se = FALSE
 )
 }
 \arguments{

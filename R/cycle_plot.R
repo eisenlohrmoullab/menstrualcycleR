@@ -45,7 +45,7 @@
 #' @export
 #' 
 
-cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRUE, y_scale = "person-centered_roll", rollingavg = 5, align_val = "center", se = F) {
+cycle_plot <- function(data, symptom, centering = "menses", include_impute = TRUE, y_scale = "person-centered_roll", rollingavg = 5, align_val = "center", se = FALSE) {
   
   `%>%` <- magrittr::`%>%`
   `:=` <- rlang::`:=`
