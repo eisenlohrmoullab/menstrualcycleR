@@ -1,22 +1,23 @@
 # How to Install and Load `menstrualcycleR`
 
 <!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/menstrualcycleR)](https://CRAN.R-project.org/package=menstrualcycleR)
 [![R-CMD-check](https://github.com/eisenlohrmoullab/menstrualcycleR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/eisenlohrmoullab/menstrualcycleR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-To install and load the `menstrualcycleR` package, follow these steps:
+`menstrualcycleR` is on CRAN: https://CRAN.R-project.org/package=menstrualcycleR
 
-1. Install the `remotes` package (if not already installed):
-   `install.packages("remotes")`
-   
+1. Install the released version from CRAN (vignettes included):
 
-2. Install `menstrualcycleR` from GitHub 
+   `install.packages("menstrualcycleR")`
+
+2. Load the package
+
+   `library(menstrualcycleR)`
+
+To try the development version instead, install it from GitHub:
 
 `remotes::install_github("eisenlohrmoullab/menstrualcycleR", build_vignettes = TRUE)`
-
-3. Load the package 
-
-`library(menstrualcycleR)`
 
 ## Quick start
 
@@ -49,9 +50,8 @@ it. `summary_ovulation()` reports how many of your cycles fall outside 21–35 d
 `?pacts_scaling` explains the behavior in full.
 
 For the full workflow, including GAMM modeling of the resulting cycle-time
-variables, see the vignette (`vignette("menstrualcycleR-overview")` once
-installed with `build_vignettes = TRUE` above, or the hosted copy linked
-below) or `?menstrualcycleR` for an overview of every exported function.
+variables, see the vignette (`vignette("menstrualcycleR-overview")`, or the
+hosted copy linked below) or `?menstrualcycleR` for an overview of every exported function.
 
 To utilize the shinyapp, visit: https://menstrualcycledata.shinyapps.io/shiny/
 

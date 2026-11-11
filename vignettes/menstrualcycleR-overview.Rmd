@@ -177,21 +177,15 @@ The dataset should include the following columns:
 
 ## Installation of the `menstrualcycleR` package
 
-Currently the `menstrualcycleR` package is hosted on the Eisenlohr-Moul Lab's (CLEAR Lab: Clarifying the Endocrinology of Acute Risk) GitHub repository. 
-
-To install it from GitHub, install and load the package `remotes` by running: 
-
-```{r remotes, eval = FALSE}
-install.packages("remotes")
-```
-
-```{r loading-remotes, warning = FALSE, eval = FALSE}
-library(remotes)
-```
-
-then install and load the `menstrualcycleR` package by running: 
+`menstrualcycleR` is on CRAN (<https://CRAN.R-project.org/package=menstrualcycleR>). Install and load it by running:
 
 ```{r menstrualcycleR-package, eval = FALSE}
+install.packages("menstrualcycleR")
+```
+
+The development version, maintained by the Eisenlohr-Moul Lab (CLEAR Lab: Clarifying the Endocrinology of Acute Risk), is on GitHub:
+
+```{r menstrualcycleR-dev, eval = FALSE}
 remotes::install_github("eisenlohrmoullab/menstrualcycleR")
 ```
 

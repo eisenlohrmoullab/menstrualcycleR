@@ -20,9 +20,10 @@ means and which to use). For a full worked example, including GAMM modeling
 of the resulting cycle-time variables, see the "Getting Started" vignette:
 \code{vignette("menstrualcycleR-overview", package = "menstrualcycleR")}, or the
 hosted copy at
-\url{https://menstrualcycler.clearlabresearch.com/articles/menstrualcycleR-overview.html}
--- installing via \code{remotes::install_github()} does not build vignettes
-locally unless you pass \code{build_vignettes = TRUE}.
+\url{https://menstrualcycler.clearlabresearch.com/articles/menstrualcycleR-overview.html}.
+The CRAN release (\url{https://CRAN.R-project.org/package=menstrualcycleR})
+includes the vignettes; the GitHub development version builds them only when
+installed with \code{remotes::install_github(..., build_vignettes = TRUE)}.
 
 For a visual explainer of \emph{why} PACTS realigns cycles the way it does, see
 \url{https://menstrualcycler.clearlabresearch.com/pacts-explainer.html}.

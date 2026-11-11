@@ -2,6 +2,19 @@ url: https://menstrualcycler.clearlabresearch.com
 template:
   bootstrap: 5
 
+# pkgdown's built-in "Links" box points at cloud.r-project.org; CRAN asks for the
+# canonical https://CRAN.R-project.org/package= form, so the box is replaced here.
+home:
+  sidebar:
+    structure: [cranlinks, license, community, citation, authors, dev]
+    components:
+      cranlinks:
+        title: Links
+        text: |
+          * [View on CRAN](https://CRAN.R-project.org/package=menstrualcycleR)
+          * [Browse source code](https://github.com/eisenlohrmoullab/menstrualcycleR)
+          * [Report a bug](https://github.com/eisenlohrmoullab/menstrualcycleR/issues)
+
 navbar:
   structure:
     left:  [reference, articles, explainer, biblio, news]
