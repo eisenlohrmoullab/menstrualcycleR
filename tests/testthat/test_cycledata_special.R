@@ -4,10 +4,21 @@
 # stops demonstrating their case and this fails -- instead of the dataset
 # quietly shipping a documented claim that is no longer true.
 
+# Scaling cycledata_special takes about half a second, and the checks below ask
+# for the same settings many times over (the defaults alone about a dozen
+# times). Each distinct set of settings is therefore scaled once and reused.
+# pacts_scaling() is deterministic, so a reused result is identical to a fresh
+# one. This halves the file's run time, which was over half of all check time
+# on CRAN.
+sc_cache <- new.env(parent = emptyenv())
 sc <- function(...) {
-  suppressMessages(suppressWarnings(pacts_scaling(
-    cycledata_special, id = id, date = daterated,
-    menses = menses, ovtoday = ovtoday, ...)))
+  key <- paste(deparse(list(...)), collapse = "")
+  if (is.null(sc_cache[[key]])) {
+    sc_cache[[key]] <- suppressMessages(suppressWarnings(pacts_scaling(
+      cycledata_special, id = id, date = daterated,
+      menses = menses, ovtoday = ovtoday, ...)))
+  }
+  sc_cache[[key]]
 }
 cov_ct  <- function(x, k) sum(!is.na(x$cyclic_time[x$id == k]))
 cov_cti <- function(x, k) sum(!is.na(x$cyclic_time_impute[x$id == k]))
